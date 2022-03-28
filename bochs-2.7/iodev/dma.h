@@ -30,78 +30,83 @@
 #  define BX_DMA_THIS this->
 #endif
 
-class bx_dma_c : public bx_dma_stub_c {
+class bx_dma_c : public bx_dma_stub_c
+{
 public:
-  bx_dma_c();
-  virtual ~bx_dma_c();
+    bx_dma_c();
+    virtual ~bx_dma_c();
 
-  virtual void     init(void);
-  virtual void     reset(unsigned type);
-  virtual void     raise_HLDA(void);
-  virtual void     set_DRQ(unsigned channel, bool val);
-  virtual unsigned get_TC(void);
-  virtual void     register_state(void);
+    virtual void     init(void);
+    virtual void     reset(unsigned type);
+    virtual void     raise_HLDA(void);
+    virtual void     set_DRQ(unsigned channel, bool val);
+    virtual unsigned get_TC(void);
+    virtual void     register_state(void);
 #if BX_DEBUGGER
-  virtual void debug_dump(int argc, char **argv);
+    virtual void debug_dump(int argc, char** argv);
 #endif
 
-  virtual unsigned registerDMA8Channel(unsigned channel,
-    Bit16u (* dmaRead)(Bit8u *data_byte, Bit16u maxlen),
-    Bit16u (* dmaWrite)(Bit8u *data_byte, Bit16u maxlen),
-    const char *name);
-  virtual unsigned registerDMA16Channel(unsigned channel,
-    Bit16u (* dmaRead)(Bit16u *data_word, Bit16u maxlen),
-    Bit16u (* dmaWrite)(Bit16u *data_word, Bit16u maxlen),
-    const char *name);
-  virtual unsigned unregisterDMAChannel(unsigned channel);
+    virtual unsigned registerDMA8Channel(unsigned channel,
+        Bit16u(*dmaRead)(Bit8u* data_byte, Bit16u maxlen),
+        Bit16u(*dmaWrite)(Bit8u* data_byte, Bit16u maxlen),
+        const char* name);
+    virtual unsigned registerDMA16Channel(unsigned channel,
+        Bit16u(*dmaRead)(Bit16u* data_word, Bit16u maxlen),
+        Bit16u(*dmaWrite)(Bit16u* data_word, Bit16u maxlen),
+        const char* name);
+    virtual unsigned unregisterDMAChannel(unsigned channel);
 
 private:
 
-  static Bit32u read_handler(void *this_ptr, Bit32u address, unsigned io_len);
-  static void   write_handler(void *this_ptr, Bit32u address, Bit32u value, unsigned io_len);
+    static Bit32u read_handler(void* this_ptr, Bit32u address, unsigned io_len);
+    static void   write_handler(void* this_ptr, Bit32u address, Bit32u value, unsigned io_len);
 #if !BX_USE_DMA_SMF
-  Bit32u   read (Bit32u address, unsigned io_len) BX_CPP_AttrRegparmN(2);
-  void     write(Bit32u address, Bit32u   value, unsigned io_len) BX_CPP_AttrRegparmN(3);
+    Bit32u   read(Bit32u address, unsigned io_len) BX_CPP_AttrRegparmN(2);
+    void     write(Bit32u address, Bit32u   value, unsigned io_len) BX_CPP_AttrRegparmN(3);
 #endif
-  BX_DMA_SMF void control_HRQ(Bit8u ma_sl);
-  BX_DMA_SMF void reset_controller(unsigned num);
+    BX_DMA_SMF void control_HRQ(Bit8u ma_sl);
+    BX_DMA_SMF void reset_controller(unsigned num);
 
-  struct {
-    bool DRQ[4];  // DMA Request
-    bool DACK[4]; // DMA Acknowlege
+    struct
+    {
+        bool DRQ[4];  // DMA Request
+        bool DACK[4]; // DMA Acknowlege
 
-    bool mask[4];
-    bool flip_flop;
-    Bit8u   status_reg;
-    Bit8u   command_reg;
-    bool ctrl_disabled;
-    struct {
-      struct {
-        Bit8u mode_type;
-        bool address_decrement;
-        bool autoinit_enable;
-        Bit8u transfer_type;
-      } mode;
-      Bit16u  base_address;
-      Bit16u  current_address;
-      Bit16u  base_count;
-      Bit16u  current_count;
-      Bit8u   page_reg;
-      bool used;
-    } chan[4]; /* DMA channels 0..3 */
-  } s[2];  // state information DMA-1 / DMA-2
+        bool mask[4];
+        bool flip_flop;
+        Bit8u   status_reg;
+        Bit8u   command_reg;
+        bool ctrl_disabled;
+        struct
+        {
+            struct
+            {
+                Bit8u mode_type;
+                bool address_decrement;
+                bool autoinit_enable;
+                Bit8u transfer_type;
+            } mode;
+            Bit16u  base_address;
+            Bit16u  current_address;
+            Bit16u  base_count;
+            Bit16u  current_count;
+            Bit8u   page_reg;
+            bool used;
+        } chan[4]; /* DMA channels 0..3 */
+    } s[2];  // state information DMA-1 / DMA-2
 
-  bool HLDA;    // Hold Acknowlege
-  bool TC;      // Terminal Count
+    bool HLDA;    // Hold Acknowlege
+    bool TC;      // Terminal Count
 
-  Bit8u   ext_page_reg[16]; // Extra page registers (unused)
+    Bit8u   ext_page_reg[16]; // Extra page registers (unused)
 
-  struct {
-    Bit16u (* dmaRead8)(Bit8u *data_byte, Bit16u maxlen);
-    Bit16u (* dmaWrite8)(Bit8u *data_byte, Bit16u maxlen);
-    Bit16u (* dmaRead16)(Bit16u *data_word, Bit16u maxlen);
-    Bit16u (* dmaWrite16)(Bit16u *data_word, Bit16u maxlen);
-  } h[4]; // DMA read and write handlers
+    struct
+    {
+        Bit16u(*dmaRead8)(Bit8u* data_byte, Bit16u maxlen);
+        Bit16u(*dmaWrite8)(Bit8u* data_byte, Bit16u maxlen);
+        Bit16u(*dmaRead16)(Bit16u* data_word, Bit16u maxlen);
+        Bit16u(*dmaWrite16)(Bit16u* data_word, Bit16u maxlen);
+    } h[4]; // DMA read and write handlers
 };
 
 #endif  // #ifndef _PCDMA_H

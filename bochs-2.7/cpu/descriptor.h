@@ -38,13 +38,14 @@
 // |------------------------|--------------------|
 //
 
-typedef struct { /* bx_selector_t */
-  Bit16u value;   /* the 16bit value of the selector */
-  /* the following fields are extracted from the value field in protected
-     mode only.  They're used for sake of efficiency */
-  Bit16u index;   /* 13bit index extracted from value in protected mode */
-  Bit8u  ti;      /* table indicator bit extracted from value */
-  Bit8u  rpl;     /* RPL extracted from value */
+typedef struct
+{ /* bx_selector_t */
+    Bit16u value;   /* the 16bit value of the selector */
+    /* the following fields are extracted from the value field in protected
+       mode only.  They're used for sake of efficiency */
+    Bit16u index;   /* 13bit index extracted from value in protected mode */
+    Bit8u  ti;      /* table indicator bit extracted from value */
+    Bit8u  rpl;     /* RPL extracted from value */
 } bx_selector_t;
 
 #define BX_SELECTOR_RPL(selector) ((selector) & 0x03)
@@ -58,31 +59,31 @@ typedef struct
 #define SegAccessWOK   (0x04)
 #define SegAccessROK4G (0x08)
 #define SegAccessWOK4G (0x10)
-  unsigned valid;        // Holds above values, Or'd together. Used to
-                         // hold only 0 or 1 once.
+    unsigned valid;        // Holds above values, Or'd together. Used to
+                           // hold only 0 or 1 once.
 
-  bool p;                /* present */
-  Bit8u   dpl;           /* descriptor privilege level 0..3 */
-  bool segment;          /* 0 = system/gate, 1 = data/code segment */
-  Bit8u   type;          /* For system & gate descriptors:
-                          *  0 = invalid descriptor (reserved)
-                          *  1 = 286 available Task State Segment (TSS)
-                          *  2 = LDT descriptor
-                          *  3 = 286 busy Task State Segment (TSS)
-                          *  4 = 286 call gate
-                          *  5 = task gate
-                          *  6 = 286 interrupt gate
-                          *  7 = 286 trap gate
-                          *  8 = (reserved)
-                          *  9 = 386 available TSS
-                          * 10 = (reserved)
-                          * 11 = 386 busy TSS
-                          * 12 = 386 call gate
-                          * 13 = (reserved)
-                          * 14 = 386 interrupt gate
-                          * 15 = 386 trap gate */
+    bool p;                /* present */
+    Bit8u   dpl;           /* descriptor privilege level 0..3 */
+    bool segment;          /* 0 = system/gate, 1 = data/code segment */
+    Bit8u   type;          /* For system & gate descriptors:
+                            *  0 = invalid descriptor (reserved)
+                            *  1 = 286 available Task State Segment (TSS)
+                            *  2 = LDT descriptor
+                            *  3 = 286 busy Task State Segment (TSS)
+                            *  4 = 286 call gate
+                            *  5 = task gate
+                            *  6 = 286 interrupt gate
+                            *  7 = 286 trap gate
+                            *  8 = (reserved)
+                            *  9 = 386 available TSS
+                            * 10 = (reserved)
+                            * 11 = 386 busy TSS
+                            * 12 = 386 call gate
+                            * 13 = (reserved)
+                            * 14 = 386 interrupt gate
+                            * 15 = 386 trap gate */
 
-// For system & gate descriptors:
+                            // For system & gate descriptors:
 
 #define BX_GATE_TYPE_NONE                       (0x0)
 #define BX_SYS_SEGMENT_AVAIL_286_TSS            (0x1)
@@ -120,39 +121,43 @@ typedef struct
 #define BX_CODE_EXEC_READ_CONFORMING            (0xe)
 #define BX_CODE_EXEC_READ_CONFORMING_ACCESSED   (0xf)
 
-union {
-  struct {
-    bx_address base;       /* base address: 286=24bits, 386=32bits, long=64 */
-    Bit32u  limit_scaled;  /* for efficiency, this contrived field is set to
-                            * limit for byte granular, and
-                            * (limit << 12) | 0xfff for page granular seg's
-                            */
-    bool g;                 /* granularity: 0=byte, 1=4K (page) */
-    bool d_b;               /* default size: 0=16bit, 1=32bit */
+    union
+    {
+        struct
+        {
+            bx_address base;       /* base address: 286=24bits, 386=32bits, long=64 */
+            Bit32u  limit_scaled;  /* for efficiency, this contrived field is set to
+                                    * limit for byte granular, and
+                                    * (limit << 12) | 0xfff for page granular seg's
+                                    */
+            bool g;                 /* granularity: 0=byte, 1=4K (page) */
+            bool d_b;               /* default size: 0=16bit, 1=32bit */
 #if BX_SUPPORT_X86_64
-    bool l;                 /* long mode: 0=compat, 1=64 bit */
+            bool l;                 /* long mode: 0=compat, 1=64 bit */
 #endif
-    bool avl;               /* available for use by system */
-  } segment;
-  struct {
-    Bit8u   param_count;   /* 5bits (0..31) #words/dword to copy from caller's
-                            * stack to called procedure's stack. */
-    Bit16u  dest_selector;
-    Bit32u  dest_offset;
-  } gate;
-  struct {                 /* type 5: Task Gate Descriptor */
-    Bit16u  tss_selector;  /* TSS segment selector */
-  } taskgate;
-} u;
+            bool avl;               /* available for use by system */
+        } segment;
+        struct
+        {
+            Bit8u   param_count;   /* 5bits (0..31) #words/dword to copy from caller's
+                                    * stack to called procedure's stack. */
+            Bit16u  dest_selector;
+            Bit32u  dest_offset;
+        } gate;
+        struct
+        {                 /* type 5: Task Gate Descriptor */
+            Bit16u  tss_selector;  /* TSS segment selector */
+        } taskgate;
+    } u;
 
 } bx_descriptor_t;
 
 #define IS_PRESENT(descriptor) (descriptor.p)
 
 #if BX_SUPPORT_X86_64
-  #define IS_LONG64_SEGMENT(descriptor)   (descriptor.u.segment.l)
+#define IS_LONG64_SEGMENT(descriptor)   (descriptor.u.segment.l)
 #else
-  #define IS_LONG64_SEGMENT(descriptor)   (0)
+#define IS_LONG64_SEGMENT(descriptor)   (0)
 #endif
 
 #define BX_SEGMENT_CODE                   (0x8)
@@ -173,19 +178,21 @@ union {
 #define IS_CODE_SEGMENT_NON_CONFORMING(type) \
             (! IS_CODE_SEGMENT_CONFORMING(type))
 
-typedef struct {
-  bx_selector_t    selector;
-  bx_descriptor_t  cache;
+typedef struct
+{
+    bx_selector_t    selector;
+    bx_descriptor_t  cache;
 } bx_segment_reg_t;
 
-typedef struct {
-  bx_address       base;   /* base address: 24bits=286,32bits=386,64bits=x86-64 */
-  Bit16u           limit;  /* limit, 16bits */
+typedef struct
+{
+    bx_address       base;   /* base address: 24bits=286,32bits=386,64bits=x86-64 */
+    Bit16u           limit;  /* limit, 16bits */
 } bx_global_segment_reg_t;
 
-void  parse_selector(Bit16u raw_selector, bx_selector_t *selector);
-Bit8u get_ar_byte(const bx_descriptor_t *d);
-void  set_ar_byte(bx_descriptor_t *d, Bit8u ar_byte);
-void  parse_descriptor(Bit32u dword1, Bit32u dword2, bx_descriptor_t *temp);
+void  parse_selector(Bit16u raw_selector, bx_selector_t* selector);
+Bit8u get_ar_byte(const bx_descriptor_t* d);
+void  set_ar_byte(bx_descriptor_t* d, Bit8u ar_byte);
+void  parse_descriptor(Bit32u dword1, Bit32u dword2, bx_descriptor_t* temp);
 
 #endif

@@ -25,11 +25,12 @@
 #define _TAG_W_H
 
 /* Tag Word */
-enum {
-  FPU_Tag_Valid   = 0x00,
-  FPU_Tag_Zero    = 0x01,
-  FPU_Tag_Special = 0x02,
-  FPU_Tag_Empty   = 0x03
+enum
+{
+    FPU_Tag_Valid = 0x00,
+    FPU_Tag_Zero = 0x01,
+    FPU_Tag_Special = 0x02,
+    FPU_Tag_Empty = 0x03
 };
 
 #endif

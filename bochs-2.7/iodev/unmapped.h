@@ -29,29 +29,31 @@
 #  define BX_UM_THIS this->
 #endif
 
-class bx_unmapped_c : public bx_devmodel_c {
+class bx_unmapped_c : public bx_devmodel_c
+{
 public:
-  bx_unmapped_c();
-  virtual ~bx_unmapped_c();
-  virtual void init(void);
-  virtual void reset(unsigned type) {}
+    bx_unmapped_c();
+    virtual ~bx_unmapped_c();
+    virtual void init(void);
+    virtual void reset(unsigned type) {}
 
 private:
 
-  static Bit32u read_handler(void *this_ptr, Bit32u address, unsigned io_len);
-  static void   write_handler(void *this_ptr, Bit32u address, Bit32u value, unsigned io_len);
+    static Bit32u read_handler(void* this_ptr, Bit32u address, unsigned io_len);
+    static void   write_handler(void* this_ptr, Bit32u address, Bit32u value, unsigned io_len);
 #if !BX_USE_UM_SMF
-  Bit32u read(Bit32u address, unsigned io_len);
-  void   write(Bit32u address, Bit32u value, unsigned io_len);
+    Bit32u read(Bit32u address, unsigned io_len);
+    void   write(Bit32u address, Bit32u value, unsigned io_len);
 #endif
-  static Bit64s param_handler(bx_param_c *param, bool set, Bit64s val);
+    static Bit64s param_handler(bx_param_c* param, bool set, Bit64s val);
 
-  struct {
-    Bit8u port80;
-    Bit8u port8e;
-    Bit8u shutdown;
-    bool port_e9_hack;
-  } s;  // state information
+    struct
+    {
+        Bit8u port80;
+        Bit8u port8e;
+        Bit8u shutdown;
+        bool port_e9_hack;
+    } s;  // state information
 };
 
 #endif

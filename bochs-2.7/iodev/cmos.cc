@@ -30,7 +30,7 @@
 
 #define LOG_THIS theCmosDevice->
 
-bx_cmos_c *theCmosDevice = NULL;
+bx_cmos_c* theCmosDevice = NULL;
 
 // CMOS register definitions from Ralf Brown's interrupt list v6.1, in a file
 // called cmos.lst.  In cases where there are multiple uses for a given
@@ -86,366 +86,406 @@ bx_cmos_c *theCmosDevice = NULL;
 
 Bit8u bcd_to_bin(Bit8u value, bool is_binary)
 {
-  if (is_binary)
-    return value;
-  else
-    return ((value >> 4) * 10) + (value & 0x0f);
+    if (is_binary)
+        return value;
+    else
+        return ((value >> 4) * 10) + (value & 0x0f);
 }
 
 Bit8u bin_to_bcd(Bit8u value, bool is_binary)
 {
-  if (is_binary)
-    return value;
-  else
-    return ((value  / 10) << 4) | (value % 10);
+    if (is_binary)
+        return value;
+    else
+        return ((value / 10) << 4) | (value % 10);
 }
 
 PLUGIN_ENTRY_FOR_MODULE(cmos)
 {
-  if (mode == PLUGIN_INIT) {
-    theCmosDevice = new bx_cmos_c();
-    bx_devices.pluginCmosDevice = theCmosDevice;
-    BX_REGISTER_DEVICE_DEVMODEL(plugin, type, theCmosDevice, BX_PLUGIN_CMOS);
-  } else if (mode == PLUGIN_FINI) {
-    delete theCmosDevice;
-  } else if (mode == PLUGIN_PROBE) {
-    return (int)PLUGTYPE_CORE;
-  }
-  return 0; // Success
+    if (mode == PLUGIN_INIT)
+    {
+        theCmosDevice = new bx_cmos_c();
+        bx_devices.pluginCmosDevice = theCmosDevice;
+        BX_REGISTER_DEVICE_DEVMODEL(plugin, type, theCmosDevice, BX_PLUGIN_CMOS);
+    }
+    else if (mode == PLUGIN_FINI)
+    {
+        delete theCmosDevice;
+    }
+    else if (mode == PLUGIN_PROBE)
+    {
+        return (int)PLUGTYPE_CORE;
+    }
+    return 0; // Success
 }
 
 bx_cmos_c::bx_cmos_c(void)
 {
-  put("CMOS");
-  memset(&s, 0, sizeof(s));
-  s.periodic_timer_index = BX_NULL_TIMER_HANDLE;
-  s.one_second_timer_index = BX_NULL_TIMER_HANDLE;
-  s.uip_timer_index = BX_NULL_TIMER_HANDLE;
+    put("CMOS");
+    memset(&s, 0, sizeof(s));
+    s.periodic_timer_index = BX_NULL_TIMER_HANDLE;
+    s.one_second_timer_index = BX_NULL_TIMER_HANDLE;
+    s.uip_timer_index = BX_NULL_TIMER_HANDLE;
 }
 
 bx_cmos_c::~bx_cmos_c(void)
 {
-  save_image();
-  char *tmptime;
-  if ((tmptime = strdup(ctime(&(BX_CMOS_THIS s.timeval)))) != NULL) {
-    tmptime[strlen(tmptime)-1]='\0';
-    BX_INFO(("Last time is %u (%s)", (unsigned) get_timeval(), tmptime));
-    free(tmptime);
-  }
-  SIM->get_bochs_root()->remove("cmos");
-  BX_DEBUG(("Exit"));
+    save_image();
+    char* tmptime;
+    if ((tmptime = strdup(ctime(&(BX_CMOS_THIS s.timeval)))) != NULL)
+    {
+        tmptime[strlen(tmptime) - 1] = '\0';
+        BX_INFO(("Last time is %u (%s)", (unsigned)get_timeval(), tmptime));
+        free(tmptime);
+    }
+    SIM->get_bochs_root()->remove("cmos");
+    BX_DEBUG(("Exit"));
 }
 
 void bx_cmos_c::init(void)
 {
-  BX_DEBUG(("Init $Id: cmos.cc 14175 2021-03-07 16:01:39Z vruppert $"));
-  // CMOS RAM & RTC
+    BX_DEBUG(("Init $Id: cmos.cc 14175 2021-03-07 16:01:39Z vruppert $"));
+    // CMOS RAM & RTC
 
-  DEV_register_ioread_handler(this, read_handler, 0x0070, "CMOS RAM", 1);
-  DEV_register_ioread_handler(this, read_handler, 0x0071, "CMOS RAM", 1);
-  DEV_register_iowrite_handler(this, write_handler, 0x0070, "CMOS RAM", 1);
-  DEV_register_iowrite_handler(this, write_handler, 0x0071, "CMOS RAM", 1);
-  DEV_register_irq(8, "CMOS RTC");
+    DEV_register_ioread_handler(this, read_handler, 0x0070, "CMOS RAM", 1);
+    DEV_register_ioread_handler(this, read_handler, 0x0071, "CMOS RAM", 1);
+    DEV_register_iowrite_handler(this, write_handler, 0x0070, "CMOS RAM", 1);
+    DEV_register_iowrite_handler(this, write_handler, 0x0071, "CMOS RAM", 1);
+    DEV_register_irq(8, "CMOS RTC");
 
-  int clock_sync = SIM->get_param_enum(BXPN_CLOCK_SYNC)->get();
-  BX_CMOS_THIS s.rtc_sync = ((clock_sync == BX_CLOCK_SYNC_REALTIME) ||
-                             (clock_sync == BX_CLOCK_SYNC_BOTH)) &&
-                            SIM->get_param_bool(BXPN_CLOCK_RTC_SYNC)->get();
+    int clock_sync = SIM->get_param_enum(BXPN_CLOCK_SYNC)->get();
+    BX_CMOS_THIS s.rtc_sync = ((clock_sync == BX_CLOCK_SYNC_REALTIME) ||
+        (clock_sync == BX_CLOCK_SYNC_BOTH)) &&
+        SIM->get_param_bool(BXPN_CLOCK_RTC_SYNC)->get();
 
-  if (BX_CMOS_THIS s.periodic_timer_index == BX_NULL_TIMER_HANDLE) {
-    BX_CMOS_THIS s.periodic_timer_index =
-      DEV_register_timer(this, periodic_timer_handler,
-        1000000, 1,0, "cmos"); // continuous, not-active
-  }
-  if (BX_CMOS_THIS s.one_second_timer_index == BX_NULL_TIMER_HANDLE) {
-    BX_CMOS_THIS s.one_second_timer_index =
-      bx_virt_timer.register_timer(this, one_second_timer_handler,
-      1000000, 1, 0, BX_CMOS_THIS s.rtc_sync, "cmos"); // continuous, not-active
-      if (BX_CMOS_THIS s.rtc_sync) {
-        BX_INFO(("CMOS RTC using realtime synchronisation method"));
-      }
-  }
-  if (BX_CMOS_THIS s.uip_timer_index == BX_NULL_TIMER_HANDLE) {
-    BX_CMOS_THIS s.uip_timer_index =
-      DEV_register_timer(this, uip_timer_handler,
-        244, 0, 0, "cmos"); // one-shot, not-active
-  }
+    if (BX_CMOS_THIS s.periodic_timer_index == BX_NULL_TIMER_HANDLE)
+    {
+        BX_CMOS_THIS s.periodic_timer_index =
+            DEV_register_timer(this, periodic_timer_handler,
+                1000000, 1, 0, "cmos"); // continuous, not-active
+    }
+    if (BX_CMOS_THIS s.one_second_timer_index == BX_NULL_TIMER_HANDLE)
+    {
+        BX_CMOS_THIS s.one_second_timer_index =
+            bx_virt_timer.register_timer(this, one_second_timer_handler,
+                1000000, 1, 0, BX_CMOS_THIS s.rtc_sync, "cmos"); // continuous, not-active
+        if (BX_CMOS_THIS s.rtc_sync)
+        {
+            BX_INFO(("CMOS RTC using realtime synchronisation method"));
+        }
+    }
+    if (BX_CMOS_THIS s.uip_timer_index == BX_NULL_TIMER_HANDLE)
+    {
+        BX_CMOS_THIS s.uip_timer_index =
+            DEV_register_timer(this, uip_timer_handler,
+                244, 0, 0, "cmos"); // one-shot, not-active
+    }
 
-  if (SIM->get_param_num(BXPN_CLOCK_TIME0)->get() == BX_CLOCK_TIME0_LOCAL) {
-    BX_INFO(("Using local time for initial clock"));
-    BX_CMOS_THIS s.timeval = time(NULL);
-  } else if (SIM->get_param_num(BXPN_CLOCK_TIME0)->get() == BX_CLOCK_TIME0_UTC) {
-    bool utc_ok = 0;
+    if (SIM->get_param_num(BXPN_CLOCK_TIME0)->get() == BX_CLOCK_TIME0_LOCAL)
+    {
+        BX_INFO(("Using local time for initial clock"));
+        BX_CMOS_THIS s.timeval = time(NULL);
+    }
+    else if (SIM->get_param_num(BXPN_CLOCK_TIME0)->get() == BX_CLOCK_TIME0_UTC)
+    {
+        bool utc_ok = 0;
 
-    BX_INFO(("Using utc time for initial clock"));
+        BX_INFO(("Using utc time for initial clock"));
 
-    BX_CMOS_THIS s.timeval = time(NULL);
+        BX_CMOS_THIS s.timeval = time(NULL);
 
 #if BX_HAVE_GMTIME
 #if BX_HAVE_MKTIME
-    struct tm *utc_holder = gmtime(&BX_CMOS_THIS s.timeval);
-    utc_holder->tm_isdst = -1;
-    utc_ok = 1;
-    BX_CMOS_THIS s.timeval = mktime(utc_holder);
+        struct tm* utc_holder = gmtime(&BX_CMOS_THIS s.timeval);
+        utc_holder->tm_isdst = -1;
+        utc_ok = 1;
+        BX_CMOS_THIS s.timeval = mktime(utc_holder);
 #elif BX_HAVE_TIMELOCAL
-    struct tm *utc_holder = gmtime(&BX_CMOS_THIS s.timeval);
-    utc_holder->tm_isdst = 0;	// XXX Is this correct???
-    utc_ok = 1;
-    BX_CMOS_THIS s.timeval = timelocal(utc_holder);
+        struct tm* utc_holder = gmtime(&BX_CMOS_THIS s.timeval);
+        utc_holder->tm_isdst = 0;	// XXX Is this correct???
+        utc_ok = 1;
+        BX_CMOS_THIS s.timeval = timelocal(utc_holder);
 #endif //BX_HAVE_MKTIME
 #endif //BX_HAVE_GMTIME
 
-    if (!utc_ok) {
-      BX_ERROR(("UTC time is not supported on your platform. Using current time(NULL)"));
+        if (!utc_ok)
+        {
+            BX_ERROR(("UTC time is not supported on your platform. Using current time(NULL)"));
+        }
     }
-  } else {
-    BX_INFO(("Using specified time for initial clock"));
-    BX_CMOS_THIS s.timeval = SIM->get_param_num(BXPN_CLOCK_TIME0)->get();
-  }
+    else
+    {
+        BX_INFO(("Using specified time for initial clock"));
+        BX_CMOS_THIS s.timeval = SIM->get_param_num(BXPN_CLOCK_TIME0)->get();
+    }
 
-  // load CMOS from image file if requested.
-  BX_CMOS_THIS s.use_image = SIM->get_param_bool(BXPN_CMOSIMAGE_ENABLED)->get();
-  if (BX_CMOS_THIS s.use_image) {
-    int fd, ret;
-    struct stat stat_buf;
+    // load CMOS from image file if requested.
+    BX_CMOS_THIS s.use_image = SIM->get_param_bool(BXPN_CMOSIMAGE_ENABLED)->get();
+    if (BX_CMOS_THIS s.use_image)
+    {
+        int fd, ret;
+        struct stat stat_buf;
 
-    fd = open(SIM->get_param_string(BXPN_CMOSIMAGE_PATH)->getptr(), O_RDONLY
+        fd = open(SIM->get_param_string(BXPN_CMOSIMAGE_PATH)->getptr(), O_RDONLY
 #ifdef O_BINARY
-       | O_BINARY
+            | O_BINARY
 #endif
         );
-    if (fd < 0) {
-      BX_PANIC(("trying to open cmos image file '%s'",
-        SIM->get_param_string(BXPN_CMOSIMAGE_PATH)->getptr()));
-    }
-    ret = fstat(fd, &stat_buf);
-    if (ret) {
-      BX_PANIC(("CMOS: could not fstat() image file."));
-    }
-    if ((stat_buf.st_size != 64) && (stat_buf.st_size != 128) &&
-        (stat_buf.st_size != 256)) {
-      BX_PANIC(("CMOS: image file size must be 64, 128 or 256"));
-    } else {
-      BX_CMOS_THIS s.max_reg = (Bit8u)(stat_buf.st_size - 1);
-      if (BX_CMOS_THIS s.max_reg == 255) {
-        DEV_register_ioread_handler(this, read_handler, 0x0072, "Ext CMOS RAM", 1);
-        DEV_register_ioread_handler(this, read_handler, 0x0073, "Ext CMOS RAM", 1);
-        DEV_register_iowrite_handler(this, write_handler, 0x0072, "Ext CMOS RAM", 1);
-        DEV_register_iowrite_handler(this, write_handler, 0x0073, "Ext CMOS RAM", 1);
-      }
-    }
+        if (fd < 0)
+        {
+            BX_PANIC(("trying to open cmos image file '%s'",
+                SIM->get_param_string(BXPN_CMOSIMAGE_PATH)->getptr()));
+        }
+        ret = fstat(fd, &stat_buf);
+        if (ret)
+        {
+            BX_PANIC(("CMOS: could not fstat() image file."));
+        }
+        if ((stat_buf.st_size != 64) && (stat_buf.st_size != 128) &&
+            (stat_buf.st_size != 256))
+        {
+            BX_PANIC(("CMOS: image file size must be 64, 128 or 256"));
+        }
+        else
+        {
+            BX_CMOS_THIS s.max_reg = (Bit8u)(stat_buf.st_size - 1);
+            if (BX_CMOS_THIS s.max_reg == 255)
+            {
+                DEV_register_ioread_handler(this, read_handler, 0x0072, "Ext CMOS RAM", 1);
+                DEV_register_ioread_handler(this, read_handler, 0x0073, "Ext CMOS RAM", 1);
+                DEV_register_iowrite_handler(this, write_handler, 0x0072, "Ext CMOS RAM", 1);
+                DEV_register_iowrite_handler(this, write_handler, 0x0073, "Ext CMOS RAM", 1);
+            }
+        }
 
-    ret = ::read(fd, (bx_ptr_t) BX_CMOS_THIS s.reg, (unsigned)stat_buf.st_size);
-    if (ret != stat_buf.st_size) {
-      BX_PANIC(("CMOS: error reading cmos file."));
+        ret = ::read(fd, (bx_ptr_t)BX_CMOS_THIS s.reg, (unsigned)stat_buf.st_size);
+        if (ret != stat_buf.st_size)
+        {
+            BX_PANIC(("CMOS: error reading cmos file."));
+        }
+        close(fd);
+        BX_INFO(("successfully read from image file '%s'.",
+            SIM->get_param_string(BXPN_CMOSIMAGE_PATH)->getptr()));
+        BX_CMOS_THIS s.rtc_mode_12hour = ((BX_CMOS_THIS s.reg[REG_STAT_B] & 0x02) == 0);
+        BX_CMOS_THIS s.rtc_mode_binary = ((BX_CMOS_THIS s.reg[REG_STAT_B] & 0x04) != 0);
+        if (SIM->get_param_bool(BXPN_CMOSIMAGE_RTC_INIT)->get())
+        {
+            update_timeval();
+        }
+        else
+        {
+            update_clock();
+        }
     }
-    close(fd);
-    BX_INFO(("successfully read from image file '%s'.",
-      SIM->get_param_string(BXPN_CMOSIMAGE_PATH)->getptr()));
-    BX_CMOS_THIS s.rtc_mode_12hour = ((BX_CMOS_THIS s.reg[REG_STAT_B] & 0x02) == 0);
-    BX_CMOS_THIS s.rtc_mode_binary = ((BX_CMOS_THIS s.reg[REG_STAT_B] & 0x04) != 0);
-    if (SIM->get_param_bool(BXPN_CMOSIMAGE_RTC_INIT)->get()) {
-      update_timeval();
-    } else {
-      update_clock();
-    }
-  } else {
-    BX_CMOS_THIS s.max_reg = 128;
-    // CMOS values generated
-    BX_CMOS_THIS s.reg[REG_STAT_A] = 0x26;
-    BX_CMOS_THIS s.reg[REG_STAT_B] = 0x02;
-    BX_CMOS_THIS s.reg[REG_STAT_C] = 0x00;
-    BX_CMOS_THIS s.reg[REG_STAT_D] = 0x80;
+    else
+    {
+        BX_CMOS_THIS s.max_reg = 128;
+        // CMOS values generated
+        BX_CMOS_THIS s.reg[REG_STAT_A] = 0x26;
+        BX_CMOS_THIS s.reg[REG_STAT_B] = 0x02;
+        BX_CMOS_THIS s.reg[REG_STAT_C] = 0x00;
+        BX_CMOS_THIS s.reg[REG_STAT_D] = 0x80;
 #if BX_SUPPORT_FPU == 1
-    BX_CMOS_THIS s.reg[REG_EQUIPMENT_BYTE] |= 0x02;
+        BX_CMOS_THIS s.reg[REG_EQUIPMENT_BYTE] |= 0x02;
 #endif
-    BX_CMOS_THIS s.rtc_mode_12hour = 0;
-    BX_CMOS_THIS s.rtc_mode_binary = 0;
-    update_clock();
-  }
+        BX_CMOS_THIS s.rtc_mode_12hour = 0;
+        BX_CMOS_THIS s.rtc_mode_binary = 0;
+        update_clock();
+    }
 
-  char *tmptime;
-  while((tmptime = strdup(ctime(&(BX_CMOS_THIS s.timeval)))) == NULL) {
-    BX_PANIC(("Out of memory."));
-  }
-  tmptime[strlen(tmptime)-1]='\0';
-  BX_INFO(("Setting initial clock to: %s (time0=%u)", tmptime, (Bit32u)BX_CMOS_THIS s.timeval));
-  free(tmptime);
+    char* tmptime;
+    while ((tmptime = strdup(ctime(&(BX_CMOS_THIS s.timeval)))) == NULL)
+    {
+        BX_PANIC(("Out of memory."));
+    }
+    tmptime[strlen(tmptime) - 1] = '\0';
+    BX_INFO(("Setting initial clock to: %s (time0=%u)", tmptime, (Bit32u)BX_CMOS_THIS s.timeval));
+    free(tmptime);
 
-  BX_CMOS_THIS s.timeval_change = 0;
+    BX_CMOS_THIS s.timeval_change = 0;
 
 #if BX_DEBUGGER
-  // register device for the 'info device' command (calls debug_dump())
-  bx_dbg_register_debug_info("cmos", this);
+    // register device for the 'info device' command (calls debug_dump())
+    bx_dbg_register_debug_info("cmos", this);
 #endif
 }
 
 void bx_cmos_c::reset(unsigned type)
 {
-  BX_CMOS_THIS s.cmos_mem_address = 0;
-  BX_CMOS_THIS s.irq_enabled = 1;
+    BX_CMOS_THIS s.cmos_mem_address = 0;
+    BX_CMOS_THIS s.irq_enabled = 1;
 
-  // RESET affects the following registers:
-  //  CRA: no effects
-  //  CRB: bits 4,5,6 forced to 0
-  //  CRC: bits 4,5,6,7 forced to 0
-  //  CRD: no effects
-  BX_CMOS_THIS s.reg[REG_STAT_B] &= 0x8f;
-  BX_CMOS_THIS s.reg[REG_STAT_C] = 0;
+    // RESET affects the following registers:
+    //  CRA: no effects
+    //  CRB: bits 4,5,6 forced to 0
+    //  CRC: bits 4,5,6,7 forced to 0
+    //  CRD: no effects
+    BX_CMOS_THIS s.reg[REG_STAT_B] &= 0x8f;
+    BX_CMOS_THIS s.reg[REG_STAT_C] = 0;
 
-  // One second timer for updating clock & alarm functions
-  bx_virt_timer.activate_timer(BX_CMOS_THIS s.one_second_timer_index,
-                               1000000, 1);
+    // One second timer for updating clock & alarm functions
+    bx_virt_timer.activate_timer(BX_CMOS_THIS s.one_second_timer_index,
+        1000000, 1);
 
-  // handle periodic interrupt rate select
-  BX_CMOS_THIS CRA_change();
+    // handle periodic interrupt rate select
+    BX_CMOS_THIS CRA_change();
 }
 
 void bx_cmos_c::save_image(void)
 {
-  int fd, ret;
+    int fd, ret;
 
-  // save CMOS to image file if requested.
-  if (BX_CMOS_THIS s.use_image) {
-    fd = open(SIM->get_param_string(BXPN_CMOSIMAGE_PATH)->getptr(), O_WRONLY
+    // save CMOS to image file if requested.
+    if (BX_CMOS_THIS s.use_image)
+    {
+        fd = open(SIM->get_param_string(BXPN_CMOSIMAGE_PATH)->getptr(), O_WRONLY
 #ifdef O_BINARY
-       | O_BINARY
+            | O_BINARY
 #endif
         );
-    ret = ::write(fd, (bx_ptr_t) BX_CMOS_THIS s.reg, BX_CMOS_THIS s.max_reg + 1);
-    if (ret != (BX_CMOS_THIS s.max_reg + 1)) {
-      BX_PANIC(("CMOS: error writing cmos file."));
+        ret = ::write(fd, (bx_ptr_t)BX_CMOS_THIS s.reg, BX_CMOS_THIS s.max_reg + 1);
+        if (ret != (BX_CMOS_THIS s.max_reg + 1))
+        {
+            BX_PANIC(("CMOS: error writing cmos file."));
+        }
+        close(fd);
     }
-    close(fd);
-  }
 }
 
 void bx_cmos_c::register_state(void)
 {
-  bx_list_c *list = new bx_list_c(SIM->get_bochs_root(), "cmos", "CMOS State");
-  BXRS_HEX_PARAM_FIELD(list, mem_address, BX_CMOS_THIS s.cmos_mem_address);
-  BXRS_PARAM_BOOL(list, irq_enabled, BX_CMOS_THIS s.irq_enabled);
-  new bx_shadow_data_c(list, "ram", BX_CMOS_THIS s.reg, 128, 1);
+    bx_list_c* list = new bx_list_c(SIM->get_bochs_root(), "cmos", "CMOS State");
+    BXRS_HEX_PARAM_FIELD(list, mem_address, BX_CMOS_THIS s.cmos_mem_address);
+    BXRS_PARAM_BOOL(list, irq_enabled, BX_CMOS_THIS s.irq_enabled);
+    new bx_shadow_data_c(list, "ram", BX_CMOS_THIS s.reg, 128, 1);
 }
 
 void bx_cmos_c::after_restore_state(void)
 {
-  BX_CMOS_THIS s.rtc_mode_12hour = ((BX_CMOS_THIS s.reg[REG_STAT_B] & 0x02) == 0);
-  BX_CMOS_THIS s.rtc_mode_binary = ((BX_CMOS_THIS s.reg[REG_STAT_B] & 0x04) != 0);
-  BX_CMOS_THIS update_timeval();
-  BX_CMOS_THIS CRA_change();
+    BX_CMOS_THIS s.rtc_mode_12hour = ((BX_CMOS_THIS s.reg[REG_STAT_B] & 0x02) == 0);
+    BX_CMOS_THIS s.rtc_mode_binary = ((BX_CMOS_THIS s.reg[REG_STAT_B] & 0x04) != 0);
+    BX_CMOS_THIS update_timeval();
+    BX_CMOS_THIS CRA_change();
 }
 
 void bx_cmos_c::CRA_change(void)
 {
-  Bit8u nibble, dcc;
+    Bit8u nibble, dcc;
 
-  // Periodic Interrupt timer
-  nibble = BX_CMOS_THIS s.reg[REG_STAT_A] & 0x0f;
-  dcc = (BX_CMOS_THIS s.reg[REG_STAT_A] >> 4) & 0x07;
-  if ((nibble == 0) || ((dcc & 0x06) == 0)) {
-    // No Periodic Interrupt Rate when 0, deactivate timer
-    bx_pc_system.deactivate_timer(BX_CMOS_THIS s.periodic_timer_index);
-    BX_CMOS_THIS s.periodic_interval_usec = (Bit32u) -1; // max value
-  } else {
-    // values 0001b and 0010b are the same as 1000b and 1001b
-    if (nibble <= 2)
-      nibble += 7;
-    BX_CMOS_THIS s.periodic_interval_usec = (unsigned) (1000000.0L /
-      (32768.0L / (1 << (nibble - 1))));
-
-    // if Periodic Interrupt Enable bit set, activate timer
-    if (BX_CMOS_THIS s.reg[REG_STAT_B] & 0x40)
-      bx_pc_system.activate_timer(BX_CMOS_THIS s.periodic_timer_index,
-        BX_CMOS_THIS s.periodic_interval_usec, 1);
+    // Periodic Interrupt timer
+    nibble = BX_CMOS_THIS s.reg[REG_STAT_A] & 0x0f;
+    dcc = (BX_CMOS_THIS s.reg[REG_STAT_A] >> 4) & 0x07;
+    if ((nibble == 0) || ((dcc & 0x06) == 0))
+    {
+        // No Periodic Interrupt Rate when 0, deactivate timer
+        bx_pc_system.deactivate_timer(BX_CMOS_THIS s.periodic_timer_index);
+        BX_CMOS_THIS s.periodic_interval_usec = (Bit32u)-1; // max value
+    }
     else
-      bx_pc_system.deactivate_timer(BX_CMOS_THIS s.periodic_timer_index);
-  }
+    {
+        // values 0001b and 0010b are the same as 1000b and 1001b
+        if (nibble <= 2)
+            nibble += 7;
+        BX_CMOS_THIS s.periodic_interval_usec = (unsigned)(1000000.0L /
+            (32768.0L / (1 << (nibble - 1))));
+
+        // if Periodic Interrupt Enable bit set, activate timer
+        if (BX_CMOS_THIS s.reg[REG_STAT_B] & 0x40)
+            bx_pc_system.activate_timer(BX_CMOS_THIS s.periodic_timer_index,
+                BX_CMOS_THIS s.periodic_interval_usec, 1);
+        else
+            bx_pc_system.deactivate_timer(BX_CMOS_THIS s.periodic_timer_index);
+    }
 }
 
 
-  // static IO port read callback handler
-  // redirects to non-static class handler to avoid virtual functions
+// static IO port read callback handler
+// redirects to non-static class handler to avoid virtual functions
 
-Bit32u bx_cmos_c::read_handler(void *this_ptr, Bit32u address, unsigned io_len)
+Bit32u bx_cmos_c::read_handler(void* this_ptr, Bit32u address, unsigned io_len)
 {
 #if !BX_USE_CMOS_SMF
-  bx_cmos_c *class_ptr = (bx_cmos_c *) this_ptr;
-  return class_ptr->read(address, io_len);
+    bx_cmos_c* class_ptr = (bx_cmos_c*)this_ptr;
+    return class_ptr->read(address, io_len);
 }
 
 Bit32u bx_cmos_c::read(Bit32u address, unsigned io_len)
 {
 #else
-  UNUSED(this_ptr);
+    UNUSED(this_ptr);
 #endif
-  Bit8u ret8;
+    Bit8u ret8;
 
-  BX_DEBUG(("CMOS read of CMOS register 0x%02x", (unsigned) BX_CMOS_THIS s.cmos_mem_address));
+    BX_DEBUG(("CMOS read of CMOS register 0x%02x", (unsigned)BX_CMOS_THIS s.cmos_mem_address));
 
-  switch (address) {
+    switch (address)
+    {
     case 0x0070:
     case 0x0072:
-      // this register is write-only on most machines
-      BX_DEBUG(("read of index port 0x%02x returning 0xff", address));
-      return 0xff;
+        // this register is write-only on most machines
+        BX_DEBUG(("read of index port 0x%02x returning 0xff", address));
+        return 0xff;
 
     case 0x0071:
-      ret8 = BX_CMOS_THIS s.reg[BX_CMOS_THIS s.cmos_mem_address];
-      // all bits of Register C are cleared after a read occurs.
-      if (BX_CMOS_THIS s.cmos_mem_address == REG_STAT_C) {
-        BX_CMOS_THIS s.reg[REG_STAT_C] = 0x00;
-        if (BX_CMOS_THIS s.irq_enabled) {
-          DEV_pic_lower_irq(8);
+        ret8 = BX_CMOS_THIS s.reg[BX_CMOS_THIS s.cmos_mem_address];
+        // all bits of Register C are cleared after a read occurs.
+        if (BX_CMOS_THIS s.cmos_mem_address == REG_STAT_C)
+        {
+            BX_CMOS_THIS s.reg[REG_STAT_C] = 0x00;
+            if (BX_CMOS_THIS s.irq_enabled)
+            {
+                DEV_pic_lower_irq(8);
+            }
         }
-      }
-      return ret8;
+        return ret8;
 
     case 0x0073:
-      return BX_CMOS_THIS s.reg[BX_CMOS_THIS s.cmos_ext_mem_addr];
+        return BX_CMOS_THIS s.reg[BX_CMOS_THIS s.cmos_ext_mem_addr];
 
     default:
-      BX_PANIC(("unsupported cmos read, address=0x%04x!", (unsigned) address));
-      return 0;
-  }
+        BX_PANIC(("unsupported cmos read, address=0x%04x!", (unsigned)address));
+        return 0;
+    }
 }
 
 
 // static IO port write callback handler
 // redirects to non-static class handler to avoid virtual functions
-void bx_cmos_c::write_handler(void *this_ptr, Bit32u address, Bit32u value, unsigned io_len)
+void bx_cmos_c::write_handler(void* this_ptr, Bit32u address, Bit32u value, unsigned io_len)
 {
 #if !BX_USE_CMOS_SMF
-  bx_cmos_c *class_ptr = (bx_cmos_c *) this_ptr;
-  class_ptr->write(address, value, io_len);
+    bx_cmos_c* class_ptr = (bx_cmos_c*)this_ptr;
+    class_ptr->write(address, value, io_len);
 }
 
 void bx_cmos_c::write(Bit32u address, Bit32u value, unsigned io_len)
 {
 #else
-  UNUSED(this_ptr);
+    UNUSED(this_ptr);
 #endif  // !BX_USE_CMOS_SMF
 
-  BX_DEBUG(("CMOS write to address: 0x%04x = 0x%02x", address, value));
+    BX_DEBUG(("CMOS write to address: 0x%04x = 0x%02x", address, value));
 
-  switch (address) {
+    switch (address)
+    {
     case 0x0070:
-      BX_CMOS_THIS s.cmos_mem_address = value & 0x7F;
-      break;
+        BX_CMOS_THIS s.cmos_mem_address = value & 0x7F;
+        break;
 
     case 0x0072:
-      BX_CMOS_THIS s.cmos_ext_mem_addr = value | 0x80;
-      break;
+        BX_CMOS_THIS s.cmos_ext_mem_addr = value | 0x80;
+        break;
 
     case 0x0071:
-      switch (BX_CMOS_THIS s.cmos_mem_address) {
+        switch (BX_CMOS_THIS s.cmos_mem_address)
+        {
         case REG_SEC_ALARM:             // seconds alarm
         case REG_MIN_ALARM:             // minutes alarm
         case REG_HOUR_ALARM:            // hours alarm
-          BX_CMOS_THIS s.reg[BX_CMOS_THIS s.cmos_mem_address] = value;
-          BX_DEBUG(("alarm time changed to %02x:%02x:%02x", BX_CMOS_THIS s.reg[REG_HOUR_ALARM],
-                    BX_CMOS_THIS s.reg[REG_MIN_ALARM], BX_CMOS_THIS s.reg[REG_SEC_ALARM]));
-          break;
+            BX_CMOS_THIS s.reg[BX_CMOS_THIS s.cmos_mem_address] = value;
+            BX_DEBUG(("alarm time changed to %02x:%02x:%02x", BX_CMOS_THIS s.reg[REG_HOUR_ALARM],
+                BX_CMOS_THIS s.reg[REG_MIN_ALARM], BX_CMOS_THIS s.reg[REG_SEC_ALARM]));
+            break;
 
         case REG_SEC:                   // seconds
         case REG_MIN:                   // minutes
@@ -456,16 +496,20 @@ void bx_cmos_c::write(Bit32u address, Bit32u value, unsigned io_len)
         case REG_YEAR:                  // year
         case REG_IBM_CENTURY_BYTE:      // century
         case REG_IBM_PS2_CENTURY_BYTE:  // century (PS/2)
-          BX_CMOS_THIS s.reg[BX_CMOS_THIS s.cmos_mem_address] = value;
-          if (BX_CMOS_THIS s.cmos_mem_address == REG_IBM_PS2_CENTURY_BYTE) {
-            BX_CMOS_THIS s.reg[REG_IBM_CENTURY_BYTE] = value;
-          }
-          if (BX_CMOS_THIS s.reg[REG_STAT_B] & 0x80) {
-            BX_CMOS_THIS s.timeval_change = 1;
-          } else {
-            update_timeval();
-          }
-          break;
+            BX_CMOS_THIS s.reg[BX_CMOS_THIS s.cmos_mem_address] = value;
+            if (BX_CMOS_THIS s.cmos_mem_address == REG_IBM_PS2_CENTURY_BYTE)
+            {
+                BX_CMOS_THIS s.reg[REG_IBM_CENTURY_BYTE] = value;
+            }
+            if (BX_CMOS_THIS s.reg[REG_STAT_B] & 0x80)
+            {
+                BX_CMOS_THIS s.timeval_change = 1;
+            }
+            else
+            {
+                update_timeval();
+            }
+            break;
 
         case REG_STAT_A: // Control Register A
           // bit 7: Update in Progress (read-only)
@@ -499,17 +543,20 @@ void bx_cmos_c::write(Bit32u address, Bit32u value, unsigned io_len)
           //   1110 250      ms
           //   1111 500      ms
 
-          unsigned dcc;
-          dcc = (value >> 4) & 0x07;
-          if ((dcc & 0x06) == 0x06) {
-            BX_INFO(("CRA: divider chain RESET"));
-          } else if (dcc > 0x02) {
-            BX_PANIC(("CRA: divider chain control 0x%02x", dcc));
-          }
-          BX_CMOS_THIS s.reg[REG_STAT_A] &= 0x80;
-          BX_CMOS_THIS s.reg[REG_STAT_A] |= (value & 0x7f);
-          BX_CMOS_THIS CRA_change();
-          break;
+            unsigned dcc;
+            dcc = (value >> 4) & 0x07;
+            if ((dcc & 0x06) == 0x06)
+            {
+                BX_INFO(("CRA: divider chain RESET"));
+            }
+            else if (dcc > 0x02)
+            {
+                BX_PANIC(("CRA: divider chain control 0x%02x", dcc));
+            }
+            BX_CMOS_THIS s.reg[REG_STAT_A] &= 0x80;
+            BX_CMOS_THIS s.reg[REG_STAT_A] |= (value & 0x7f);
+            BX_CMOS_THIS CRA_change();
+            break;
 
         case REG_STAT_B: // Control Register B
           // bit 0: Daylight Savings Enable
@@ -537,359 +584,393 @@ void bx_cmos_c::write(Bit32u address, Bit32u value, unsigned io_len)
           //       to be accessed without regard for an occurance of an update
           //   0 = time updates occur normally
 
-          if (value & 0x01)
-            BX_ERROR(("write status reg B, daylight savings unsupported"));
+            if (value & 0x01)
+                BX_ERROR(("write status reg B, daylight savings unsupported"));
 
-          value &= 0xf7; // bit3 always 0
-          // Note: setting bit 7 clears bit 4
-          if (value & 0x80)
-            value &= 0xef;
+            value &= 0xf7; // bit3 always 0
+            // Note: setting bit 7 clears bit 4
+            if (value & 0x80)
+                value &= 0xef;
 
-          unsigned prev_CRB;
-          prev_CRB = BX_CMOS_THIS s.reg[REG_STAT_B];
-          BX_CMOS_THIS s.reg[REG_STAT_B] = value;
-          if ((prev_CRB & 0x02) != (value & 0x02)) {
-            BX_CMOS_THIS s.rtc_mode_12hour = ((value & 0x02) == 0);
-            update_clock();
-          }
-          if ((prev_CRB & 0x04) != (value & 0x04)) {
-            BX_CMOS_THIS s.rtc_mode_binary = ((value & 0x04) != 0);
-            update_clock();
-          }
-          if ((prev_CRB & 0x40) != (value & 0x40)) {
-            // Periodic Interrupt Enabled changed
-            if (prev_CRB & 0x40) {
-              // transition from 1 to 0, deactivate timer
-              bx_pc_system.deactivate_timer(BX_CMOS_THIS s.periodic_timer_index);
-            } else {
-              // transition from 0 to 1
-              // if rate select is not 0, activate timer
-              if ((BX_CMOS_THIS s.reg[REG_STAT_A] & 0x0f) != 0) {
-                bx_pc_system.activate_timer(
-                  BX_CMOS_THIS s.periodic_timer_index,
-                  BX_CMOS_THIS s.periodic_interval_usec, 1);
-              }
+            unsigned prev_CRB;
+            prev_CRB = BX_CMOS_THIS s.reg[REG_STAT_B];
+            BX_CMOS_THIS s.reg[REG_STAT_B] = value;
+            if ((prev_CRB & 0x02) != (value & 0x02))
+            {
+                BX_CMOS_THIS s.rtc_mode_12hour = ((value & 0x02) == 0);
+                update_clock();
             }
-          }
-          if ((prev_CRB >= 0x80) && (value < 0x80) && BX_CMOS_THIS s.timeval_change) {
-            update_timeval();
-            BX_CMOS_THIS s.timeval_change = 0;
-          }
-          break;
+            if ((prev_CRB & 0x04) != (value & 0x04))
+            {
+                BX_CMOS_THIS s.rtc_mode_binary = ((value & 0x04) != 0);
+                update_clock();
+            }
+            if ((prev_CRB & 0x40) != (value & 0x40))
+            {
+                // Periodic Interrupt Enabled changed
+                if (prev_CRB & 0x40)
+                {
+                    // transition from 1 to 0, deactivate timer
+                    bx_pc_system.deactivate_timer(BX_CMOS_THIS s.periodic_timer_index);
+                }
+                else
+                {
+                    // transition from 0 to 1
+                    // if rate select is not 0, activate timer
+                    if ((BX_CMOS_THIS s.reg[REG_STAT_A] & 0x0f) != 0)
+                    {
+                        bx_pc_system.activate_timer(
+                            BX_CMOS_THIS s.periodic_timer_index,
+                            BX_CMOS_THIS s.periodic_interval_usec, 1);
+                    }
+                }
+            }
+            if ((prev_CRB >= 0x80) && (value < 0x80) && BX_CMOS_THIS s.timeval_change)
+            {
+                update_timeval();
+                BX_CMOS_THIS s.timeval_change = 0;
+            }
+            break;
 
         case REG_STAT_C: // Control Register C
         case REG_STAT_D: // Control Register D
-          BX_ERROR(("write to control register 0x%02x ignored (read-only)",
-            BX_CMOS_THIS s.cmos_mem_address));
-          break;
+            BX_ERROR(("write to control register 0x%02x ignored (read-only)",
+                BX_CMOS_THIS s.cmos_mem_address));
+            break;
 
         case REG_DIAGNOSTIC_STATUS:
-          BX_DEBUG(("write register 0x0e: 0x%02x", value));
-          BX_CMOS_THIS s.reg[REG_DIAGNOSTIC_STATUS] = value;
-          break;
+            BX_DEBUG(("write register 0x0e: 0x%02x", value));
+            BX_CMOS_THIS s.reg[REG_DIAGNOSTIC_STATUS] = value;
+            break;
 
         case REG_SHUTDOWN_STATUS:
-          switch (value) {
+            switch (value)
+            {
             case 0x00: /* proceed with normal POST (soft reset) */
-              BX_DEBUG(("Reg 0Fh(00): shutdown action = normal POST"));
-              break;
+                BX_DEBUG(("Reg 0Fh(00): shutdown action = normal POST"));
+                break;
             case 0x01: /* shutdown after memory size check */
-              BX_DEBUG(("Reg 0Fh(01): request to change shutdown action"
-                        " to shutdown after memory size check"));
-              break;
+                BX_DEBUG(("Reg 0Fh(01): request to change shutdown action"
+                    " to shutdown after memory size check"));
+                break;
             case 0x02: /* shutdown after successful memory test */
-              BX_DEBUG(("Reg 0Fh(02): request to change shutdown action"
-                        " to shutdown after successful memory test"));
-              break;
+                BX_DEBUG(("Reg 0Fh(02): request to change shutdown action"
+                    " to shutdown after successful memory test"));
+                break;
             case 0x03: /* shutdown after failed memory test */
-              BX_DEBUG(("Reg 0Fh(03): request to change shutdown action"
-                        " to shutdown after successful memory test"));
-              break;
+                BX_DEBUG(("Reg 0Fh(03): request to change shutdown action"
+                    " to shutdown after successful memory test"));
+                break;
             case 0x04: /* jump to disk bootstrap routine */
-              BX_DEBUG(("Reg 0Fh(04): request to change shutdown action "
-                        "to jump to disk bootstrap routine."));
-              break;
+                BX_DEBUG(("Reg 0Fh(04): request to change shutdown action "
+                    "to jump to disk bootstrap routine."));
+                break;
             case 0x05: /* flush keyboard (issue EOI) and jump via 40h:0067h */
-              BX_DEBUG(("Reg 0Fh(05): request to change shutdown action "
-                        "to flush keyboard (issue EOI) and jump via 40h:0067h."));
-              break;
+                BX_DEBUG(("Reg 0Fh(05): request to change shutdown action "
+                    "to flush keyboard (issue EOI) and jump via 40h:0067h."));
+                break;
             case 0x06:
-              BX_DEBUG(("Reg 0Fh(06): Shutdown after memory test !"));
-              break;
+                BX_DEBUG(("Reg 0Fh(06): Shutdown after memory test !"));
+                break;
             case 0x07: /* reset (after failed test in virtual mode) */
-              BX_DEBUG(("Reg 0Fh(07): request to change shutdown action "
-                        "to reset (after failed test in virtual mode)."));
-              break;
+                BX_DEBUG(("Reg 0Fh(07): request to change shutdown action "
+                    "to reset (after failed test in virtual mode)."));
+                break;
             case 0x08: /* used by POST during protected-mode RAM test (return to POST) */
-              BX_DEBUG(("Reg 0Fh(08): request to change shutdown action "
-                        "to return to POST (used by POST during protected-mode RAM test)."));
-              break;
+                BX_DEBUG(("Reg 0Fh(08): request to change shutdown action "
+                    "to return to POST (used by POST during protected-mode RAM test)."));
+                break;
             case 0x09: /* return to BIOS extended memory block move
                   (interrupt 15h, func 87h was in progress) */
-              BX_DEBUG(("Reg 0Fh(09): request to change shutdown action "
-                        "to return to BIOS extended memory block move."));
-              break;
+                BX_DEBUG(("Reg 0Fh(09): request to change shutdown action "
+                    "to return to BIOS extended memory block move."));
+                break;
             case 0x0a: /* jump to DWORD pointer at 40:67 */
-              BX_DEBUG(("Reg 0Fh(0a): request to change shutdown action"
-                        " to jump to DWORD at 40:67"));
-              break;
+                BX_DEBUG(("Reg 0Fh(0a): request to change shutdown action"
+                    " to jump to DWORD at 40:67"));
+                break;
             case 0x0b: /* iret to DWORD pointer at 40:67 */
-              BX_DEBUG(("Reg 0Fh(0b): request to change shutdown action"
-                        " to iret to DWORD at 40:67"));
-              break;
+                BX_DEBUG(("Reg 0Fh(0b): request to change shutdown action"
+                    " to iret to DWORD at 40:67"));
+                break;
             case 0x0c: /* retf to DWORD pointer at 40:67 */
-              BX_DEBUG(("Reg 0Fh(0c): request to change shutdown action"
-                        " to retf to DWORD at 40:67"));
-              break;
+                BX_DEBUG(("Reg 0Fh(0c): request to change shutdown action"
+                    " to retf to DWORD at 40:67"));
+                break;
             default:
-              if (!BX_CMOS_THIS s.use_image) {
-                BX_ERROR(("unsupported shutdown status: 0x%02x!", value));
-              } else {
-                BX_DEBUG(("shutdown status register set to 0x%02x", value));
-              }
-          }
-          BX_CMOS_THIS s.reg[REG_SHUTDOWN_STATUS] = value;
-          break;
+                if (!BX_CMOS_THIS s.use_image)
+                {
+                    BX_ERROR(("unsupported shutdown status: 0x%02x!", value));
+                }
+                else
+                {
+                    BX_DEBUG(("shutdown status register set to 0x%02x", value));
+                }
+            }
+            BX_CMOS_THIS s.reg[REG_SHUTDOWN_STATUS] = value;
+            break;
 
         default:
-          BX_DEBUG(("write reg 0x%02x: value = 0x%02x",
-            BX_CMOS_THIS s.cmos_mem_address, value));
-          BX_CMOS_THIS s.reg[BX_CMOS_THIS s.cmos_mem_address] = value;
-      }
-      break;
+            BX_DEBUG(("write reg 0x%02x: value = 0x%02x",
+                BX_CMOS_THIS s.cmos_mem_address, value));
+            BX_CMOS_THIS s.reg[BX_CMOS_THIS s.cmos_mem_address] = value;
+        }
+        break;
 
     case 0x0073:
-      BX_CMOS_THIS s.reg[BX_CMOS_THIS s.cmos_ext_mem_addr] = value;
-      break;
-  }
+        BX_CMOS_THIS s.reg[BX_CMOS_THIS s.cmos_ext_mem_addr] = value;
+        break;
+    }
 }
 
 void bx_cmos_c::checksum_cmos(void)
 {
-  Bit16u sum = 0;
-  for (unsigned i=0x10; i<=0x2d; i++)
-    sum += BX_CMOS_THIS s.reg[i];
-  BX_CMOS_THIS s.reg[REG_CSUM_HIGH] = (sum >> 8) & 0xff; /* checksum high */
-  BX_CMOS_THIS s.reg[REG_CSUM_LOW] = (sum & 0xff);      /* checksum low */
+    Bit16u sum = 0;
+    for (unsigned i = 0x10; i <= 0x2d; i++)
+        sum += BX_CMOS_THIS s.reg[i];
+    BX_CMOS_THIS s.reg[REG_CSUM_HIGH] = (sum >> 8) & 0xff; /* checksum high */
+    BX_CMOS_THIS s.reg[REG_CSUM_LOW] = (sum & 0xff);      /* checksum low */
 }
 
-void bx_cmos_c::periodic_timer_handler(void *this_ptr)
+void bx_cmos_c::periodic_timer_handler(void* this_ptr)
 {
-  bx_cmos_c *class_ptr = (bx_cmos_c *) this_ptr;
-  class_ptr->periodic_timer();
+    bx_cmos_c* class_ptr = (bx_cmos_c*)this_ptr;
+    class_ptr->periodic_timer();
 }
 
 void bx_cmos_c::periodic_timer()
 {
-  // if periodic interrupts are enabled, trip IRQ 8, and
-  // update status register C
-  if (BX_CMOS_THIS s.reg[REG_STAT_B] & 0x40) {
-    BX_CMOS_THIS s.reg[REG_STAT_C] |= 0xc0; // Interrupt Request, Periodic Int
-    if (BX_CMOS_THIS s.irq_enabled) {
-      DEV_pic_raise_irq(8);
+    // if periodic interrupts are enabled, trip IRQ 8, and
+    // update status register C
+    if (BX_CMOS_THIS s.reg[REG_STAT_B] & 0x40)
+    {
+        BX_CMOS_THIS s.reg[REG_STAT_C] |= 0xc0; // Interrupt Request, Periodic Int
+        if (BX_CMOS_THIS s.irq_enabled)
+        {
+            DEV_pic_raise_irq(8);
+        }
     }
-  }
 }
 
-void bx_cmos_c::one_second_timer_handler(void *this_ptr)
+void bx_cmos_c::one_second_timer_handler(void* this_ptr)
 {
-  bx_cmos_c *class_ptr = (bx_cmos_c *) this_ptr;
-  class_ptr->one_second_timer();
+    bx_cmos_c* class_ptr = (bx_cmos_c*)this_ptr;
+    class_ptr->one_second_timer();
 }
 
 void bx_cmos_c::one_second_timer()
 {
-  // divider chain reset - RTC stopped
-  if ((BX_CMOS_THIS s.reg[REG_STAT_A] & 0x60) == 0x60)
-    return;
+    // divider chain reset - RTC stopped
+    if ((BX_CMOS_THIS s.reg[REG_STAT_A] & 0x60) == 0x60)
+        return;
 
-  // update internal time/date buffer
-  BX_CMOS_THIS s.timeval++;
+    // update internal time/date buffer
+    BX_CMOS_THIS s.timeval++;
 
-  // Dont update CMOS user copy of time/date if CRB bit7 is 1
-  // Nothing else do to
-  if (BX_CMOS_THIS s.reg[REG_STAT_B] & 0x80)
-    return;
+    // Dont update CMOS user copy of time/date if CRB bit7 is 1
+    // Nothing else do to
+    if (BX_CMOS_THIS s.reg[REG_STAT_B] & 0x80)
+        return;
 
-  BX_CMOS_THIS s.reg[REG_STAT_A] |= 0x80; // set UIP bit
+    BX_CMOS_THIS s.reg[REG_STAT_A] |= 0x80; // set UIP bit
 
-  // UIP timer for updating clock & alarm functions
-  bx_pc_system.activate_timer(BX_CMOS_THIS s.uip_timer_index, 244, 0);
+    // UIP timer for updating clock & alarm functions
+    bx_pc_system.activate_timer(BX_CMOS_THIS s.uip_timer_index, 244, 0);
 }
 
-void bx_cmos_c::uip_timer_handler(void *this_ptr)
+void bx_cmos_c::uip_timer_handler(void* this_ptr)
 {
-  bx_cmos_c *class_ptr = (bx_cmos_c *) this_ptr;
-  class_ptr->uip_timer();
+    bx_cmos_c* class_ptr = (bx_cmos_c*)this_ptr;
+    class_ptr->uip_timer();
 }
 
 void bx_cmos_c::uip_timer()
 {
-  update_clock();
+    update_clock();
 
-  // if update interrupts are enabled, trip IRQ 8, and
-  // update status register C
-  if (BX_CMOS_THIS s.reg[REG_STAT_B] & 0x10) {
-    BX_CMOS_THIS s.reg[REG_STAT_C] |= 0x90; // Interrupt Request, Update Ended
-    if (BX_CMOS_THIS s.irq_enabled) {
-      DEV_pic_raise_irq(8);
+    // if update interrupts are enabled, trip IRQ 8, and
+    // update status register C
+    if (BX_CMOS_THIS s.reg[REG_STAT_B] & 0x10)
+    {
+        BX_CMOS_THIS s.reg[REG_STAT_C] |= 0x90; // Interrupt Request, Update Ended
+        if (BX_CMOS_THIS s.irq_enabled)
+        {
+            DEV_pic_raise_irq(8);
+        }
     }
-  }
 
-  // compare CMOS user copy of time/date to alarm time/date here
-  if (BX_CMOS_THIS s.reg[REG_STAT_B] & 0x20) {
-    // Alarm interrupts enabled
-    bool alarm_match = 1;
-    if ((BX_CMOS_THIS s.reg[REG_SEC_ALARM] & 0xc0) != 0xc0) {
-      // seconds alarm not in dont care mode
-      if (BX_CMOS_THIS s.reg[REG_SEC] != BX_CMOS_THIS s.reg[REG_SEC_ALARM])
-        alarm_match = 0;
+    // compare CMOS user copy of time/date to alarm time/date here
+    if (BX_CMOS_THIS s.reg[REG_STAT_B] & 0x20)
+    {
+        // Alarm interrupts enabled
+        bool alarm_match = 1;
+        if ((BX_CMOS_THIS s.reg[REG_SEC_ALARM] & 0xc0) != 0xc0)
+        {
+            // seconds alarm not in dont care mode
+            if (BX_CMOS_THIS s.reg[REG_SEC] != BX_CMOS_THIS s.reg[REG_SEC_ALARM])
+                alarm_match = 0;
+        }
+        if ((BX_CMOS_THIS s.reg[REG_MIN_ALARM] & 0xc0) != 0xc0)
+        {
+            // minutes alarm not in dont care mode
+            if (BX_CMOS_THIS s.reg[REG_MIN] != BX_CMOS_THIS s.reg[REG_MIN_ALARM])
+                alarm_match = 0;
+        }
+        if ((BX_CMOS_THIS s.reg[REG_HOUR_ALARM] & 0xc0) != 0xc0)
+        {
+            // hours alarm not in dont care mode
+            if (BX_CMOS_THIS s.reg[REG_HOUR] != BX_CMOS_THIS s.reg[REG_HOUR_ALARM])
+                alarm_match = 0;
+        }
+        if (alarm_match)
+        {
+            BX_CMOS_THIS s.reg[REG_STAT_C] |= 0xa0; // Interrupt Request, Alarm Int
+            if (BX_CMOS_THIS s.irq_enabled)
+            {
+                DEV_pic_raise_irq(8);
+            }
+        }
     }
-    if ((BX_CMOS_THIS s.reg[REG_MIN_ALARM] & 0xc0) != 0xc0) {
-      // minutes alarm not in dont care mode
-      if (BX_CMOS_THIS s.reg[REG_MIN] != BX_CMOS_THIS s.reg[REG_MIN_ALARM])
-        alarm_match = 0;
-    }
-    if ((BX_CMOS_THIS s.reg[REG_HOUR_ALARM] & 0xc0) != 0xc0) {
-      // hours alarm not in dont care mode
-      if (BX_CMOS_THIS s.reg[REG_HOUR] != BX_CMOS_THIS s.reg[REG_HOUR_ALARM])
-        alarm_match = 0;
-    }
-    if (alarm_match) {
-      BX_CMOS_THIS s.reg[REG_STAT_C] |= 0xa0; // Interrupt Request, Alarm Int
-      if (BX_CMOS_THIS s.irq_enabled) {
-        DEV_pic_raise_irq(8);
-      }
-    }
-  }
-  BX_CMOS_THIS s.reg[REG_STAT_A] &= 0x7f; // clear UIP bit
+    BX_CMOS_THIS s.reg[REG_STAT_A] &= 0x7f; // clear UIP bit
 }
 
 void bx_cmos_c::update_clock()
 {
-  struct tm *time_calendar;
-  unsigned year, month, day, century;
-  Bit8u val_bcd, hour;
+    struct tm* time_calendar;
+    unsigned year, month, day, century;
+    Bit8u val_bcd, hour;
 
-  time_calendar = localtime(& BX_CMOS_THIS s.timeval);
+    time_calendar = localtime(&BX_CMOS_THIS s.timeval);
 
-  // update seconds
-  BX_CMOS_THIS s.reg[REG_SEC] = bin_to_bcd(time_calendar->tm_sec,
-    BX_CMOS_THIS s.rtc_mode_binary);
+    // update seconds
+    BX_CMOS_THIS s.reg[REG_SEC] = bin_to_bcd(time_calendar->tm_sec,
+        BX_CMOS_THIS s.rtc_mode_binary);
 
-  // update minutes
-  BX_CMOS_THIS s.reg[REG_MIN] = bin_to_bcd(time_calendar->tm_min,
-    BX_CMOS_THIS s.rtc_mode_binary);
+    // update minutes
+    BX_CMOS_THIS s.reg[REG_MIN] = bin_to_bcd(time_calendar->tm_min,
+        BX_CMOS_THIS s.rtc_mode_binary);
 
-  // update hours
-  if (BX_CMOS_THIS s.rtc_mode_12hour) {
-    hour = time_calendar->tm_hour;
-    val_bcd = (hour > 11) ? 0x80 : 0x00;
-    if (hour > 11) hour -= 12;
-    if (hour == 0) hour = 12;
-    val_bcd |= bin_to_bcd(hour, BX_CMOS_THIS s.rtc_mode_binary);
-    BX_CMOS_THIS s.reg[REG_HOUR] = val_bcd;
-  } else {
-    BX_CMOS_THIS s.reg[REG_HOUR] = bin_to_bcd(time_calendar->tm_hour,
-      BX_CMOS_THIS s.rtc_mode_binary);
-  }
+    // update hours
+    if (BX_CMOS_THIS s.rtc_mode_12hour)
+    {
+        hour = time_calendar->tm_hour;
+        val_bcd = (hour > 11) ? 0x80 : 0x00;
+        if (hour > 11) hour -= 12;
+        if (hour == 0) hour = 12;
+        val_bcd |= bin_to_bcd(hour, BX_CMOS_THIS s.rtc_mode_binary);
+        BX_CMOS_THIS s.reg[REG_HOUR] = val_bcd;
+    }
+    else
+    {
+        BX_CMOS_THIS s.reg[REG_HOUR] = bin_to_bcd(time_calendar->tm_hour,
+            BX_CMOS_THIS s.rtc_mode_binary);
+    }
 
-  // update day of the week
-  day = time_calendar->tm_wday + 1; // 0..6 to 1..7
-  BX_CMOS_THIS s.reg[REG_WEEK_DAY] = bin_to_bcd(day,
-    BX_CMOS_THIS s.rtc_mode_binary);
+    // update day of the week
+    day = time_calendar->tm_wday + 1; // 0..6 to 1..7
+    BX_CMOS_THIS s.reg[REG_WEEK_DAY] = bin_to_bcd(day,
+        BX_CMOS_THIS s.rtc_mode_binary);
 
-  // update day of the month
-  day = time_calendar->tm_mday;
-  BX_CMOS_THIS s.reg[REG_MONTH_DAY] = bin_to_bcd(day,
-    BX_CMOS_THIS s.rtc_mode_binary);
+    // update day of the month
+    day = time_calendar->tm_mday;
+    BX_CMOS_THIS s.reg[REG_MONTH_DAY] = bin_to_bcd(day,
+        BX_CMOS_THIS s.rtc_mode_binary);
 
-  // update month
-  month   = time_calendar->tm_mon + 1;
-  BX_CMOS_THIS s.reg[REG_MONTH] = bin_to_bcd(month,
-    BX_CMOS_THIS s.rtc_mode_binary);
+    // update month
+    month = time_calendar->tm_mon + 1;
+    BX_CMOS_THIS s.reg[REG_MONTH] = bin_to_bcd(month,
+        BX_CMOS_THIS s.rtc_mode_binary);
 
-  // update year
-  year = time_calendar->tm_year % 100;
-  BX_CMOS_THIS s.reg[REG_YEAR] = bin_to_bcd(year,
-    BX_CMOS_THIS s.rtc_mode_binary);
+    // update year
+    year = time_calendar->tm_year % 100;
+    BX_CMOS_THIS s.reg[REG_YEAR] = bin_to_bcd(year,
+        BX_CMOS_THIS s.rtc_mode_binary);
 
-  // update century
-  century = (time_calendar->tm_year / 100) + 19;
-  BX_CMOS_THIS s.reg[REG_IBM_CENTURY_BYTE] = bin_to_bcd(century,
-    BX_CMOS_THIS s.rtc_mode_binary);
+    // update century
+    century = (time_calendar->tm_year / 100) + 19;
+    BX_CMOS_THIS s.reg[REG_IBM_CENTURY_BYTE] = bin_to_bcd(century,
+        BX_CMOS_THIS s.rtc_mode_binary);
 
-  // Raul Hudea pointed out that some bioses also use reg 0x37 for the
-  // century byte.  Tony Heller says this is critical in getting WinXP to run.
-  BX_CMOS_THIS s.reg[REG_IBM_PS2_CENTURY_BYTE] =
-    BX_CMOS_THIS s.reg[REG_IBM_CENTURY_BYTE];
+    // Raul Hudea pointed out that some bioses also use reg 0x37 for the
+    // century byte.  Tony Heller says this is critical in getting WinXP to run.
+    BX_CMOS_THIS s.reg[REG_IBM_PS2_CENTURY_BYTE] =
+        BX_CMOS_THIS s.reg[REG_IBM_CENTURY_BYTE];
 }
 
 void bx_cmos_c::update_timeval()
 {
-  struct tm time_calendar;
-  Bit8u val_bin, pm_flag;
+    struct tm time_calendar;
+    Bit8u val_bin, pm_flag;
 
-  // update seconds
-  time_calendar.tm_sec = bcd_to_bin(BX_CMOS_THIS s.reg[REG_SEC],
-    BX_CMOS_THIS s.rtc_mode_binary);
+    // update seconds
+    time_calendar.tm_sec = bcd_to_bin(BX_CMOS_THIS s.reg[REG_SEC],
+        BX_CMOS_THIS s.rtc_mode_binary);
 
-  // update minutes
-  time_calendar.tm_min = bcd_to_bin(BX_CMOS_THIS s.reg[REG_MIN],
-    BX_CMOS_THIS s.rtc_mode_binary);
+    // update minutes
+    time_calendar.tm_min = bcd_to_bin(BX_CMOS_THIS s.reg[REG_MIN],
+        BX_CMOS_THIS s.rtc_mode_binary);
 
-  // update hours
-  if (BX_CMOS_THIS s.rtc_mode_12hour) {
-    pm_flag = BX_CMOS_THIS s.reg[REG_HOUR] & 0x80;
-    val_bin = bcd_to_bin(BX_CMOS_THIS s.reg[REG_HOUR] & 0x70,
-      BX_CMOS_THIS s.rtc_mode_binary);
-    if ((val_bin < 12) & (pm_flag > 0)) {
-      val_bin += 12;
-    } else if ((val_bin == 12) & (pm_flag == 0)) {
-      val_bin = 0;
+    // update hours
+    if (BX_CMOS_THIS s.rtc_mode_12hour)
+    {
+        pm_flag = BX_CMOS_THIS s.reg[REG_HOUR] & 0x80;
+        val_bin = bcd_to_bin(BX_CMOS_THIS s.reg[REG_HOUR] & 0x70,
+            BX_CMOS_THIS s.rtc_mode_binary);
+        if ((val_bin < 12) & (pm_flag > 0))
+        {
+            val_bin += 12;
+        }
+        else if ((val_bin == 12) & (pm_flag == 0))
+        {
+            val_bin = 0;
+        }
+        time_calendar.tm_hour = val_bin;
     }
-    time_calendar.tm_hour = val_bin;
-  } else {
-    time_calendar.tm_hour = bcd_to_bin(BX_CMOS_THIS s.reg[REG_HOUR],
-      BX_CMOS_THIS s.rtc_mode_binary);
-  }
+    else
+    {
+        time_calendar.tm_hour = bcd_to_bin(BX_CMOS_THIS s.reg[REG_HOUR],
+            BX_CMOS_THIS s.rtc_mode_binary);
+    }
 
-  // update day of the month
-  time_calendar.tm_mday = bcd_to_bin(BX_CMOS_THIS s.reg[REG_MONTH_DAY],
-    BX_CMOS_THIS s.rtc_mode_binary);
+    // update day of the month
+    time_calendar.tm_mday = bcd_to_bin(BX_CMOS_THIS s.reg[REG_MONTH_DAY],
+        BX_CMOS_THIS s.rtc_mode_binary);
 
-  // update month
-  time_calendar.tm_mon = bcd_to_bin(BX_CMOS_THIS s.reg[REG_MONTH],
-    BX_CMOS_THIS s.rtc_mode_binary) - 1;
+    // update month
+    time_calendar.tm_mon = bcd_to_bin(BX_CMOS_THIS s.reg[REG_MONTH],
+        BX_CMOS_THIS s.rtc_mode_binary) - 1;
 
-  // update year
-  val_bin = bcd_to_bin(BX_CMOS_THIS s.reg[REG_IBM_CENTURY_BYTE],
-    BX_CMOS_THIS s.rtc_mode_binary);
-  val_bin = (val_bin - 19) * 100;
-  val_bin += bcd_to_bin(BX_CMOS_THIS s.reg[REG_YEAR],
-    BX_CMOS_THIS s.rtc_mode_binary);
-  time_calendar.tm_year = val_bin;
+    // update year
+    val_bin = bcd_to_bin(BX_CMOS_THIS s.reg[REG_IBM_CENTURY_BYTE],
+        BX_CMOS_THIS s.rtc_mode_binary);
+    val_bin = (val_bin - 19) * 100;
+    val_bin += bcd_to_bin(BX_CMOS_THIS s.reg[REG_YEAR],
+        BX_CMOS_THIS s.rtc_mode_binary);
+    time_calendar.tm_year = val_bin;
 
-  BX_CMOS_THIS s.timeval = mktime(& time_calendar);
+    BX_CMOS_THIS s.timeval = mktime(&time_calendar);
 }
 
 #if BX_DEBUGGER
-void bx_cmos_c::debug_dump(int argc, char **argv)
+void bx_cmos_c::debug_dump(int argc, char** argv)
 {
-  int i, j, r;
+    int i, j, r;
 
-  dbg_printf("CMOS RTC\n\n");
-  dbg_printf("Index register: 0x%02x\n\n", BX_CMOS_THIS s.cmos_mem_address);
-  r = 0;
-  for (i=0; i<8; i++) {
-    dbg_printf("%04x ", r);
-    for (j=0; j<16; j++) {
-      dbg_printf(" %02x", BX_CMOS_THIS s.reg[r++]);
+    dbg_printf("CMOS RTC\n\n");
+    dbg_printf("Index register: 0x%02x\n\n", BX_CMOS_THIS s.cmos_mem_address);
+    r = 0;
+    for (i = 0; i < 8; i++)
+    {
+        dbg_printf("%04x ", r);
+        for (j = 0; j < 16; j++)
+        {
+            dbg_printf(" %02x", BX_CMOS_THIS s.reg[r++]);
+        }
+        dbg_printf("\n");
     }
-    dbg_printf("\n");
-  }
-  if (argc > 0) {
-    dbg_printf("\nAdditional options not supported\n");
-  }
+    if (argc > 0)
+    {
+        dbg_printf("\nAdditional options not supported\n");
+    }
 }
 #endif

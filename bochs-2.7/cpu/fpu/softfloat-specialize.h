@@ -45,11 +45,12 @@ these four paragraphs for those parts of this code that are retained.
 #define uint32_indefinite (0xffffffff)
 #define uint64_indefinite BX_CONST64(0xffffffffffffffff)
 
-/*----------------------------------------------------------------------------
-| Internal canonical NaN format.
-*----------------------------------------------------------------------------*/
+ /*----------------------------------------------------------------------------
+ | Internal canonical NaN format.
+ *----------------------------------------------------------------------------*/
 
-typedef struct {
+typedef struct
+{
     int sign;
     Bit64u hi, lo;
 } commonNaNT;
@@ -80,7 +81,7 @@ BX_CPP_INLINE Bit16u extractFloat16Frac(float16 a)
 
 BX_CPP_INLINE Bit16s extractFloat16Exp(float16 a)
 {
-    return (a>>10) & 0x1F;
+    return (a >> 10) & 0x1F;
 }
 
 /*----------------------------------------------------------------------------
@@ -89,7 +90,7 @@ BX_CPP_INLINE Bit16s extractFloat16Exp(float16 a)
 
 BX_CPP_INLINE int extractFloat16Sign(float16 a)
 {
-    return a>>15;
+    return a >> 15;
 }
 
 /*----------------------------------------------------------------------------
@@ -105,7 +106,7 @@ BX_CPP_INLINE int extractFloat16Sign(float16 a)
 
 BX_CPP_INLINE float16 packFloat16(int zSign, int zExp, Bit16u zSig)
 {
-    return (((Bit16u) zSign)<<15) + (((Bit16u) zExp)<<10) + zSig;
+    return (((Bit16u)zSign) << 15) + (((Bit16u)zExp) << 10) + zSig;
 }
 
 /*----------------------------------------------------------------------------
@@ -115,7 +116,7 @@ BX_CPP_INLINE float16 packFloat16(int zSign, int zExp, Bit16u zSig)
 
 BX_CPP_INLINE int float16_is_nan(float16 a)
 {
-    return (0xF800 < (Bit16u) (a<<1));
+    return (0xF800 < (Bit16u)(a << 1));
 }
 
 /*----------------------------------------------------------------------------
@@ -125,7 +126,7 @@ BX_CPP_INLINE int float16_is_nan(float16 a)
 
 BX_CPP_INLINE int float16_is_signaling_nan(float16 a)
 {
-    return (((a>>9) & 0x3F) == 0x3E) && (a & 0x1FF);
+    return (((a >> 9) & 0x3F) == 0x3E) && (a & 0x1FF);
 }
 
 /*----------------------------------------------------------------------------
@@ -135,7 +136,7 @@ BX_CPP_INLINE int float16_is_signaling_nan(float16 a)
 
 BX_CPP_INLINE int float16_is_denormal(float16 a)
 {
-   return (extractFloat16Exp(a) == 0) && (extractFloat16Frac(a) != 0);
+    return (extractFloat16Exp(a) == 0) && (extractFloat16Frac(a) != 0);
 }
 
 /*----------------------------------------------------------------------------
@@ -144,8 +145,8 @@ BX_CPP_INLINE int float16_is_denormal(float16 a)
 
 BX_CPP_INLINE float16 float16_denormal_to_zero(float16 a)
 {
-  if (float16_is_denormal(a)) a &= 0x8000;
-  return a;
+    if (float16_is_denormal(a)) a &= 0x8000;
+    return a;
 }
 
 /*----------------------------------------------------------------------------
@@ -154,13 +155,13 @@ BX_CPP_INLINE float16 float16_denormal_to_zero(float16 a)
 | exception is raised.
 *----------------------------------------------------------------------------*/
 
-BX_CPP_INLINE commonNaNT float16ToCommonNaN(float16 a, float_status_t &status)
+BX_CPP_INLINE commonNaNT float16ToCommonNaN(float16 a, float_status_t& status)
 {
     commonNaNT z;
     if (float16_is_signaling_nan(a)) float_raise(status, float_flag_invalid);
-    z.sign = a>>15;
+    z.sign = a >> 15;
     z.lo = 0;
-    z.hi = ((Bit64u) a)<<54;
+    z.hi = ((Bit64u)a) << 54;
     return z;
 }
 
@@ -171,7 +172,7 @@ BX_CPP_INLINE commonNaNT float16ToCommonNaN(float16 a, float_status_t &status)
 
 BX_CPP_INLINE float16 commonNaNToFloat16(commonNaNT a)
 {
-    return (((Bit16u) a.sign)<<15) | 0x7E00 | (Bit16u)(a.hi>>54);
+    return (((Bit16u)a.sign) << 15) | 0x7E00 | (Bit16u)(a.hi >> 54);
 }
 
 #endif
@@ -179,19 +180,19 @@ BX_CPP_INLINE float16 commonNaNToFloat16(commonNaNT a)
 /*----------------------------------------------------------------------------
 | Commonly used single-precision floating point constants
 *----------------------------------------------------------------------------*/
-const float32 float32_negative_inf  = 0xff800000;
-const float32 float32_positive_inf  = 0x7f800000;
+const float32 float32_negative_inf = 0xff800000;
+const float32 float32_positive_inf = 0x7f800000;
 const float32 float32_negative_zero = 0x80000000;
 const float32 float32_positive_zero = 0x00000000;
-const float32 float32_negative_one  = 0xbf800000;
-const float32 float32_positive_one  = 0x3f800000;
-const float32 float32_max_float     = 0x7f7fffff;
-const float32 float32_min_float     = 0xff7fffff;
+const float32 float32_negative_one = 0xbf800000;
+const float32 float32_positive_one = 0x3f800000;
+const float32 float32_max_float = 0x7f7fffff;
+const float32 float32_min_float = 0xff7fffff;
 
 /*----------------------------------------------------------------------------
 | The pattern for a default generated single-precision NaN.
 *----------------------------------------------------------------------------*/
-const float32 float32_default_nan   = 0xffc00000;
+const float32 float32_default_nan = 0xffc00000;
 
 #define float32_fraction extractFloat32Frac
 #define float32_exp extractFloat32Exp
@@ -214,7 +215,7 @@ BX_CPP_INLINE Bit32u extractFloat32Frac(float32 a)
 
 BX_CPP_INLINE Bit16s extractFloat32Exp(float32 a)
 {
-    return (a>>23) & 0xFF;
+    return (a >> 23) & 0xFF;
 }
 
 /*----------------------------------------------------------------------------
@@ -223,7 +224,7 @@ BX_CPP_INLINE Bit16s extractFloat32Exp(float32 a)
 
 BX_CPP_INLINE int extractFloat32Sign(float32 a)
 {
-    return a>>31;
+    return a >> 31;
 }
 
 /*----------------------------------------------------------------------------
@@ -239,7 +240,7 @@ BX_CPP_INLINE int extractFloat32Sign(float32 a)
 
 BX_CPP_INLINE float32 packFloat32(int zSign, Bit16s zExp, Bit32u zSig)
 {
-    return (((Bit32u) zSign)<<31) + (((Bit32u) zExp)<<23) + zSig;
+    return (((Bit32u)zSign) << 31) + (((Bit32u)zExp) << 23) + zSig;
 }
 
 /*----------------------------------------------------------------------------
@@ -249,7 +250,7 @@ BX_CPP_INLINE float32 packFloat32(int zSign, Bit16s zExp, Bit32u zSig)
 
 BX_CPP_INLINE int float32_is_nan(float32 a)
 {
-    return (0xFF000000 < (Bit32u) (a<<1));
+    return (0xFF000000 < (Bit32u)(a << 1));
 }
 
 /*----------------------------------------------------------------------------
@@ -259,7 +260,7 @@ BX_CPP_INLINE int float32_is_nan(float32 a)
 
 BX_CPP_INLINE int float32_is_signaling_nan(float32 a)
 {
-    return (((a>>22) & 0x1FF) == 0x1FE) && (a & 0x003FFFFF);
+    return (((a >> 22) & 0x1FF) == 0x1FE) && (a & 0x003FFFFF);
 }
 
 /*----------------------------------------------------------------------------
@@ -269,7 +270,7 @@ BX_CPP_INLINE int float32_is_signaling_nan(float32 a)
 
 BX_CPP_INLINE int float32_is_denormal(float32 a)
 {
-   return (extractFloat32Exp(a) == 0) && (extractFloat32Frac(a) != 0);
+    return (extractFloat32Exp(a) == 0) && (extractFloat32Frac(a) != 0);
 }
 
 /*----------------------------------------------------------------------------
@@ -278,8 +279,8 @@ BX_CPP_INLINE int float32_is_denormal(float32 a)
 
 BX_CPP_INLINE float32 float32_denormal_to_zero(float32 a)
 {
-  if (float32_is_denormal(a)) a &= 0x80000000;
-  return a;
+    if (float32_is_denormal(a)) a &= 0x80000000;
+    return a;
 }
 
 /*----------------------------------------------------------------------------
@@ -288,13 +289,13 @@ BX_CPP_INLINE float32 float32_denormal_to_zero(float32 a)
 | exception is raised.
 *----------------------------------------------------------------------------*/
 
-BX_CPP_INLINE commonNaNT float32ToCommonNaN(float32 a, float_status_t &status)
+BX_CPP_INLINE commonNaNT float32ToCommonNaN(float32 a, float_status_t& status)
 {
     commonNaNT z;
     if (float32_is_signaling_nan(a)) float_raise(status, float_flag_invalid);
-    z.sign = a>>31;
+    z.sign = a >> 31;
     z.lo = 0;
-    z.hi = ((Bit64u) a)<<41;
+    z.hi = ((Bit64u)a) << 41;
     return z;
 }
 
@@ -305,7 +306,7 @@ BX_CPP_INLINE commonNaNT float32ToCommonNaN(float32 a, float_status_t &status)
 
 BX_CPP_INLINE float32 commonNaNToFloat32(commonNaNT a)
 {
-    return (((Bit32u) a.sign)<<31) | 0x7FC00000 | (Bit32u)(a.hi>>41);
+    return (((Bit32u)a.sign) << 31) | 0x7FC00000 | (Bit32u)(a.hi >> 41);
 }
 
 /*----------------------------------------------------------------------------
@@ -314,14 +315,14 @@ BX_CPP_INLINE float32 commonNaNToFloat32(commonNaNT a)
 | signaling NaN, the invalid exception is raised.
 *----------------------------------------------------------------------------*/
 
-float32 propagateFloat32NaN(float32 a, float32 b, float_status_t &status);
+float32 propagateFloat32NaN(float32 a, float32 b, float_status_t& status);
 
 /*----------------------------------------------------------------------------
 | Takes single-precision floating-point NaN `a' and returns the appropriate
 | NaN result.  If `a' is a signaling NaN, the invalid exception is raised.
 *----------------------------------------------------------------------------*/
 
-BX_CPP_INLINE float32 propagateFloat32NaN(float32 a, float_status_t &status)
+BX_CPP_INLINE float32 propagateFloat32NaN(float32 a, float_status_t& status)
 {
     if (float32_is_signaling_nan(a))
         float_raise(status, float_flag_invalid);
@@ -332,14 +333,14 @@ BX_CPP_INLINE float32 propagateFloat32NaN(float32 a, float_status_t &status)
 /*----------------------------------------------------------------------------
 | Commonly used single-precision floating point constants
 *----------------------------------------------------------------------------*/
-const float64 float64_negative_inf  = BX_CONST64(0xfff0000000000000);
-const float64 float64_positive_inf  = BX_CONST64(0x7ff0000000000000);
+const float64 float64_negative_inf = BX_CONST64(0xfff0000000000000);
+const float64 float64_positive_inf = BX_CONST64(0x7ff0000000000000);
 const float64 float64_negative_zero = BX_CONST64(0x8000000000000000);
 const float64 float64_positive_zero = BX_CONST64(0x0000000000000000);
-const float64 float64_negative_one  = BX_CONST64(0xbff0000000000000);
-const float64 float64_positive_one  = BX_CONST64(0x3ff0000000000000);
-const float64 float64_max_float     = BX_CONST64(0x7fefffffffffffff);
-const float64 float64_min_float     = BX_CONST64(0xffefffffffffffff);
+const float64 float64_negative_one = BX_CONST64(0xbff0000000000000);
+const float64 float64_positive_one = BX_CONST64(0x3ff0000000000000);
+const float64 float64_max_float = BX_CONST64(0x7fefffffffffffff);
+const float64 float64_min_float = BX_CONST64(0xffefffffffffffff);
 
 /*----------------------------------------------------------------------------
 | The pattern for a default generated double-precision NaN.
@@ -367,7 +368,7 @@ BX_CPP_INLINE Bit64u extractFloat64Frac(float64 a)
 
 BX_CPP_INLINE Bit16s extractFloat64Exp(float64 a)
 {
-    return (Bit16s)(a>>52) & 0x7FF;
+    return (Bit16s)(a >> 52) & 0x7FF;
 }
 
 /*----------------------------------------------------------------------------
@@ -376,7 +377,7 @@ BX_CPP_INLINE Bit16s extractFloat64Exp(float64 a)
 
 BX_CPP_INLINE int extractFloat64Sign(float64 a)
 {
-    return (int)(a>>63);
+    return (int)(a >> 63);
 }
 
 /*----------------------------------------------------------------------------
@@ -392,7 +393,7 @@ BX_CPP_INLINE int extractFloat64Sign(float64 a)
 
 BX_CPP_INLINE float64 packFloat64(int zSign, Bit16s zExp, Bit64u zSig)
 {
-    return (((Bit64u) zSign)<<63) + (((Bit64u) zExp)<<52) + zSig;
+    return (((Bit64u)zSign) << 63) + (((Bit64u)zExp) << 52) + zSig;
 }
 
 /*----------------------------------------------------------------------------
@@ -402,7 +403,7 @@ BX_CPP_INLINE float64 packFloat64(int zSign, Bit16s zExp, Bit64u zSig)
 
 BX_CPP_INLINE int float64_is_nan(float64 a)
 {
-    return (BX_CONST64(0xFFE0000000000000) < (Bit64u) (a<<1));
+    return (BX_CONST64(0xFFE0000000000000) < (Bit64u)(a << 1));
 }
 
 /*----------------------------------------------------------------------------
@@ -412,7 +413,7 @@ BX_CPP_INLINE int float64_is_nan(float64 a)
 
 BX_CPP_INLINE int float64_is_signaling_nan(float64 a)
 {
-    return (((a>>51) & 0xFFF) == 0xFFE) && (a & BX_CONST64(0x0007FFFFFFFFFFFF));
+    return (((a >> 51) & 0xFFF) == 0xFFE) && (a & BX_CONST64(0x0007FFFFFFFFFFFF));
 }
 
 /*----------------------------------------------------------------------------
@@ -422,7 +423,7 @@ BX_CPP_INLINE int float64_is_signaling_nan(float64 a)
 
 BX_CPP_INLINE int float64_is_denormal(float64 a)
 {
-   return (extractFloat64Exp(a) == 0) && (extractFloat64Frac(a) != 0);
+    return (extractFloat64Exp(a) == 0) && (extractFloat64Frac(a) != 0);
 }
 
 /*----------------------------------------------------------------------------
@@ -431,8 +432,8 @@ BX_CPP_INLINE int float64_is_denormal(float64 a)
 
 BX_CPP_INLINE float64 float64_denormal_to_zero(float64 a)
 {
-  if (float64_is_denormal(a)) a &= ((Bit64u)(1) << 63);
-  return a;
+    if (float64_is_denormal(a)) a &= ((Bit64u)(1) << 63);
+    return a;
 }
 
 /*----------------------------------------------------------------------------
@@ -441,13 +442,13 @@ BX_CPP_INLINE float64 float64_denormal_to_zero(float64 a)
 | exception is raised.
 *----------------------------------------------------------------------------*/
 
-BX_CPP_INLINE commonNaNT float64ToCommonNaN(float64 a, float_status_t &status)
+BX_CPP_INLINE commonNaNT float64ToCommonNaN(float64 a, float_status_t& status)
 {
     commonNaNT z;
     if (float64_is_signaling_nan(a)) float_raise(status, float_flag_invalid);
-    z.sign = (int)(a>>63);
+    z.sign = (int)(a >> 63);
     z.lo = 0;
-    z.hi = a<<12;
+    z.hi = a << 12;
     return z;
 }
 
@@ -458,7 +459,7 @@ BX_CPP_INLINE commonNaNT float64ToCommonNaN(float64 a, float_status_t &status)
 
 BX_CPP_INLINE float64 commonNaNToFloat64(commonNaNT a)
 {
-    return (((Bit64u) a.sign)<<63) | BX_CONST64(0x7FF8000000000000) | (a.hi>>12);
+    return (((Bit64u)a.sign) << 63) | BX_CONST64(0x7FF8000000000000) | (a.hi >> 12);
 }
 
 /*----------------------------------------------------------------------------
@@ -467,14 +468,14 @@ BX_CPP_INLINE float64 commonNaNToFloat64(commonNaNT a)
 | signaling NaN, the invalid exception is raised.
 *----------------------------------------------------------------------------*/
 
-float64 propagateFloat64NaN(float64 a, float64 b, float_status_t &status);
+float64 propagateFloat64NaN(float64 a, float64 b, float_status_t& status);
 
 /*----------------------------------------------------------------------------
 | Takes double-precision floating-point NaN `a' and returns the appropriate
 | NaN result.  If `a' is a signaling NaN, the invalid exception is raised.
 *----------------------------------------------------------------------------*/
 
-BX_CPP_INLINE float64 propagateFloat64NaN(float64 a, float_status_t &status)
+BX_CPP_INLINE float64 propagateFloat64NaN(float64 a, float_status_t& status)
 {
     if (float64_is_signaling_nan(a))
         float_raise(status, float_flag_invalid);
@@ -525,7 +526,7 @@ BX_CPP_INLINE Bit32s extractFloatx80Exp(floatx80 a)
 
 BX_CPP_INLINE int extractFloatx80Sign(floatx80 a)
 {
-    return a.exp>>15;
+    return a.exp >> 15;
 }
 
 /*----------------------------------------------------------------------------
@@ -548,7 +549,7 @@ BX_CPP_INLINE floatx80 packFloatx80(int zSign, Bit32s zExp, Bit64u zSig)
 
 BX_CPP_INLINE int floatx80_is_nan(floatx80 a)
 {
-    return ((a.exp & 0x7FFF) == 0x7FFF) && (Bit64s) (a.fraction<<1);
+    return ((a.exp & 0x7FFF) == 0x7FFF) && (Bit64s)(a.fraction << 1);
 }
 
 /*----------------------------------------------------------------------------
@@ -560,7 +561,7 @@ BX_CPP_INLINE int floatx80_is_signaling_nan(floatx80 a)
 {
     Bit64u aLow = a.fraction & ~BX_CONST64(0x4000000000000000);
     return ((a.exp & 0x7FFF) == 0x7FFF) &&
-            ((Bit64u) (aLow<<1)) && (a.fraction == aLow);
+        ((Bit64u)(aLow << 1)) && (a.fraction == aLow);
 }
 
 /*----------------------------------------------------------------------------
@@ -579,7 +580,7 @@ BX_CPP_INLINE int floatx80_is_unsupported(floatx80 a)
 | invalid exception is raised.
 *----------------------------------------------------------------------------*/
 
-BX_CPP_INLINE commonNaNT floatx80ToCommonNaN(floatx80 a, float_status_t &status)
+BX_CPP_INLINE commonNaNT floatx80ToCommonNaN(floatx80 a, float_status_t& status)
 {
     commonNaNT z;
     if (floatx80_is_signaling_nan(a)) float_raise(status, float_flag_invalid);
@@ -597,8 +598,8 @@ BX_CPP_INLINE commonNaNT floatx80ToCommonNaN(floatx80 a, float_status_t &status)
 BX_CPP_INLINE floatx80 commonNaNToFloatx80(commonNaNT a)
 {
     floatx80 z;
-    z.fraction = BX_CONST64(0xC000000000000000) | (a.hi>>1);
-    z.exp = (((Bit16u) a.sign)<<15) | 0x7FFF;
+    z.fraction = BX_CONST64(0xC000000000000000) | (a.hi >> 1);
+    z.exp = (((Bit16u)a.sign) << 15) | 0x7FFF;
     return z;
 }
 
@@ -608,7 +609,7 @@ BX_CPP_INLINE floatx80 commonNaNToFloatx80(commonNaNT a)
 | `b' is a signaling NaN, the invalid exception is raised.
 *----------------------------------------------------------------------------*/
 
-floatx80 propagateFloatx80NaN(floatx80 a, floatx80 b, float_status_t &status);
+floatx80 propagateFloatx80NaN(floatx80 a, floatx80 b, float_status_t& status);
 
 /*----------------------------------------------------------------------------
 | Takes extended double-precision floating-point  NaN  `a' and returns the
@@ -616,7 +617,7 @@ floatx80 propagateFloatx80NaN(floatx80 a, floatx80 b, float_status_t &status);
 | is raised.
 *----------------------------------------------------------------------------*/
 
-BX_CPP_INLINE floatx80 propagateFloatx80NaN(floatx80 a, float_status_t &status)
+BX_CPP_INLINE floatx80 propagateFloatx80NaN(floatx80 a, float_status_t& status)
 {
     if (floatx80_is_signaling_nan(a))
         float_raise(status, float_flag_invalid);
@@ -673,7 +674,7 @@ BX_CPP_INLINE Bit64u extractFloat128Frac0(float128 a)
 
 BX_CPP_INLINE Bit32s extractFloat128Exp(float128 a)
 {
-    return ((Bit32s)(a.hi>>48)) & 0x7FFF;
+    return ((Bit32s)(a.hi >> 48)) & 0x7FFF;
 }
 
 /*----------------------------------------------------------------------------
@@ -702,7 +703,7 @@ BX_CPP_INLINE float128 packFloat128(int zSign, Bit32s zExp, Bit64u zSig0, Bit64u
 {
     float128 z;
     z.lo = zSig1;
-    z.hi = (((Bit64u) zSign)<<63) + (((Bit64u) zExp)<<48) + zSig0;
+    z.hi = (((Bit64u)zSign) << 63) + (((Bit64u)zExp) << 48) + zSig0;
     return z;
 }
 
@@ -732,7 +733,7 @@ BX_CPP_INLINE float128 packFloat128(Bit64u zHi, Bit64u zLo)
 
 BX_CPP_INLINE int float128_is_nan(float128 a)
 {
-    return (BX_CONST64(0xFFFE000000000000) <= (Bit64u) (a.hi<<1))
+    return (BX_CONST64(0xFFFE000000000000) <= (Bit64u)(a.hi << 1))
         && (a.lo || (a.hi & BX_CONST64(0x0000FFFFFFFFFFFF)));
 }
 
@@ -743,7 +744,7 @@ BX_CPP_INLINE int float128_is_nan(float128 a)
 
 BX_CPP_INLINE int float128_is_signaling_nan(float128 a)
 {
-    return (((a.hi>>47) & 0xFFFF) == 0xFFFE)
+    return (((a.hi >> 47) & 0xFFFF) == 0xFFFE)
         && (a.lo || (a.hi & BX_CONST64(0x00007FFFFFFFFFFF)));
 }
 
@@ -753,11 +754,11 @@ BX_CPP_INLINE int float128_is_signaling_nan(float128 a)
 | exception is raised.
 *----------------------------------------------------------------------------*/
 
-BX_CPP_INLINE commonNaNT float128ToCommonNaN(float128 a, float_status_t &status)
+BX_CPP_INLINE commonNaNT float128ToCommonNaN(float128 a, float_status_t& status)
 {
     commonNaNT z;
     if (float128_is_signaling_nan(a)) float_raise(status, float_flag_invalid);
-    z.sign = (int)(a.hi>>63);
+    z.sign = (int)(a.hi >> 63);
     shortShift128Left(a.hi, a.lo, 16, &z.hi, &z.lo);
     return z;
 }
@@ -771,7 +772,7 @@ BX_CPP_INLINE float128 commonNaNToFloat128(commonNaNT a)
 {
     float128 z;
     shift128Right(a.hi, a.lo, 16, &z.hi, &z.lo);
-    z.hi |= (((Bit64u) a.sign)<<63) | BX_CONST64(0x7FFF800000000000);
+    z.hi |= (((Bit64u)a.sign) << 63) | BX_CONST64(0x7FFF800000000000);
     return z;
 }
 
@@ -781,7 +782,7 @@ BX_CPP_INLINE float128 commonNaNToFloat128(commonNaNT a)
 | `b' is a signaling NaN, the invalid exception is raised.
 *----------------------------------------------------------------------------*/
 
-float128 propagateFloat128NaN(float128 a, float128 b, float_status_t &status);
+float128 propagateFloat128NaN(float128 a, float128 b, float_status_t& status);
 
 /*----------------------------------------------------------------------------
 | The pattern for a default generated quadruple-precision NaN.

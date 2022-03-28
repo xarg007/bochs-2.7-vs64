@@ -11,6 +11,7 @@
 // Download it from http://www.winpcap.org/
 //
 /////////////////////////////////////////////////////////////////////////
+#define _CRT_SECURE_NO_WARNINGS
 
 #ifndef WIN32
 #error Niclist will only work on WIN32 platforms.

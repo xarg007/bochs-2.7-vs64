@@ -22,9 +22,9 @@
 #define BX_BITBLT_H
 
 typedef void (*bx_bitblt_rop_t)(
-    Bit8u *dst,const Bit8u *src,
-    int dstpitch,int srcpitch,
-    int bltwidth,int bltheight);
+    Bit8u* dst, const Bit8u* src,
+    int dstpitch, int srcpitch,
+    int bltwidth, int bltheight);
 
 #define IMPLEMENT_FORWARD_BITBLT(name,opline) \
   static void bitblt_rop_fwd_##name( \
@@ -103,25 +103,27 @@ IMPLEMENT_BACKWARD_BITBLT(notsrc_and_notdst, *dst = (~(*src)) & (~(*dst)))
 #endif
 
 #ifdef BX_USE_TERNARY_ROP
-static void bx_ternary_rop(Bit8u rop0, Bit8u *dst_ptr, Bit8u *src_ptr, Bit8u *pat_ptr,
-                    int dpxsize)
+static void bx_ternary_rop(Bit8u rop0, Bit8u* dst_ptr, Bit8u* src_ptr, Bit8u* pat_ptr,
+    int dpxsize)
 {
-  Bit8u mask, inbits, outbits;
+    Bit8u mask, inbits, outbits;
 
-  for (int i = 0; i < dpxsize; i++) {
-    mask = 0x80;
-    outbits = 0;
-    for (int b = 7; b >= 0; b--) {
-      inbits = (*dst_ptr & mask) > 0;
-      inbits |= ((*src_ptr & mask) > 0) << 1;
-      inbits |= ((*pat_ptr & mask) > 0) << 2;
-      outbits |= ((rop0 & (1 << inbits)) > 0) << b;
-      mask >>= 1;
+    for (int i = 0; i < dpxsize; i++)
+    {
+        mask = 0x80;
+        outbits = 0;
+        for (int b = 7; b >= 0; b--)
+        {
+            inbits = (*dst_ptr & mask) > 0;
+            inbits |= ((*src_ptr & mask) > 0) << 1;
+            inbits |= ((*pat_ptr & mask) > 0) << 2;
+            outbits |= ((rop0 & (1 << inbits)) > 0) << b;
+            mask >>= 1;
+        }
+        *dst_ptr++ = outbits;
+        src_ptr++;
+        pat_ptr++;
     }
-    *dst_ptr++ = outbits;
-    src_ptr++;
-    pat_ptr++;
-  }
 }
 #endif
 

@@ -28,22 +28,23 @@ these four paragraphs for those parts of this code that are retained.
 #include <assert.h>
 #include "softfloat.h"
 
-//                            2         3         4               n
-// f(x) ~ C + (C * x) + (C * x) + (C * x) + (C * x) + ... + (C * x)
-//         0    1         2         3         4               n
-//
-//          --       2k                --        2k+1
-//   p(x) = >  C  * x           q(x) = >  C   * x
-//          --  2k                     --  2k+1
-//
-//   f(x) ~ [ p(x) + x * q(x) ]
-//
+ //                            2         3         4               n
+ // f(x) ~ C + (C * x) + (C * x) + (C * x) + (C * x) + ... + (C * x)
+ //         0    1         2         3         4               n
+ //
+ //          --       2k                --        2k+1
+ //   p(x) = >  C  * x           q(x) = >  C   * x
+ //          --  2k                     --  2k+1
+ //
+ //   f(x) ~ [ p(x) + x * q(x) ]
+ //
 
-float128 EvalPoly(float128 x, float128 *arr, int n, float_status_t &status)
+float128 EvalPoly(float128 x, float128* arr, int n, float_status_t& status)
 {
     float128 r = arr[--n];
 
-    do {
+    do
+    {
         r = float128_mul(r, x, status);
         r = float128_add(r, arr[--n], status);
     } while (n > 0);
@@ -63,9 +64,9 @@ float128 EvalPoly(float128 x, float128 *arr, int n, float_status_t &status)
 //   f(x) ~ [ p(x) + x * q(x) ]
 //
 
-float128 EvenPoly(float128 x, float128 *arr, int n, float_status_t &status)
+float128 EvenPoly(float128 x, float128* arr, int n, float_status_t& status)
 {
-     return EvalPoly(float128_mul(x, x, status), arr, n, status);
+    return EvalPoly(float128_mul(x, x, status), arr, n, status);
 }
 
 //                        3         5         7         9               2n+1
@@ -83,7 +84,7 @@ float128 EvenPoly(float128 x, float128 *arr, int n, float_status_t &status)
 //   f(x) ~ x * [ p(x) + x * q(x) ]
 //
 
-float128 OddPoly(float128 x, float128 *arr, int n, float_status_t &status)
+float128 OddPoly(float128 x, float128* arr, int n, float_status_t& status)
 {
-     return float128_mul(x, EvenPoly(x, arr, n, status), status);
+    return float128_mul(x, EvenPoly(x, arr, n, status), status);
 }

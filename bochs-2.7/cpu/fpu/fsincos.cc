@@ -34,7 +34,7 @@ static const floatx80 floatx80_one = packFloatx80(0, 0x3fff, BX_CONST64(0x800000
 
 /* reduce trigonometric function argument using 128-bit precision
    M_PI approximation */
-static Bit64u argument_reduction_kernel(Bit64u aSig0, int Exp, Bit64u *zSig0, Bit64u *zSig1)
+static Bit64u argument_reduction_kernel(Bit64u aSig0, int Exp, Bit64u* zSig0, Bit64u* zSig1)
 {
     Bit64u term0, term1, term2;
     Bit64u aSig1 = 0;
@@ -43,7 +43,8 @@ static Bit64u argument_reduction_kernel(Bit64u aSig0, int Exp, Bit64u *zSig0, Bi
     Bit64u q = estimateDiv128To64(aSig1, aSig0, FLOAT_PI_HI);
     mul128By64To192(FLOAT_PI_HI, FLOAT_PI_LO, q, &term0, &term1, &term2);
     sub128(aSig1, aSig0, term0, term1, zSig1, zSig0);
-    while ((Bit64s)(*zSig1) < 0) {
+    while ((Bit64s)(*zSig1) < 0)
+    {
         --q;
         add192(*zSig1, *zSig0, term2, 0, FLOAT_PI_HI, FLOAT_PI_LO, zSig1, zSig0, &term2);
     }
@@ -51,31 +52,36 @@ static Bit64u argument_reduction_kernel(Bit64u aSig0, int Exp, Bit64u *zSig0, Bi
     return q;
 }
 
-static int reduce_trig_arg(int expDiff, int &zSign, Bit64u &aSig0, Bit64u &aSig1)
+static int reduce_trig_arg(int expDiff, int& zSign, Bit64u& aSig0, Bit64u& aSig1)
 {
     Bit64u term0, term1, q = 0;
 
-    if (expDiff < 0) {
+    if (expDiff < 0)
+    {
         shift128Right(aSig0, 0, 1, &aSig0, &aSig1);
         expDiff = 0;
     }
-    if (expDiff > 0) {
+    if (expDiff > 0)
+    {
         q = argument_reduction_kernel(aSig0, expDiff, &aSig0, &aSig1);
     }
-    else {
-        if (FLOAT_PI_HI <= aSig0) {
+    else
+    {
+        if (FLOAT_PI_HI <= aSig0)
+        {
             aSig0 -= FLOAT_PI_HI;
             q = 1;
         }
     }
 
     shift128Right(FLOAT_PI_HI, FLOAT_PI_LO, 1, &term0, &term1);
-    if (! lt128(aSig0, aSig1, term0, term1))
+    if (!lt128(aSig0, aSig1, term0, term1))
     {
         int lt = lt128(term0, term1, aSig0, aSig1);
         int eq = eq128(aSig0, aSig1, term0, term1);
 
-        if ((eq && (q & 1)) || lt) {
+        if ((eq && (q & 1)) || lt)
+        {
             zSign = !zSign;
             ++q;
         }
@@ -118,10 +124,10 @@ static float128 cos_arr[COS_ARR_SIZE] =
     PACK_FLOAT_128(0x3fc1e542ba402022, 0x507a9cad2bf8f0bb)  /* 20 */
 };
 
-extern float128 OddPoly (float128 x, float128 *arr, int n, float_status_t &status);
+extern float128 OddPoly(float128 x, float128* arr, int n, float_status_t& status);
 
 /* 0 <= x <= pi/4 */
-BX_CPP_INLINE float128 poly_sin(float128 x, float_status_t &status)
+BX_CPP_INLINE float128 poly_sin(float128 x, float_status_t& status)
 {
     //                 3     5     7     9     11     13     15
     //                x     x     x     x     x      x      x
@@ -146,10 +152,10 @@ BX_CPP_INLINE float128 poly_sin(float128 x, float_status_t &status)
     return OddPoly(x, sin_arr, SIN_ARR_SIZE, status);
 }
 
-extern float128 EvenPoly(float128 x, float128 *arr, int n, float_status_t &status);
+extern float128 EvenPoly(float128 x, float128* arr, int n, float_status_t& status);
 
 /* 0 <= x <= pi/4 */
-BX_CPP_INLINE float128 poly_cos(float128 x, float_status_t &status)
+BX_CPP_INLINE float128 poly_cos(float128 x, float_status_t& status)
 {
     //                 2     4     6     8     10     12     14
     //                x     x     x     x     x      x      x
@@ -169,30 +175,33 @@ BX_CPP_INLINE float128 poly_cos(float128 x, float_status_t &status)
     return EvenPoly(x, cos_arr, COS_ARR_SIZE, status);
 }
 
-BX_CPP_INLINE void sincos_invalid(floatx80 *sin_a, floatx80 *cos_a, floatx80 a)
+BX_CPP_INLINE void sincos_invalid(floatx80* sin_a, floatx80* cos_a, floatx80 a)
 {
     if (sin_a) *sin_a = a;
     if (cos_a) *cos_a = a;
 }
 
-BX_CPP_INLINE void sincos_tiny_argument(floatx80 *sin_a, floatx80 *cos_a, floatx80 a)
+BX_CPP_INLINE void sincos_tiny_argument(floatx80* sin_a, floatx80* cos_a, floatx80 a)
 {
     if (sin_a) *sin_a = a;
     if (cos_a) *cos_a = floatx80_one;
 }
 
-static floatx80 sincos_approximation(int neg, float128 r, Bit64u quotient, float_status_t &status)
+static floatx80 sincos_approximation(int neg, float128 r, Bit64u quotient, float_status_t& status)
 {
-    if (quotient & 0x1) {
+    if (quotient & 0x1)
+    {
         r = poly_cos(r, status);
         neg = 0;
-    } else  {
+    }
+    else
+    {
         r = poly_sin(r, status);
     }
 
     floatx80 result = float128_to_floatx80(r, status);
     if (quotient & 0x2)
-        neg = ! neg;
+        neg = !neg;
 
     if (neg)
         floatx80_chs(result);
@@ -220,7 +229,7 @@ static floatx80 sincos_approximation(int neg, float128 r, Bit64u quotient, float
 //  sin(x+2pi)    =  sin(x)
 //
 
-int fsincos(floatx80 a, floatx80 *sin_a, floatx80 *cos_a, float_status_t &status)
+int fsincos(floatx80 a, floatx80* sin_a, floatx80* cos_a, float_status_t& status)
 {
     Bit64u aSig0, aSig1 = 0;
     Bit32s aExp, zExp, expDiff;
@@ -228,7 +237,8 @@ int fsincos(floatx80 a, floatx80 *sin_a, floatx80 *cos_a, float_status_t &status
     int q = 0;
 
     // handle unsupported extended double-precision floating encodings
-    if (floatx80_is_unsupported(a)) {
+    if (floatx80_is_unsupported(a))
+    {
         goto invalid;
     }
 
@@ -237,8 +247,10 @@ int fsincos(floatx80 a, floatx80 *sin_a, floatx80 *cos_a, float_status_t &status
     aSign = extractFloatx80Sign(a);
 
     /* invalid argument */
-    if (aExp == 0x7FFF) {
-        if ((Bit64u) (aSig0<<1)) {
+    if (aExp == 0x7FFF)
+    {
+        if ((Bit64u)(aSig0 << 1))
+        {
             sincos_invalid(sin_a, cos_a, propagateFloatx80NaN(a, status));
             return 0;
         }
@@ -249,8 +261,10 @@ int fsincos(floatx80 a, floatx80 *sin_a, floatx80 *cos_a, float_status_t &status
         return 0;
     }
 
-    if (aExp == 0) {
-        if (aSig0 == 0) {
+    if (aExp == 0)
+    {
+        if (aSig0 == 0)
+        {
             sincos_tiny_argument(sin_a, cos_a, a);
             return 0;
         }
@@ -258,7 +272,7 @@ int fsincos(floatx80 a, floatx80 *sin_a, floatx80 *cos_a, float_status_t &status
         float_raise(status, float_flag_denormal);
 
         /* handle pseudo denormals */
-        if (! (aSig0 & BX_CONST64(0x8000000000000000)))
+        if (!(aSig0 & BX_CONST64(0x8000000000000000)))
         {
             float_raise(status, float_flag_inexact);
             if (sin_a)
@@ -280,15 +294,18 @@ int fsincos(floatx80 a, floatx80 *sin_a, floatx80 *cos_a, float_status_t &status
 
     float_raise(status, float_flag_inexact);
 
-    if (expDiff < -1) {    // doesn't require reduction
-        if (expDiff <= -68) {
+    if (expDiff < -1)
+    {    // doesn't require reduction
+        if (expDiff <= -68)
+        {
             a = packFloatx80(aSign, aExp, aSig0);
             sincos_tiny_argument(sin_a, cos_a, a);
             return 0;
         }
         zExp = aExp;
     }
-    else {
+    else
+    {
         q = reduce_trig_arg(expDiff, zSign, aSig0, aSig1);
     }
 
@@ -297,21 +314,21 @@ int fsincos(floatx80 a, floatx80 *sin_a, floatx80 *cos_a, float_status_t &status
     /* **************************** */
 
     /* using float128 for approximation */
-    float128 r = normalizeRoundAndPackFloat128(0, zExp-0x10, aSig0, aSig1, status);
+    float128 r = normalizeRoundAndPackFloat128(0, zExp - 0x10, aSig0, aSig1, status);
 
     if (aSign) q = -q;
-    if (sin_a) *sin_a = sincos_approximation(zSign, r,   q, status);
-    if (cos_a) *cos_a = sincos_approximation(zSign, r, q+1, status);
+    if (sin_a) *sin_a = sincos_approximation(zSign, r, q, status);
+    if (cos_a) *cos_a = sincos_approximation(zSign, r, q + 1, status);
 
     return 0;
 }
 
-int fsin(floatx80 &a, float_status_t &status)
+int fsin(floatx80& a, float_status_t& status)
 {
     return fsincos(a, &a, 0, status);
 }
 
-int fcos(floatx80 &a, float_status_t &status)
+int fcos(floatx80& a, float_status_t& status)
 {
     return fsincos(a, 0, &a, status);
 }
@@ -343,7 +360,7 @@ int fcos(floatx80 &a, float_status_t &status)
 //           cos(x)
 //
 
-int ftan(floatx80 &a, float_status_t &status)
+int ftan(floatx80& a, float_status_t& status)
 {
     Bit64u aSig0, aSig1 = 0;
     Bit32s aExp, zExp, expDiff;
@@ -351,7 +368,8 @@ int ftan(floatx80 &a, float_status_t &status)
     int q = 0;
 
     // handle unsupported extended double-precision floating encodings
-    if (floatx80_is_unsupported(a)) {
+    if (floatx80_is_unsupported(a))
+    {
         goto invalid;
     }
 
@@ -360,8 +378,9 @@ int ftan(floatx80 &a, float_status_t &status)
     aSign = extractFloatx80Sign(a);
 
     /* invalid argument */
-    if (aExp == 0x7FFF) {
-        if ((Bit64u) (aSig0<<1))
+    if (aExp == 0x7FFF)
+    {
+        if ((Bit64u)(aSig0 << 1))
         {
             a = propagateFloatx80NaN(a, status);
             return 0;
@@ -373,11 +392,12 @@ int ftan(floatx80 &a, float_status_t &status)
         return 0;
     }
 
-    if (aExp == 0) {
+    if (aExp == 0)
+    {
         if (aSig0 == 0) return 0;
         float_raise(status, float_flag_denormal);
         /* handle pseudo denormals */
-        if (! (aSig0 & BX_CONST64(0x8000000000000000)))
+        if (!(aSig0 & BX_CONST64(0x8000000000000000)))
         {
             float_raise(status, float_flag_inexact | float_flag_underflow);
             return 0;
@@ -395,14 +415,17 @@ int ftan(floatx80 &a, float_status_t &status)
 
     float_raise(status, float_flag_inexact);
 
-    if (expDiff < -1) {    // doesn't require reduction
-        if (expDiff <= -68) {
+    if (expDiff < -1)
+    {    // doesn't require reduction
+        if (expDiff <= -68)
+        {
             a = packFloatx80(aSign, aExp, aSig0);
             return 0;
         }
         zExp = aExp;
     }
-    else {
+    else
+    {
         q = reduce_trig_arg(expDiff, zSign, aSig0, aSig1);
     }
 
@@ -411,15 +434,18 @@ int ftan(floatx80 &a, float_status_t &status)
     /* **************************** */
 
     /* using float128 for approximation */
-    float128 r = normalizeRoundAndPackFloat128(0, zExp-0x10, aSig0, aSig1, status);
+    float128 r = normalizeRoundAndPackFloat128(0, zExp - 0x10, aSig0, aSig1, status);
 
     float128 sin_r = poly_sin(r, status);
     float128 cos_r = poly_cos(r, status);
 
-    if (q & 0x1) {
+    if (q & 0x1)
+    {
         r = float128_div(cos_r, sin_r, status);
-        zSign = ! zSign;
-    } else {
+        zSign = !zSign;
+    }
+    else
+    {
         r = float128_div(sin_r, cos_r, status);
     }
 

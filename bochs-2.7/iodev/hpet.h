@@ -75,59 +75,62 @@
 #define HPET_TN_CFG_WRITE_MASK  0x7f4e
 #define HPET_TN_INT_ROUTE_SHIFT      9
 
-typedef struct {
-  Bit8u  tn;
-  int    timer_id;
-  Bit64u config;
-  Bit64u cmp;
-  Bit64u fsb;
-  Bit64u period;
-  Bit64u last_checked;
+typedef struct
+{
+    Bit8u  tn;
+    int    timer_id;
+    Bit64u config;
+    Bit64u cmp;
+    Bit64u fsb;
+    Bit64u period;
+    Bit64u last_checked;
 } HPETTimer;
 
-class bx_hpet_c : public bx_devmodel_c {
+class bx_hpet_c : public bx_devmodel_c
+{
 public:
-  bx_hpet_c();
-  virtual ~bx_hpet_c();
-  virtual void init();
-  virtual void reset(unsigned type);
-  virtual void register_state(void);
+    bx_hpet_c();
+    virtual ~bx_hpet_c();
+    virtual void init();
+    virtual void reset(unsigned type);
+    virtual void register_state(void);
 #if BX_DEBUGGER
-  virtual void debug_dump(int argc, char **argv);
+    virtual void debug_dump(int argc, char** argv);
 #endif
 
-  Bit32u read_aligned(bx_phy_address address);
-  void write_aligned(bx_phy_address address, Bit32u data);
+    Bit32u read_aligned(bx_phy_address address);
+    void write_aligned(bx_phy_address address, Bit32u data);
 
 private:
-  Bit32u hpet_in_legacy_mode(void) {return s.config & HPET_CFG_LEGACY;}
-  Bit32u timer_int_route(HPETTimer *timer)
-  {
-    return (timer->config & HPET_TN_INT_ROUTE_MASK) >> HPET_TN_INT_ROUTE_SHIFT;
-  }
-  Bit32u timer_fsb_route(HPETTimer *t) {return t->config & HPET_TN_FSB_ENABLE;}
-  Bit32u hpet_enabled(void) {return s.config & HPET_CFG_ENABLE;}
-  Bit32u timer_is_periodic(HPETTimer *t) {return t->config & HPET_TN_PERIODIC;}
-  Bit32u timer_enabled(HPETTimer *t) {return t->config & HPET_TN_ENABLE;}
-  Bit64u hpet_get_ticks(void);
-  Bit64u hpet_calculate_diff(HPETTimer *t, Bit64u current);
-  void   update_irq(HPETTimer *timer, bool set);
-  void   hpet_set_timer(HPETTimer *t);
-  void   hpet_del_timer(HPETTimer *t);
+    Bit32u hpet_in_legacy_mode(void) { return s.config & HPET_CFG_LEGACY; }
+    Bit32u timer_int_route(HPETTimer* timer)
+    {
+        return (timer->config & HPET_TN_INT_ROUTE_MASK) >> HPET_TN_INT_ROUTE_SHIFT;
+    }
+    Bit32u timer_fsb_route(HPETTimer* t) { return t->config & HPET_TN_FSB_ENABLE; }
+    Bit32u hpet_enabled(void) { return s.config & HPET_CFG_ENABLE; }
+    Bit32u timer_is_periodic(HPETTimer* t) { return t->config & HPET_TN_PERIODIC; }
+    Bit32u timer_enabled(HPETTimer* t) { return t->config & HPET_TN_ENABLE; }
+    Bit64u hpet_get_ticks(void);
+    Bit64u hpet_calculate_diff(HPETTimer* t, Bit64u current);
+    void   update_irq(HPETTimer* timer, bool set);
+    void   hpet_set_timer(HPETTimer* t);
+    void   hpet_del_timer(HPETTimer* t);
 
-  static void timer_handler(void *);
-  void   hpet_timer(void);
+    static void timer_handler(void*);
+    void   hpet_timer(void);
 
-  struct {
-    Bit8u  num_timers;
-    Bit64u hpet_reference_value;
-    Bit64u hpet_reference_time;
-    Bit64u capability;
-    Bit64u config;
-    Bit64u isr;
-    Bit64u hpet_counter;
-    HPETTimer timer[HPET_MAX_TIMERS];
-  } s;
+    struct
+    {
+        Bit8u  num_timers;
+        Bit64u hpet_reference_value;
+        Bit64u hpet_reference_time;
+        Bit64u capability;
+        Bit64u config;
+        Bit64u isr;
+        Bit64u hpet_counter;
+        HPETTimer timer[HPET_MAX_TIMERS];
+    } s;
 };
 
 #endif

@@ -30,17 +30,18 @@ typedef
 #if defined(_MSC_VER) && (_MSC_VER>=1300)
 __declspec(align(16))
 #endif
-union bx_xmm_reg_t {
-   Bit8s   xmm_sbyte[16];
-   Bit16s  xmm_s16[8];
-   Bit32s  xmm_s32[4];
-   Bit64s  xmm_s64[2];
-   Bit8u   xmm_ubyte[16];
-   Bit16u  xmm_u16[8];
-   Bit32u  xmm_u32[4];
-   Bit64u  xmm_u64[2];
+union bx_xmm_reg_t
+{
+    Bit8s   xmm_sbyte[16];
+    Bit16s  xmm_s16[8];
+    Bit32s  xmm_s32[4];
+    Bit64s  xmm_s64[2];
+    Bit8u   xmm_ubyte[16];
+    Bit16u  xmm_u16[8];
+    Bit32u  xmm_u32[4];
+    Bit64u  xmm_u64[2];
 
-   void clear() { xmm_u64[0] = xmm_u64[1] = 0; }
+    void clear() { xmm_u64[0] = xmm_u64[1] = 0; }
 } BxPackedXmmRegister;
 
 #ifdef BX_BIG_ENDIAN
@@ -69,21 +70,23 @@ typedef
 #if defined(_MSC_VER) && (_MSC_VER>=1300)
 __declspec(align(32))
 #endif
-union bx_ymm_reg_t {
-   Bit8s   ymm_sbyte[32];
-   Bit16s  ymm_s16[16];
-   Bit32s  ymm_s32[8];
-   Bit64s  ymm_s64[4];
-   Bit8u   ymm_ubyte[32];
-   Bit16u  ymm_u16[16];
-   Bit32u  ymm_u32[8];
-   Bit64u  ymm_u64[4];
-   BxPackedXmmRegister ymm_v128[2];
+union bx_ymm_reg_t
+{
+    Bit8s   ymm_sbyte[32];
+    Bit16s  ymm_s16[16];
+    Bit32s  ymm_s32[8];
+    Bit64s  ymm_s64[4];
+    Bit8u   ymm_ubyte[32];
+    Bit16u  ymm_u16[16];
+    Bit32u  ymm_u32[8];
+    Bit64u  ymm_u64[4];
+    BxPackedXmmRegister ymm_v128[2];
 
-   void clear() {
-     ymm_v128[0].clear();
-     ymm_v128[1].clear();
-   }
+    void clear()
+    {
+        ymm_v128[0].clear();
+        ymm_v128[1].clear();
+    }
 } BxPackedYmmRegister;
 
 #ifdef BX_BIG_ENDIAN
@@ -112,22 +115,24 @@ typedef
 #if defined(_MSC_VER) && (_MSC_VER>=1300)
 __declspec(align(64))
 #endif
-union bx_zmm_reg_t {
-   Bit8s   zmm_sbyte[64];
-   Bit16s  zmm_s16[32];
-   Bit32s  zmm_s32[16];
-   Bit64s  zmm_s64[8];
-   Bit8u   zmm_ubyte[64];
-   Bit16u  zmm_u16[32];
-   Bit32u  zmm_u32[16];
-   Bit64u  zmm_u64[8];
-   BxPackedXmmRegister zmm_v128[4];
-   BxPackedYmmRegister zmm_v256[2];
+union bx_zmm_reg_t
+{
+    Bit8s   zmm_sbyte[64];
+    Bit16s  zmm_s16[32];
+    Bit32s  zmm_s32[16];
+    Bit64s  zmm_s64[8];
+    Bit8u   zmm_ubyte[64];
+    Bit16u  zmm_u16[32];
+    Bit32u  zmm_u32[16];
+    Bit64u  zmm_u64[8];
+    BxPackedXmmRegister zmm_v128[4];
+    BxPackedYmmRegister zmm_v256[2];
 
-   void clear() {
-     zmm_v256[0].clear();
-     zmm_v256[1].clear();
-   }
+    void clear()
+    {
+        zmm_v256[0].clear();
+        zmm_v256[1].clear();
+    }
 } BxPackedZmmRegister;
 
 #ifdef BX_BIG_ENDIAN
@@ -380,36 +385,37 @@ typedef BxPackedYmmRegister BxPackedAvxRegister;
 
 #endif
 
-BX_CPP_INLINE int is_clear(const BxPackedXmmRegister *r)
+BX_CPP_INLINE int is_clear(const BxPackedXmmRegister* r)
 {
-  return (r->xmm64u(0) | r->xmm64u(1)) == 0;
+    return (r->xmm64u(0) | r->xmm64u(1)) == 0;
 }
 
 #if BX_SUPPORT_EVEX
 // implement SAE and EVEX encoded rounding control
-BX_CPP_INLINE void softfloat_status_word_rc_override(float_status_t &status, bxInstruction_c *i)
+BX_CPP_INLINE void softfloat_status_word_rc_override(float_status_t& status, bxInstruction_c* i)
 {
-  /* must be VL512 otherwise EVEX.LL encodes vector length */
-  if (i->modC0() && i->getEvexb()) {
-    status.float_rounding_mode = i->getRC();
-    status.float_suppress_exception = float_all_exceptions_mask;
-    status.float_exception_masks = float_all_exceptions_mask;
-  }
+    /* must be VL512 otherwise EVEX.LL encodes vector length */
+    if (i->modC0() && i->getEvexb())
+    {
+        status.float_rounding_mode = i->getRC();
+        status.float_suppress_exception = float_all_exceptions_mask;
+        status.float_exception_masks = float_all_exceptions_mask;
+    }
 }
 #else
-  #define softfloat_status_word_rc_override(status, i)
+#define softfloat_status_word_rc_override(status, i)
 #endif
 
 /* convert float32 NaN number to QNaN */
 BX_CPP_INLINE float32 convert_to_QNaN(float32 op)
 {
-  return op | 0x7FC00000;
+    return op | 0x7FC00000;
 }
 
 /* convert float64 NaN number to QNaN */
 BX_CPP_INLINE float64 convert_to_QNaN(float64 op)
 {
-  return op | BX_CONST64(0x7FF8000000000000);
+    return op | BX_CONST64(0x7FF8000000000000);
 }
 
 /* MXCSR REGISTER */
@@ -423,33 +429,33 @@ BX_CPP_INLINE float64 convert_to_QNaN(float64 op)
  * FZ| R C |PM|UM|OM|ZM|DM|IM|DZ|PE|UE|OE|ZE|DE|IE
  */
 
-/* MXCSR REGISTER FIELDS DESCRIPTION */
+ /* MXCSR REGISTER FIELDS DESCRIPTION */
 
-/*
- * IE  0    Invalid-Operation Exception             0
- * DE  1    Denormalized-Operand Exception          0
- * ZE  2    Zero-Divide Exception                   0
- * OE  3    Overflow Exception                      0
- * UE  4    Underflow Exception                     0
- * PE  5    Precision Exception                     0
- * DZ  6    Denormals are Zeros                     0
- * IM  7    Invalid-Operation Exception Mask        1
- * DM  8    Denormalized-Operand Exception Mask     1
- * ZM  9    Zero-Divide Exception Mask              1
- * OM 10    Overflow Exception Mask                 1
- * UM 11    Underflow Exception Mask                1
- * PM 12    Precision Exception Mask                1
- * RC 13-14 Floating-Point Rounding Control         00
- * FZ 15    Flush-to-Zero for Masked Underflow      0
- * RZ 16    Reserved                                0
- * MM 17    Misaligned Exception Mask               0
- */
+ /*
+  * IE  0    Invalid-Operation Exception             0
+  * DE  1    Denormalized-Operand Exception          0
+  * ZE  2    Zero-Divide Exception                   0
+  * OE  3    Overflow Exception                      0
+  * UE  4    Underflow Exception                     0
+  * PE  5    Precision Exception                     0
+  * DZ  6    Denormals are Zeros                     0
+  * IM  7    Invalid-Operation Exception Mask        1
+  * DM  8    Denormalized-Operand Exception Mask     1
+  * ZM  9    Zero-Divide Exception Mask              1
+  * OM 10    Overflow Exception Mask                 1
+  * UM 11    Underflow Exception Mask                1
+  * PM 12    Precision Exception Mask                1
+  * RC 13-14 Floating-Point Rounding Control         00
+  * FZ 15    Flush-to-Zero for Masked Underflow      0
+  * RZ 16    Reserved                                0
+  * MM 17    Misaligned Exception Mask               0
+  */
 
-const Bit32u MXCSR_EXCEPTIONS                = 0x0000003F;
-const Bit32u MXCSR_DAZ                       = 0x00000040;
-const Bit32u MXCSR_MASKED_EXCEPTIONS         = 0x00001F80;
-const Bit32u MXCSR_ROUNDING_CONTROL          = 0x00006000;
-const Bit32u MXCSR_FLUSH_MASKED_UNDERFLOW    = 0x00008000;
+const Bit32u MXCSR_EXCEPTIONS = 0x0000003F;
+const Bit32u MXCSR_DAZ = 0x00000040;
+const Bit32u MXCSR_MASKED_EXCEPTIONS = 0x00001F80;
+const Bit32u MXCSR_ROUNDING_CONTROL = 0x00006000;
+const Bit32u MXCSR_FLUSH_MASKED_UNDERFLOW = 0x00008000;
 const Bit32u MXCSR_MISALIGNED_EXCEPTION_MASK = 0x00020000;
 
 #define MXCSR_IE 0x00000001
@@ -470,91 +476,94 @@ const Bit32u MXCSR_RESET = 0x00001F80;  /* reset value of the MXCSR register */
 
 struct BOCHSAPI bx_mxcsr_t
 {
-  Bit32u mxcsr;
+    Bit32u mxcsr;
 
-  bx_mxcsr_t (Bit32u val = MXCSR_RESET)
-	: mxcsr(val) {}
+    bx_mxcsr_t(Bit32u val = MXCSR_RESET)
+        : mxcsr(val)
+    {}
 
 #define IMPLEMENT_MXCSR_ACCESSOR(name, bitmask, bitnum)        \
   int get_##name () const {                                    \
     return (mxcsr & (bitmask)) >> (bitnum);                    \
   }
 
-  IMPLEMENT_MXCSR_ACCESSOR(exceptions_masks, MXCSR_MASKED_EXCEPTIONS, 7);
-  IMPLEMENT_MXCSR_ACCESSOR(DAZ, MXCSR_DAZ, 6);
-  IMPLEMENT_MXCSR_ACCESSOR(rounding_mode, MXCSR_ROUNDING_CONTROL, 13);
-  IMPLEMENT_MXCSR_ACCESSOR(flush_masked_underflow, MXCSR_FLUSH_MASKED_UNDERFLOW, 15);
-  IMPLEMENT_MXCSR_ACCESSOR(MM, MXCSR_MISALIGNED_EXCEPTION_MASK, 17);
+    IMPLEMENT_MXCSR_ACCESSOR(exceptions_masks, MXCSR_MASKED_EXCEPTIONS, 7);
+    IMPLEMENT_MXCSR_ACCESSOR(DAZ, MXCSR_DAZ, 6);
+    IMPLEMENT_MXCSR_ACCESSOR(rounding_mode, MXCSR_ROUNDING_CONTROL, 13);
+    IMPLEMENT_MXCSR_ACCESSOR(flush_masked_underflow, MXCSR_FLUSH_MASKED_UNDERFLOW, 15);
+    IMPLEMENT_MXCSR_ACCESSOR(MM, MXCSR_MISALIGNED_EXCEPTION_MASK, 17);
 
-  IMPLEMENT_MXCSR_ACCESSOR(IE, MXCSR_IE, 0);
-  IMPLEMENT_MXCSR_ACCESSOR(DE, MXCSR_DE, 1);
-  IMPLEMENT_MXCSR_ACCESSOR(ZE, MXCSR_ZE, 2);
-  IMPLEMENT_MXCSR_ACCESSOR(OE, MXCSR_OE, 3);
-  IMPLEMENT_MXCSR_ACCESSOR(UE, MXCSR_UE, 4);
-  IMPLEMENT_MXCSR_ACCESSOR(PE, MXCSR_PE, 5);
+    IMPLEMENT_MXCSR_ACCESSOR(IE, MXCSR_IE, 0);
+    IMPLEMENT_MXCSR_ACCESSOR(DE, MXCSR_DE, 1);
+    IMPLEMENT_MXCSR_ACCESSOR(ZE, MXCSR_ZE, 2);
+    IMPLEMENT_MXCSR_ACCESSOR(OE, MXCSR_OE, 3);
+    IMPLEMENT_MXCSR_ACCESSOR(UE, MXCSR_UE, 4);
+    IMPLEMENT_MXCSR_ACCESSOR(PE, MXCSR_PE, 5);
 
-  IMPLEMENT_MXCSR_ACCESSOR(IM, MXCSR_IM, 7);
-  IMPLEMENT_MXCSR_ACCESSOR(DM, MXCSR_DM, 8);
-  IMPLEMENT_MXCSR_ACCESSOR(ZM, MXCSR_ZM, 9);
-  IMPLEMENT_MXCSR_ACCESSOR(OM, MXCSR_OM, 10);
-  IMPLEMENT_MXCSR_ACCESSOR(UM, MXCSR_UM, 11);
-  IMPLEMENT_MXCSR_ACCESSOR(PM, MXCSR_PM, 12);
+    IMPLEMENT_MXCSR_ACCESSOR(IM, MXCSR_IM, 7);
+    IMPLEMENT_MXCSR_ACCESSOR(DM, MXCSR_DM, 8);
+    IMPLEMENT_MXCSR_ACCESSOR(ZM, MXCSR_ZM, 9);
+    IMPLEMENT_MXCSR_ACCESSOR(OM, MXCSR_OM, 10);
+    IMPLEMENT_MXCSR_ACCESSOR(UM, MXCSR_UM, 11);
+    IMPLEMENT_MXCSR_ACCESSOR(PM, MXCSR_PM, 12);
 
-  void set_exceptions(int status) {
-    mxcsr |= (status & MXCSR_EXCEPTIONS);
-  }
+    void set_exceptions(int status)
+    {
+        mxcsr |= (status & MXCSR_EXCEPTIONS);
+    }
 
-  void mask_all_exceptions() {
-    mxcsr |= (MXCSR_MASKED_EXCEPTIONS);
-  }
+    void mask_all_exceptions()
+    {
+        mxcsr |= (MXCSR_MASKED_EXCEPTIONS);
+    }
 
 };
 
 #if defined(NEED_CPU_REG_SHORTCUTS)
-  #define MXCSR             (BX_CPU_THIS_PTR mxcsr)
-  #define BX_MXCSR_REGISTER (BX_CPU_THIS_PTR mxcsr.mxcsr)
-  #define MXCSR_MASK        (BX_CPU_THIS_PTR mxcsr_mask)
+#define MXCSR             (BX_CPU_THIS_PTR mxcsr)
+#define BX_MXCSR_REGISTER (BX_CPU_THIS_PTR mxcsr.mxcsr)
+#define MXCSR_MASK        (BX_CPU_THIS_PTR mxcsr_mask)
 #endif
 
 /* INTEGER SATURATION */
 
 /*
  * SaturateWordSToByteS  converts  a  signed  16-bit  value  to a signed
- * 8-bit value.  If  the signed 16-bit value is less than -128, it is 
- * represented by the saturated value  -128  (0x80).  If it is  greater 
+ * 8-bit value.  If  the signed 16-bit value is less than -128, it is
+ * represented by the saturated value  -128  (0x80).  If it is  greater
  * than 127, it is represented by the saturated value 127 (0x7F).
 */
 BX_CPP_INLINE Bit8s BX_CPP_AttrRegparmN(1) SaturateWordSToByteS(Bit16s value)
 {
-  if(value < -128) return -128;
-  if(value >  127) return  127;
-  return (Bit8s) value;
+    if (value < -128) return -128;
+    if (value > 127) return  127;
+    return (Bit8s)value;
 }
 
 /*
  * SaturateQwordSToByteS converts a signed 32-bit value to a signed
  * 8-bit value. If the signed 32-bit value is less than -128, it is
- * represented by the saturated value -128 (0x80). If it is greater 
+ * represented by the saturated value -128 (0x80). If it is greater
  * than 127, it is represented by the saturated value 127 (0x7F).
 */
 BX_CPP_INLINE Bit8s BX_CPP_AttrRegparmN(1) SaturateDwordSToByteS(Bit32s value)
 {
-  if(value < -128) return -128;
-  if(value >  127) return  127;
-  return (Bit8s) value;
+    if (value < -128) return -128;
+    if (value > 127) return  127;
+    return (Bit8s)value;
 }
 
 /*
  * SaturateQwordSToByteS converts a signed 64-bit value to a signed
  * 8-bit value. If the signed 64-bit value is less than -128, it is
- * represented by the saturated value -128 (0x80). If it is greater 
+ * represented by the saturated value -128 (0x80). If it is greater
  * than 127, it is represented by the saturated value 127 (0x7F).
 */
 BX_CPP_INLINE Bit8s BX_CPP_AttrRegparmN(1) SaturateQwordSToByteS(Bit64s value)
 {
-  if(value < -128) return -128;
-  if(value >  127) return  127;
-  return (Bit8s) value;
+    if (value < -128) return -128;
+    if (value > 127) return  127;
+    return (Bit8s)value;
 }
 
 /*
@@ -565,9 +574,9 @@ BX_CPP_INLINE Bit8s BX_CPP_AttrRegparmN(1) SaturateQwordSToByteS(Bit64s value)
 */
 BX_CPP_INLINE Bit16s BX_CPP_AttrRegparmN(1) SaturateQwordSToWordS(Bit64s value)
 {
-  if(value < -32768) return -32768;
-  if(value >  32767) return  32767;
-  return (Bit16s) value;
+    if (value < -32768) return -32768;
+    if (value > 32767) return  32767;
+    return (Bit16s)value;
 }
 
 /*
@@ -578,9 +587,9 @@ BX_CPP_INLINE Bit16s BX_CPP_AttrRegparmN(1) SaturateQwordSToWordS(Bit64s value)
 */
 BX_CPP_INLINE Bit16s BX_CPP_AttrRegparmN(1) SaturateDwordSToWordS(Bit32s value)
 {
-  if(value < -32768) return -32768;
-  if(value >  32767) return  32767;
-  return (Bit16s) value;
+    if (value < -32768) return -32768;
+    if (value > 32767) return  32767;
+    return (Bit16s)value;
 }
 
 /*
@@ -592,9 +601,9 @@ BX_CPP_INLINE Bit16s BX_CPP_AttrRegparmN(1) SaturateDwordSToWordS(Bit32s value)
 */
 BX_CPP_INLINE Bit32s BX_CPP_AttrRegparmN(1) SaturateQwordSToDwordS(Bit64s value)
 {
-  if(value < BX_CONST64(-2147483648)) return BX_CONST64(-2147483648);
-  if(value >  2147483647) return  2147483647;
-  return (Bit32s) value;
+    if (value < BX_CONST64(-2147483648)) return BX_CONST64(-2147483648);
+    if (value > 2147483647) return  2147483647;
+    return (Bit32s)value;
 }
 
 /*
@@ -605,9 +614,9 @@ BX_CPP_INLINE Bit32s BX_CPP_AttrRegparmN(1) SaturateQwordSToDwordS(Bit64s value)
 */
 BX_CPP_INLINE Bit8u BX_CPP_AttrRegparmN(1) SaturateWordSToByteU(Bit16s value)
 {
-  if(value < 0) return 0;
-  if(value > 255) return 255;
-  return (Bit8u) value;
+    if (value < 0) return 0;
+    if (value > 255) return 255;
+    return (Bit8u)value;
 }
 
 /*
@@ -618,9 +627,9 @@ BX_CPP_INLINE Bit8u BX_CPP_AttrRegparmN(1) SaturateWordSToByteU(Bit16s value)
 */
 BX_CPP_INLINE Bit16u BX_CPP_AttrRegparmN(1) SaturateDwordSToWordU(Bit32s value)
 {
-  if(value < 0) return 0;
-  if(value > 65535) return 65535;
-  return (Bit16u) value;
+    if (value < 0) return 0;
+    if (value > 65535) return 65535;
+    return (Bit16u)value;
 }
 
 /*
@@ -632,9 +641,9 @@ BX_CPP_INLINE Bit16u BX_CPP_AttrRegparmN(1) SaturateDwordSToWordU(Bit32s value)
 */
 BX_CPP_INLINE Bit32u BX_CPP_AttrRegparmN(1) SaturateQwordSToDwordU(Bit64s value)
 {
-  if(value < 0) return 0;
-  if(value > BX_CONST64(4294967295)) return BX_CONST64(4294967295);
-  return (Bit32u) value;
+    if (value < 0) return 0;
+    if (value > BX_CONST64(4294967295)) return BX_CONST64(4294967295);
+    return (Bit32u)value;
 }
 
 /*
@@ -644,8 +653,8 @@ BX_CPP_INLINE Bit32u BX_CPP_AttrRegparmN(1) SaturateQwordSToDwordU(Bit64s value)
 */
 BX_CPP_INLINE Bit8u BX_CPP_AttrRegparmN(1) SaturateWordUToByteU(Bit16u value)
 {
-  if(value > 255) return 255;
-  return (Bit8u) value;
+    if (value > 255) return 255;
+    return (Bit8u)value;
 }
 
 /*
@@ -655,8 +664,8 @@ BX_CPP_INLINE Bit8u BX_CPP_AttrRegparmN(1) SaturateWordUToByteU(Bit16u value)
 */
 BX_CPP_INLINE Bit8u BX_CPP_AttrRegparmN(1) SaturateDwordUToByteU(Bit32u value)
 {
-  if(value > 255) return 255;
-  return (Bit8u) value;
+    if (value > 255) return 255;
+    return (Bit8u)value;
 }
 
 /*
@@ -666,8 +675,8 @@ BX_CPP_INLINE Bit8u BX_CPP_AttrRegparmN(1) SaturateDwordUToByteU(Bit32u value)
 */
 BX_CPP_INLINE Bit8u BX_CPP_AttrRegparmN(1) SaturateQwordUToByteU(Bit64u value)
 {
-  if(value > 255) return 255;
-  return (Bit8u) value;
+    if (value > 255) return 255;
+    return (Bit8u)value;
 }
 
 /*
@@ -677,8 +686,8 @@ BX_CPP_INLINE Bit8u BX_CPP_AttrRegparmN(1) SaturateQwordUToByteU(Bit64u value)
 */
 BX_CPP_INLINE Bit16u BX_CPP_AttrRegparmN(1) SaturateQwordUToWordU(Bit64u value)
 {
-  if(value > 65535) return 65535;
-  return (Bit16u) value;
+    if (value > 65535) return 65535;
+    return (Bit16u)value;
 }
 
 /*
@@ -688,8 +697,8 @@ BX_CPP_INLINE Bit16u BX_CPP_AttrRegparmN(1) SaturateQwordUToWordU(Bit64u value)
 */
 BX_CPP_INLINE Bit16u BX_CPP_AttrRegparmN(1) SaturateDwordUToWordU(Bit32u value)
 {
-  if(value > 65535) return 65535;
-  return (Bit16u) value;
+    if (value > 65535) return 65535;
+    return (Bit16u)value;
 }
 
 /*
@@ -699,8 +708,8 @@ BX_CPP_INLINE Bit16u BX_CPP_AttrRegparmN(1) SaturateDwordUToWordU(Bit32u value)
 */
 BX_CPP_INLINE Bit32u BX_CPP_AttrRegparmN(1) SaturateQwordUToDwordU(Bit64u value)
 {
-  if(value > BX_CONST64(4294967295)) return BX_CONST64(4294967295);
-  return (Bit32u) value;
+    if (value > BX_CONST64(4294967295)) return BX_CONST64(4294967295);
+    return (Bit32u)value;
 }
 
 #endif

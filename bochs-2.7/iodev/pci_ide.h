@@ -31,52 +31,55 @@
 #  define BX_PIDE_THIS_PTR this
 #endif
 
-class bx_pci_ide_c : public bx_pci_ide_stub_c {
+class bx_pci_ide_c : public bx_pci_ide_stub_c
+{
 public:
-  bx_pci_ide_c();
-  virtual ~bx_pci_ide_c();
-  virtual void init(void);
-  virtual void reset(unsigned type);
-  virtual bool bmdma_present(void);
-  virtual void bmdma_start_transfer(Bit8u channel);
-  virtual void bmdma_set_irq(Bit8u channel);
-  virtual void register_state(void);
-  virtual void after_restore_state(void);
-  static Bit64s param_save_handler(void *devptr, bx_param_c *param);
-  static void param_restore_handler(void *devptr, bx_param_c *param, Bit64s val);
+    bx_pci_ide_c();
+    virtual ~bx_pci_ide_c();
+    virtual void init(void);
+    virtual void reset(unsigned type);
+    virtual bool bmdma_present(void);
+    virtual void bmdma_start_transfer(Bit8u channel);
+    virtual void bmdma_set_irq(Bit8u channel);
+    virtual void register_state(void);
+    virtual void after_restore_state(void);
+    static Bit64s param_save_handler(void* devptr, bx_param_c* param);
+    static void param_restore_handler(void* devptr, bx_param_c* param, Bit64s val);
 #if !BX_USE_PIDE_SMF
-  Bit64s param_save(bx_param_c *param);
-  void param_restore(bx_param_c *param, Bit64s val);
+    Bit64s param_save(bx_param_c* param);
+    void param_restore(bx_param_c* param, Bit64s val);
 #endif
 
-  virtual void pci_write_handler(Bit8u address, Bit32u value, unsigned io_len);
+    virtual void pci_write_handler(Bit8u address, Bit32u value, unsigned io_len);
 
-  static void timer_handler(void *);
-  BX_PIDE_SMF void timer(void);
+    static void timer_handler(void*);
+    BX_PIDE_SMF void timer(void);
 
 private:
 
-  struct {
-    unsigned chipset;
-    struct {
-      bool cmd_ssbm;
-      bool cmd_rwcon;
-      Bit8u  status;
-      Bit32u dtpr;
-      Bit32u prd_current;
-      int timer_index;
-      Bit8u *buffer;
-      Bit8u *buffer_top;
-      Bit8u *buffer_idx;
-      bool data_ready;
-    } bmdma[2];
-  } s;
+    struct
+    {
+        unsigned chipset;
+        struct
+        {
+            bool cmd_ssbm;
+            bool cmd_rwcon;
+            Bit8u  status;
+            Bit32u dtpr;
+            Bit32u prd_current;
+            int timer_index;
+            Bit8u* buffer;
+            Bit8u* buffer_top;
+            Bit8u* buffer_idx;
+            bool data_ready;
+        } bmdma[2];
+    } s;
 
-  static Bit32u read_handler(void *this_ptr, Bit32u address, unsigned io_len);
-  static void   write_handler(void *this_ptr, Bit32u address, Bit32u value, unsigned io_len);
+    static Bit32u read_handler(void* this_ptr, Bit32u address, unsigned io_len);
+    static void   write_handler(void* this_ptr, Bit32u address, Bit32u value, unsigned io_len);
 #if !BX_USE_PIDE_SMF
-  Bit32u read(Bit32u address, unsigned io_len);
-  void   write(Bit32u address, Bit32u value, unsigned io_len);
+    Bit32u read(Bit32u address, unsigned io_len);
+    void   write(Bit32u address, Bit32u value, unsigned io_len);
 #endif
 };
 

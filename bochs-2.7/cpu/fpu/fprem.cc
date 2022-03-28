@@ -28,8 +28,8 @@ these four paragraphs for those parts of this code that are retained.
 #define USE_estimateDiv128To64
 #include "softfloat-macros.h"
 
-/* executes single exponent reduction cycle */
-static Bit64u remainder_kernel(Bit64u aSig0, Bit64u bSig, int expDiff, Bit64u *zSig0, Bit64u *zSig1)
+ /* executes single exponent reduction cycle */
+static Bit64u remainder_kernel(Bit64u aSig0, Bit64u bSig, int expDiff, Bit64u* zSig0, Bit64u* zSig1)
 {
     Bit64u term0, term1;
     Bit64u aSig1 = 0;
@@ -38,14 +38,15 @@ static Bit64u remainder_kernel(Bit64u aSig0, Bit64u bSig, int expDiff, Bit64u *z
     Bit64u q = estimateDiv128To64(aSig1, aSig0, bSig);
     mul64To128(bSig, q, &term0, &term1);
     sub128(aSig1, aSig0, term0, term1, zSig1, zSig0);
-    while ((Bit64s)(*zSig1) < 0) {
+    while ((Bit64s)(*zSig1) < 0)
+    {
         --q;
         add128(*zSig1, *zSig0, 0, bSig, zSig1, zSig0);
     }
     return q;
 }
 
-static int do_fprem(floatx80 a, floatx80 b, floatx80 &r, Bit64u &q, int rounding_mode, float_status_t &status)
+static int do_fprem(floatx80 a, floatx80 b, floatx80& r, Bit64u& q, int rounding_mode, float_status_t& status)
 {
     Bit32s aExp, bExp, zExp, expDiff;
     Bit64u aSig0, aSig1, bSig;
@@ -66,8 +67,10 @@ static int do_fprem(floatx80 a, floatx80 b, floatx80 &r, Bit64u &q, int rounding
     bSig = extractFloatx80Frac(b);
     bExp = extractFloatx80Exp(b);
 
-    if (aExp == 0x7FFF) {
-        if ((Bit64u) (aSig0<<1) || ((bExp == 0x7FFF) && (Bit64u) (bSig<<1))) {
+    if (aExp == 0x7FFF)
+    {
+        if ((Bit64u)(aSig0 << 1) || ((bExp == 0x7FFF) && (Bit64u)(bSig << 1)))
+        {
             r = propagateFloatx80NaN(a, b, status);
             return -1;
         }
@@ -75,24 +78,29 @@ static int do_fprem(floatx80 a, floatx80 b, floatx80 &r, Bit64u &q, int rounding
         r = floatx80_default_nan;
         return -1;
     }
-    if (bExp == 0x7FFF) {
-        if ((Bit64u) (bSig<<1)) {
+    if (bExp == 0x7FFF)
+    {
+        if ((Bit64u)(bSig << 1))
+        {
             r = propagateFloatx80NaN(a, b, status);
             return -1;
         }
-        if (aExp == 0 && aSig0) {
+        if (aExp == 0 && aSig0)
+        {
             float_raise(status, float_flag_denormal);
             normalizeFloatx80Subnormal(aSig0, &aExp, &aSig0);
             r = (a.fraction & BX_CONST64(0x8000000000000000)) ?
-                    packFloatx80(aSign, aExp, aSig0) : a;
+                packFloatx80(aSign, aExp, aSig0) : a;
             return 0;
         }
         r = a;
         return 0;
 
     }
-    if (bExp == 0) {
-        if (bSig == 0) {
+    if (bExp == 0)
+    {
+        if (bSig == 0)
+        {
             float_raise(status, float_flag_invalid);
             r = floatx80_default_nan;
             return -1;
@@ -100,8 +108,10 @@ static int do_fprem(floatx80 a, floatx80 b, floatx80 &r, Bit64u &q, int rounding
         float_raise(status, float_flag_denormal);
         normalizeFloatx80Subnormal(bSig, &bExp, &bSig);
     }
-    if (aExp == 0) {
-        if (aSig0 == 0) {
+    if (aExp == 0)
+    {
+        if (aSig0 == 0)
+        {
             r = a;
             return 0;
         }
@@ -113,32 +123,39 @@ static int do_fprem(floatx80 a, floatx80 b, floatx80 &r, Bit64u &q, int rounding
 
     Bit32u overflow = 0;
 
-    if (expDiff >= 64) {
+    if (expDiff >= 64)
+    {
         int n = (expDiff & 0x1f) | 0x20;
         remainder_kernel(aSig0, bSig, n, &aSig0, &aSig1);
         zExp = aExp - n;
         overflow = 1;
     }
-    else {
+    else
+    {
         zExp = bExp;
 
-        if (expDiff < 0) {
-            if (expDiff < -1) {
-               r = (a.fraction & BX_CONST64(0x8000000000000000)) ?
+        if (expDiff < 0)
+        {
+            if (expDiff < -1)
+            {
+                r = (a.fraction & BX_CONST64(0x8000000000000000)) ?
                     packFloatx80(aSign, aExp, aSig0) : a;
-               return 0;
+                return 0;
             }
             shift128Right(aSig0, 0, 1, &aSig0, &aSig1);
             expDiff = 0;
         }
 
-        if (expDiff > 0) {
+        if (expDiff > 0)
+        {
             q = remainder_kernel(aSig0, bSig, expDiff, &aSig0, &aSig1);
         }
-        else {
-            if (bSig <= aSig0) {
-               aSig0 -= bSig;
-               q = 1;
+        else
+        {
+            if (bSig <= aSig0)
+            {
+                aSig0 -= bSig;
+                q = 1;
             }
         }
 
@@ -147,16 +164,17 @@ static int do_fprem(floatx80 a, floatx80 b, floatx80 &r, Bit64u &q, int rounding
             Bit64u term0, term1;
             shift128Right(bSig, 0, 1, &term0, &term1);
 
-            if (! lt128(aSig0, aSig1, term0, term1))
+            if (!lt128(aSig0, aSig1, term0, term1))
             {
-               int lt = lt128(term0, term1, aSig0, aSig1);
-               int eq = eq128(aSig0, aSig1, term0, term1);
+                int lt = lt128(term0, term1, aSig0, aSig1);
+                int eq = eq128(aSig0, aSig1, term0, term1);
 
-               if ((eq && (q & 1)) || lt) {
-                  aSign = !aSign;
-                  ++q;
-               }
-               if (lt) sub128(bSig, 0, aSig0, aSig1, &aSig0, &aSig1);
+                if ((eq && (q & 1)) || lt)
+                {
+                    aSign = !aSign;
+                    ++q;
+                }
+                if (lt) sub128(bSig, 0, aSig0, aSig1, &aSig0, &aSig1);
             }
         }
     }
@@ -171,7 +189,7 @@ static int do_fprem(floatx80 a, floatx80 b, floatx80 &r, Bit64u &q, int rounding
 | according to the IEC/IEEE Standard for Binary Floating-Point Arithmetic.
 *----------------------------------------------------------------------------*/
 
-int floatx80_ieee754_remainder(floatx80 a, floatx80 b, floatx80 &r, Bit64u &q, float_status_t &status)
+int floatx80_ieee754_remainder(floatx80 a, floatx80 b, floatx80& r, Bit64u& q, float_status_t& status)
 {
     return do_fprem(a, b, r, q, float_round_nearest_even, status);
 }
@@ -185,7 +203,7 @@ int floatx80_ieee754_remainder(floatx80 a, floatx80 b, floatx80 &r, Bit64u &q, f
 | quotient of 'a' divided by 'b' to an integer.
 *----------------------------------------------------------------------------*/
 
-int floatx80_remainder(floatx80 a, floatx80 b, floatx80 &r, Bit64u &q, float_status_t &status)
+int floatx80_remainder(floatx80 a, floatx80 b, floatx80& r, Bit64u& q, float_status_t& status)
 {
     return do_fprem(a, b, r, q, float_round_to_zero, status);
 }

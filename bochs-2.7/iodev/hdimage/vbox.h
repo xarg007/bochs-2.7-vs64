@@ -3,7 +3,7 @@
 /////////////////////////////////////////////////////////////////////////
 
 /*
- * This file provides support for the following VBox virtual 
+ * This file provides support for the following VBox virtual
  * disk image formats: VDI.
  *
  * Author: Benjamin D Lunt
@@ -76,46 +76,46 @@ VBOX_VDI_Header;
 
 class vbox_image_t : public device_image_t
 {
-    public:
-        vbox_image_t();
-        virtual ~vbox_image_t();
+public:
+    vbox_image_t();
+    virtual ~vbox_image_t();
 
-        int open(const char* pathname, int flags);
-        void close();
-        Bit64s lseek(Bit64s offset, int whence);
-        ssize_t read(void* buf, size_t count);
-        ssize_t write(const void* buf, size_t count);
+    int open(const char* pathname, int flags);
+    void close();
+    Bit64s lseek(Bit64s offset, int whence);
+    ssize_t read(void* buf, size_t count);
+    ssize_t write(const void* buf, size_t count);
 
-        Bit32u get_capabilities();
-        static int check_format(int fd, Bit64u imgsize);
+    Bit32u get_capabilities();
+    static int check_format(int fd, Bit64u imgsize);
 
 #ifndef BXIMAGE
-        bool save_state(const char *backup_fname);
-        void restore_state(const char *backup_fname);
+    bool save_state(const char* backup_fname);
+    void restore_state(const char* backup_fname);
 #endif
 
-    private:
-        static const off_t INVALID_OFFSET;
-        static const int SECTOR_SIZE;
+private:
+    static const off_t INVALID_OFFSET;
+    static const int SECTOR_SIZE;
 
-        bool is_open() const;
+    bool is_open() const;
 
-        bool read_header();
-        off_t perform_seek();
-        void flush();
-        void read_block(const Bit32u index);
-        void write_block(const Bit32u index);
+    bool read_header();
+    off_t perform_seek();
+    void flush();
+    void read_block(const Bit32u index);
+    void write_block(const Bit32u index);
 
-        int file_descriptor;
-        VBOX_VDI_Header header;
-        Bit32s *mtlb;
-        Bit8u  *block_data;
-        off_t current_offset;
-        Bit32u mtlb_sector;
-        bool is_dirty;
-        bool mtlb_dirty;
-        bool header_dirty;
-        const char *pathname;
+    int file_descriptor;
+    VBOX_VDI_Header header;
+    Bit32s* mtlb;
+    Bit8u* block_data;
+    off_t current_offset;
+    Bit32u mtlb_sector;
+    bool is_dirty;
+    bool mtlb_dirty;
+    bool header_dirty;
+    const char* pathname;
 };
 
 #endif

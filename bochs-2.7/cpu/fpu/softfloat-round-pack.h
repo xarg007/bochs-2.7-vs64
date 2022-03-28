@@ -37,18 +37,18 @@ these four paragraphs for those parts of this code that are retained.
 
 #include "softfloat.h"
 
-/*----------------------------------------------------------------------------
-| Takes a 64-bit fixed-point value `absZ' with binary point between bits 6
-| and 7, and returns the properly rounded 32-bit integer corresponding to the
-| input.  If `zSign' is 1, the input is negated before being converted to an
-| integer.  Bit 63 of `absZ' must be zero.  Ordinarily, the fixed-point input
-| is simply rounded to an integer, with the inexact exception raised if the
-| input cannot be represented exactly as an integer.  However, if the fixed-
-| point input is too large, the invalid exception is raised and the integer
-| indefinite value is returned.
-*----------------------------------------------------------------------------*/
+ /*----------------------------------------------------------------------------
+ | Takes a 64-bit fixed-point value `absZ' with binary point between bits 6
+ | and 7, and returns the properly rounded 32-bit integer corresponding to the
+ | input.  If `zSign' is 1, the input is negated before being converted to an
+ | integer.  Bit 63 of `absZ' must be zero.  Ordinarily, the fixed-point input
+ | is simply rounded to an integer, with the inexact exception raised if the
+ | input cannot be represented exactly as an integer.  However, if the fixed-
+ | point input is too large, the invalid exception is raised and the integer
+ | indefinite value is returned.
+ *----------------------------------------------------------------------------*/
 
-Bit32s roundAndPackInt32(int zSign, Bit64u absZ, float_status_t &status);
+Bit32s roundAndPackInt32(int zSign, Bit64u absZ, float_status_t& status);
 
 /*----------------------------------------------------------------------------
 | Takes the 128-bit fixed-point value formed by concatenating `absZ0' and
@@ -61,7 +61,7 @@ Bit32s roundAndPackInt32(int zSign, Bit64u absZ, float_status_t &status);
 | exception is raised and the integer indefinite value is returned.
 *----------------------------------------------------------------------------*/
 
-Bit64s roundAndPackInt64(int zSign, Bit64u absZ0, Bit64u absZ1, float_status_t &status);
+Bit64s roundAndPackInt64(int zSign, Bit64u absZ0, Bit64u absZ1, float_status_t& status);
 
 /*----------------------------------------------------------------------------
 | Takes the 128-bit fixed-point value formed by concatenating `absZ0' and
@@ -73,7 +73,7 @@ Bit64s roundAndPackInt64(int zSign, Bit64u absZ0, Bit64u absZ1, float_status_t &
 | exception is raised and the largest unsigned integer is returned.
 *----------------------------------------------------------------------------*/
 
-Bit64u roundAndPackUint64(int zSign, Bit64u absZ0, Bit64u absZ1, float_status_t &status);
+Bit64u roundAndPackUint64(int zSign, Bit64u absZ0, Bit64u absZ1, float_status_t& status);
 
 #ifdef FLOAT16
 
@@ -84,7 +84,7 @@ Bit64u roundAndPackUint64(int zSign, Bit64u absZ0, Bit64u absZ1, float_status_t 
 | `zSigPtr', respectively.
 *----------------------------------------------------------------------------*/
 
-void normalizeFloat16Subnormal(Bit16u aSig, Bit16s *zExpPtr, Bit16u *zSigPtr);
+void normalizeFloat16Subnormal(Bit16u aSig, Bit16s* zExpPtr, Bit16u* zSigPtr);
 
 /*----------------------------------------------------------------------------
 | Takes an abstract floating-point value having sign `zSign', exponent `zExp',
@@ -108,7 +108,7 @@ void normalizeFloat16Subnormal(Bit16u aSig, Bit16s *zExpPtr, Bit16u *zSigPtr);
 | Binary Floating-Point Arithmetic.
 *----------------------------------------------------------------------------*/
 
-float16 roundAndPackFloat16(int zSign, Bit16s zExp, Bit16u zSig, float_status_t &status);
+float16 roundAndPackFloat16(int zSign, Bit16s zExp, Bit16u zSig, float_status_t& status);
 
 #endif
 
@@ -119,7 +119,7 @@ float16 roundAndPackFloat16(int zSign, Bit16s zExp, Bit16u zSig, float_status_t 
 | `zSigPtr', respectively.
 *----------------------------------------------------------------------------*/
 
-void normalizeFloat32Subnormal(Bit32u aSig, Bit16s *zExpPtr, Bit32u *zSigPtr);
+void normalizeFloat32Subnormal(Bit32u aSig, Bit16s* zExpPtr, Bit32u* zSigPtr);
 
 /*----------------------------------------------------------------------------
 | Takes an abstract floating-point value having sign `zSign', exponent `zExp',
@@ -143,7 +143,7 @@ void normalizeFloat32Subnormal(Bit32u aSig, Bit16s *zExpPtr, Bit32u *zSigPtr);
 | Binary Floating-Point Arithmetic.
 *----------------------------------------------------------------------------*/
 
-float32 roundAndPackFloat32(int zSign, Bit16s zExp, Bit32u zSig, float_status_t &status);
+float32 roundAndPackFloat32(int zSign, Bit16s zExp, Bit32u zSig, float_status_t& status);
 
 /*----------------------------------------------------------------------------
 | Takes an abstract floating-point value having sign `zSign', exponent `zExp',
@@ -154,7 +154,7 @@ float32 roundAndPackFloat32(int zSign, Bit16s zExp, Bit32u zSig, float_status_t 
 | floating-point exponent.
 *----------------------------------------------------------------------------*/
 
-float32 normalizeRoundAndPackFloat32(int zSign, Bit16s zExp, Bit32u zSig, float_status_t &status);
+float32 normalizeRoundAndPackFloat32(int zSign, Bit16s zExp, Bit32u zSig, float_status_t& status);
 
 /*----------------------------------------------------------------------------
 | Normalizes the subnormal double-precision floating-point value represented
@@ -163,7 +163,7 @@ float32 normalizeRoundAndPackFloat32(int zSign, Bit16s zExp, Bit32u zSig, float_
 | `zSigPtr', respectively.
 *----------------------------------------------------------------------------*/
 
-void normalizeFloat64Subnormal(Bit64u aSig, Bit16s *zExpPtr, Bit64u *zSigPtr);
+void normalizeFloat64Subnormal(Bit64u aSig, Bit16s* zExpPtr, Bit64u* zSigPtr);
 
 /*----------------------------------------------------------------------------
 | Takes an abstract floating-point value having sign `zSign', exponent `zExp',
@@ -187,7 +187,7 @@ void normalizeFloat64Subnormal(Bit64u aSig, Bit16s *zExpPtr, Bit64u *zSigPtr);
 | Binary Floating-Point Arithmetic.
 *----------------------------------------------------------------------------*/
 
-float64 roundAndPackFloat64(int zSign, Bit16s zExp, Bit64u zSig, float_status_t &status);
+float64 roundAndPackFloat64(int zSign, Bit16s zExp, Bit64u zSig, float_status_t& status);
 
 /*----------------------------------------------------------------------------
 | Takes an abstract floating-point value having sign `zSign', exponent `zExp',
@@ -198,7 +198,7 @@ float64 roundAndPackFloat64(int zSign, Bit16s zExp, Bit64u zSig, float_status_t 
 | floating-point exponent.
 *----------------------------------------------------------------------------*/
 
-float64 normalizeRoundAndPackFloat64(int zSign, Bit16s zExp, Bit64u zSig, float_status_t &status);
+float64 normalizeRoundAndPackFloat64(int zSign, Bit16s zExp, Bit64u zSig, float_status_t& status);
 
 #ifdef FLOATX80
 
@@ -209,7 +209,7 @@ float64 normalizeRoundAndPackFloat64(int zSign, Bit16s zExp, Bit64u zSig, float_
 | `zSigPtr', respectively.
 *----------------------------------------------------------------------------*/
 
-void normalizeFloatx80Subnormal(Bit64u aSig, Bit32s *zExpPtr, Bit64u *zSigPtr);
+void normalizeFloatx80Subnormal(Bit64u aSig, Bit32s* zExpPtr, Bit64u* zSigPtr);
 
 /*----------------------------------------------------------------------------
 | Takes an abstract floating-point value having sign `zSign', exponent `zExp',
@@ -236,7 +236,7 @@ void normalizeFloatx80Subnormal(Bit64u aSig, Bit32s *zExpPtr, Bit64u *zSigPtr);
 *----------------------------------------------------------------------------*/
 
 floatx80 roundAndPackFloatx80(int roundingPrecision,
-        int zSign, Bit32s zExp, Bit64u zSig0, Bit64u zSig1, float_status_t &status);
+    int zSign, Bit32s zExp, Bit64u zSig0, Bit64u zSig1, float_status_t& status);
 
 /*----------------------------------------------------------------------------
 | Takes an abstract floating-point value having sign `zSign', exponent
@@ -248,7 +248,7 @@ floatx80 roundAndPackFloatx80(int roundingPrecision,
 *----------------------------------------------------------------------------*/
 
 floatx80 normalizeRoundAndPackFloatx80(int roundingPrecision,
-        int zSign, Bit32s zExp, Bit64u zSig0, Bit64u zSig1, float_status_t &status);
+    int zSign, Bit32s zExp, Bit64u zSig0, Bit64u zSig1, float_status_t& status);
 
 #endif // FLOATX80
 
@@ -265,7 +265,7 @@ floatx80 normalizeRoundAndPackFloatx80(int roundingPrecision,
 *----------------------------------------------------------------------------*/
 
 void normalizeFloat128Subnormal(
-     Bit64u aSig0, Bit64u aSig1, Bit32s *zExpPtr, Bit64u *zSig0Ptr, Bit64u *zSig1Ptr);
+    Bit64u aSig0, Bit64u aSig1, Bit32s* zExpPtr, Bit64u* zSig0Ptr, Bit64u* zSig1Ptr);
 
 /*----------------------------------------------------------------------------
 | Takes an abstract floating-point value having sign `zSign', exponent `zExp',
@@ -289,7 +289,7 @@ void normalizeFloat128Subnormal(
 *----------------------------------------------------------------------------*/
 
 float128 roundAndPackFloat128(
-     int zSign, Bit32s zExp, Bit64u zSig0, Bit64u zSig1, Bit64u zSig2, float_status_t &status);
+    int zSign, Bit32s zExp, Bit64u zSig0, Bit64u zSig1, Bit64u zSig2, float_status_t& status);
 
 /*----------------------------------------------------------------------------
 | Takes an abstract floating-point value having sign `zSign', exponent `zExp',
@@ -302,7 +302,7 @@ float128 roundAndPackFloat128(
 *----------------------------------------------------------------------------*/
 
 float128 normalizeRoundAndPackFloat128(
-     int zSign, Bit32s zExp, Bit64u zSig0, Bit64u zSig1, float_status_t &status);
+    int zSign, Bit32s zExp, Bit64u zSig0, Bit64u zSig1, float_status_t& status);
 
 #endif // FLOAT128
 

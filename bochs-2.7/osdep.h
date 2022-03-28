@@ -38,9 +38,9 @@
 extern "C" {
 #endif   /* __cplusplus */
 
-//////////////////////////////////////////////////////////////////////
-// Hacks for win32, but exclude MINGW32 because it doesn't need them.
-//////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    // Hacks for win32, but exclude MINGW32 because it doesn't need them.
+    //////////////////////////////////////////////////////////////////////
 #ifdef WIN32
 
 #ifndef __MINGW32__
@@ -165,187 +165,187 @@ extern "C" {
 //////////////////////////////////////////////////////////////////////
 
 #if !BX_HAVE_SNPRINTF
-  #define snprintf bx_snprintf
-  extern int bx_snprintf (char *s, size_t maxlen, const char *format, ...);
+#define snprintf bx_snprintf
+    extern int bx_snprintf(char* s, size_t maxlen, const char* format, ...);
 #endif
 
 #if !BX_HAVE_VSNPRINTF
-  #define vsnprintf bx_vsnprintf
-  extern int bx_vsnprintf (char *s, size_t maxlen, const char *format, va_list arg);
+#define vsnprintf bx_vsnprintf
+    extern int bx_vsnprintf(char* s, size_t maxlen, const char* format, va_list arg);
 #endif
 
 #if BX_HAVE_STRTOULL
-  // great, just use the usual function
+    // great, just use the usual function
 #elif BX_HAVE_STRTOUQ
-  // they have strtouq and not strtoull
-  #define strtoull strtouq
+    // they have strtouq and not strtoull
+#define strtoull strtouq
 #else
-  #define strtoull bx_strtoull
-  extern Bit64u bx_strtoull (const char *nptr, char **endptr, int baseignore);
+#define strtoull bx_strtoull
+    extern Bit64u bx_strtoull(const char* nptr, char** endptr, int baseignore);
 #endif
 
 #if !BX_HAVE_STRDUP
 #define strdup bx_strdup
-  extern char *bx_strdup(const char *str);
+    extern char* bx_strdup(const char* str);
 #endif
 
 #if !BX_HAVE_STRREV
 #define strrev bx_strrev
-  extern char *bx_strrev(char *str);
+    extern char* bx_strrev(char* str);
 #endif
 
 #if BX_HAVE_STRICMP
-  // great, just use the usual function
+    // great, just use the usual function
 #elif BX_HAVE_STRCASECMP
-  #define stricmp strcasecmp
+#define stricmp strcasecmp
 #else
-  // FIXME: for now using case sensitive function
-  #define stricmp strcmp
+    // FIXME: for now using case sensitive function
+#define stricmp strcmp
 #endif
 
 #if !BX_HAVE_SOCKLEN_T
 // needed on MacOS X 10.1
-typedef int socklen_t;
+    typedef int socklen_t;
 #endif
 
 #if !BX_HAVE_SSIZE_T
-// needed on Windows
-typedef Bit64s ssize_t;
+    // needed on Windows
+    typedef Bit64s ssize_t;
 #endif
 
 #if !BX_HAVE_MKSTEMP
 #define mkstemp bx_mkstemp
-  BOCHSAPI_MSVCONLY extern int bx_mkstemp(char *tpl);
+    BOCHSAPI_MSVCONLY extern int bx_mkstemp(char* tpl);
 #endif
 
-//////////////////////////////////////////////////////////////////////
-// Missing library functions, implemented for MacOS only
-//////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    // Missing library functions, implemented for MacOS only
+    //////////////////////////////////////////////////////////////////////
 
 #if BX_WITH_MACOS
 // fd_read and fd_write are called by floppy.cc to access the Mac
 // floppy drive directly, since the MacOS doesn't have "special"
 // pathnames which map directly to IO devices
 
-int fd_read(char *buffer, Bit32u offset, Bit32u bytes);
-int fd_write(char *buffer, Bit32u offset, Bit32u bytes);
-int fd_stat(struct stat *buf);
-FILE *  fdopen(int fd, const char *type);
+    int fd_read(char* buffer, Bit32u offset, Bit32u bytes);
+    int fd_write(char* buffer, Bit32u offset, Bit32u bytes);
+    int fd_stat(struct stat* buf);
+    FILE* fdopen(int fd, const char* type);
 
-typedef long ssize_t ;
+    typedef long ssize_t;
 #endif
 
-//////////////////////////////////////////////////////////////////////
-// Missing library functions and byte-swapping stuff,
-// implemented for MorphOS only
-//////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    // Missing library functions and byte-swapping stuff,
+    // implemented for MorphOS only
+    //////////////////////////////////////////////////////////////////////
 
 #ifdef __MORPHOS__
-int fseeko(FILE *stream, off_t offset, int whence);
-struct tm *localtime_r(const time_t *timep, struct tm *result);
+    int fseeko(FILE* stream, off_t offset, int whence);
+    struct tm* localtime_r(const time_t* timep, struct tm* result);
 
-BX_CPP_INLINE Bit16u bx_ppc_bswap16(Bit16u val)
-{
-  Bit32u res;
+    BX_CPP_INLINE Bit16u bx_ppc_bswap16(Bit16u val)
+    {
+        Bit32u res;
 
-  __asm__("rlwimi %0,%0,16,8,15"
-          : "=r" (res)
-          : "0" (val));
+        __asm__("rlwimi %0,%0,16,8,15"
+            : "=r" (res)
+            : "0" (val));
 
-  return (Bit16u)(res >> 8);
-}
+        return (Bit16u)(res >> 8);
+    }
 
-BX_CPP_INLINE Bit32u bx_ppc_bswap32(Bit32u val)
-{
-  Bit32u res;
+    BX_CPP_INLINE Bit32u bx_ppc_bswap32(Bit32u val)
+    {
+        Bit32u res;
 
-  __asm__("rotlwi %0,%1,8\n\t"
-          "rlwimi %0,%1,24,0,7\n\t"
-          "rlwimi %0,%1,24,16,23"
-          : "=&r" (res)
-          : "r" (val));
+        __asm__("rotlwi %0,%1,8\n\t"
+            "rlwimi %0,%1,24,0,7\n\t"
+            "rlwimi %0,%1,24,16,23"
+            : "=&r" (res)
+            : "r" (val));
 
-  return res;
-}
+        return res;
+    }
 
-BX_CPP_INLINE Bit64u bx_ppc_bswap64(Bit64u val)
-{
-  Bit32u hi, lo;
+    BX_CPP_INLINE Bit64u bx_ppc_bswap64(Bit64u val)
+    {
+        Bit32u hi, lo;
 
-  __asm__("rotlwi %0,%2,8\n\t"
-          "rlwimi %0,%2,24,0,7\n\t"
-          "rlwimi %0,%2,24,16,23\n\t"
-          "rotlwi %1,%3,8\n\t"
-          "rlwimi %1,%3,24,0,7\n\t"
-          "rlwimi %1,%3,24,16,23"
-          : "=&r" (hi), "=&r" (lo)
-          : "r" ((Bit32u)(val & 0xffffffff)), "r" ((Bit32u)(val >> 32)));
+        __asm__("rotlwi %0,%2,8\n\t"
+            "rlwimi %0,%2,24,0,7\n\t"
+            "rlwimi %0,%2,24,16,23\n\t"
+            "rotlwi %1,%3,8\n\t"
+            "rlwimi %1,%3,24,0,7\n\t"
+            "rlwimi %1,%3,24,16,23"
+            : "=&r" (hi), "=&r" (lo)
+            : "r" ((Bit32u)(val & 0xffffffff)), "r" ((Bit32u)(val >> 32)));
 
-  return ((Bit64u)hi << 32) | (Bit64u)lo;
-}
+        return ((Bit64u)hi << 32) | (Bit64u)lo;
+    }
 
-BX_CPP_INLINE Bit16u bx_ppc_load_le16(const Bit16u *p)
-{
-  Bit16u v;
-  __asm__("lhbrx %0, 0, %1"
-          : "=r" (v)
-          : "r" (p), "m" (*p));
-  return v;
-}
+    BX_CPP_INLINE Bit16u bx_ppc_load_le16(const Bit16u* p)
+    {
+        Bit16u v;
+        __asm__("lhbrx %0, 0, %1"
+            : "=r" (v)
+            : "r" (p), "m" (*p));
+        return v;
+    }
 
-BX_CPP_INLINE void bx_ppc_store_le16(Bit16u *p, Bit16u v)
-{
-  __asm__("sthbrx %1, 0, %2"
-          : "=m" (*p)
-          : "r" (v), "r" (p));
-}
+    BX_CPP_INLINE void bx_ppc_store_le16(Bit16u* p, Bit16u v)
+    {
+        __asm__("sthbrx %1, 0, %2"
+            : "=m" (*p)
+            : "r" (v), "r" (p));
+    }
 
-BX_CPP_INLINE Bit32u bx_ppc_load_le32(const Bit32u *p)
-{
-  Bit32u v;
-  __asm__("lwbrx %0, 0, %1"
-          : "=r" (v)
-          : "r" (p), "m" (*p));
-  return v;
-}
+    BX_CPP_INLINE Bit32u bx_ppc_load_le32(const Bit32u* p)
+    {
+        Bit32u v;
+        __asm__("lwbrx %0, 0, %1"
+            : "=r" (v)
+            : "r" (p), "m" (*p));
+        return v;
+    }
 
-BX_CPP_INLINE void bx_ppc_store_le32(Bit32u *p, Bit32u v)
-{
-  __asm__("stwbrx %1, 0, %2"
-          : "=m" (*p)
-          : "r" (v), "r" (p));
-}
+    BX_CPP_INLINE void bx_ppc_store_le32(Bit32u* p, Bit32u v)
+    {
+        __asm__("stwbrx %1, 0, %2"
+            : "=m" (*p)
+            : "r" (v), "r" (p));
+    }
 
-BX_CPP_INLINE Bit64u bx_ppc_load_le64(const Bit64u *p)
-{
-  Bit32u hi, lo;
+    BX_CPP_INLINE Bit64u bx_ppc_load_le64(const Bit64u* p)
+    {
+        Bit32u hi, lo;
 
-  __asm__("lwbrx %0, 0, %2\n\t"
-          "lwbrx %1, 0, %3"
-          : "=&r" (lo), "=&r" (hi)
-          : "r" ((Bit32u *)p), "r" ((Bit32u *)p+1));
+        __asm__("lwbrx %0, 0, %2\n\t"
+            "lwbrx %1, 0, %3"
+            : "=&r" (lo), "=&r" (hi)
+            : "r" ((Bit32u*)p), "r" ((Bit32u*)p + 1));
 
-  return ((Bit64u)hi << 32) | (Bit64u)lo;
-}
+        return ((Bit64u)hi << 32) | (Bit64u)lo;
+    }
 
-BX_CPP_INLINE void bx_ppc_store_le64(Bit64u *p, Bit64u v)
-{
-  __asm__("stwbrx %1, 0, %3\n\t"
-          "stwbrx %2, 0, %4"
-          : "=m" (*p)
-          : "r" ((Bit32u)(v & 0xffffffff)), "r" ((Bit32u)(v >> 32)),
-            "r" ((Bit32u *)p), "r" ((Bit32u *)p+1));
-}
+    BX_CPP_INLINE void bx_ppc_store_le64(Bit64u* p, Bit64u v)
+    {
+        __asm__("stwbrx %1, 0, %3\n\t"
+            "stwbrx %2, 0, %4"
+            : "=m" (*p)
+            : "r" ((Bit32u)(v & 0xffffffff)), "r" ((Bit32u)(v >> 32)),
+            "r" ((Bit32u*)p), "r" ((Bit32u*)p + 1));
+    }
 #endif
 
-//////////////////////////////////////////////////////////////////////
-// New functions to replace library functions
-//   with OS-independent versions
-//////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////
+    // New functions to replace library functions
+    //   with OS-independent versions
+    //////////////////////////////////////////////////////////////////////
 
 #if BX_HAVE_REALTIME_USEC
 // 64-bit time in useconds.
-BOCHSAPI_MSVCONLY extern Bit64u bx_get_realtime64_usec (void);
+    BOCHSAPI_MSVCONLY extern Bit64u bx_get_realtime64_usec(void);
 #endif
 
 #ifdef WIN32
@@ -366,14 +366,14 @@ BOCHSAPI_MSVCONLY extern Bit64u bx_get_realtime64_usec (void);
 
 // these macros required for large ramfile option functionality
 #if BX_HAVE_TMPFILE64 == 0
-  #define tmpfile64 tmpfile /* use regular tmpfile() function */
+#define tmpfile64 tmpfile /* use regular tmpfile() function */
 #endif
 
 #if BX_HAVE_FSEEKO64 == 0
 #if BX_HAVE_FSEEK64
-  #define fseeko64 fseek64 /* use fseek64() function */
+#define fseeko64 fseek64 /* use fseek64() function */
 #elif !defined(_MSC_VER)
-  #define fseeko64 fseeko  /* use regular fseeko() function */
+#define fseeko64 fseeko  /* use regular fseeko() function */
 #endif
 #endif
 

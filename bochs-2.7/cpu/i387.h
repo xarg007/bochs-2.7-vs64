@@ -42,7 +42,7 @@
 #include "fpu/status_w.h"
 #include "fpu/control_w.h"
 
-extern int FPU_tagof(const floatx80 &reg);
+extern int FPU_tagof(const floatx80& reg);
 
 //
 // Minimal i387 structure
@@ -62,14 +62,14 @@ public:
     Bit16u    get_status_word() const { return (swd & ~FPU_SW_Top & 0xFFFF) | ((tos << 11) & FPU_SW_Top); }
     Bit16u    get_partial_status() const { return swd; }
 
-    void      FPU_pop ();
+    void      FPU_pop();
     void      FPU_push();
 
     void      FPU_settagi(int tag, int stnr);
     void      FPU_settagi_valid(int stnr);
     int       FPU_gettagi(int stnr);
 
-    floatx80  FPU_read_regi(int stnr) { return st_space[(tos+stnr) & 7]; }
+    floatx80  FPU_read_regi(int stnr) { return st_space[(tos + stnr) & 7]; }
     void      FPU_save_regi(floatx80 reg, int stnr);
     void      FPU_save_regi(floatx80 reg, int tag, int stnr);
 
@@ -106,31 +106,31 @@ public:
 
 BX_CPP_INLINE int i387_t::FPU_gettagi(int stnr)
 {
-  return (twd >> (((stnr+tos) & 7)*2)) & 3;
+    return (twd >> (((stnr + tos) & 7) * 2)) & 3;
 }
 
 BX_CPP_INLINE void i387_t::FPU_settagi_valid(int stnr)
 {
-  int regnr = (stnr + tos) & 7;
-  twd &= ~(3 << (regnr*2));     // FPU_Tag_Valid == '00
+    int regnr = (stnr + tos) & 7;
+    twd &= ~(3 << (regnr * 2));     // FPU_Tag_Valid == '00
 }
 
 BX_CPP_INLINE void i387_t::FPU_settagi(int tag, int stnr)
 {
-  int regnr = (stnr + tos) & 7;
-  twd &= ~(3 << (regnr*2));
-  twd |= (tag & 3) << (regnr*2);
+    int regnr = (stnr + tos) & 7;
+    twd &= ~(3 << (regnr * 2));
+    twd |= (tag & 3) << (regnr * 2);
 }
 
 BX_CPP_INLINE void i387_t::FPU_push(void)
 {
-  tos = (tos - 1) & 7;
+    tos = (tos - 1) & 7;
 }
 
 BX_CPP_INLINE void i387_t::FPU_pop(void)
 {
-  twd |= 3 << (tos*2);
-  tos = (tos + 1) & 7;
+    twd |= 3 << (tos * 2);
+    tos = (tos + 1) & 7;
 }
 
 // it is only possisble to read FPU tag word through certain
@@ -138,59 +138,60 @@ BX_CPP_INLINE void i387_t::FPU_pop(void)
 // real value anyway
 BX_CPP_INLINE void i387_t::FPU_save_regi(floatx80 reg, int stnr)
 {
-  st_space[(stnr+tos) & 7] = reg;
-  FPU_settagi_valid(stnr);
+    st_space[(stnr + tos) & 7] = reg;
+    FPU_settagi_valid(stnr);
 }
 
 BX_CPP_INLINE void i387_t::FPU_save_regi(floatx80 reg, int tag, int stnr)
 {
-  st_space[(stnr+tos) & 7] = reg;
-  FPU_settagi(tag, stnr);
+    st_space[(stnr + tos) & 7] = reg;
+    FPU_settagi(tag, stnr);
 }
 
 #include <string.h>
 
 BX_CPP_INLINE void i387_t::init()
 {
-  cwd = 0x037F;
-  swd = 0;
-  tos = 0;
-  twd = 0xFFFF;
-  foo = 0;
-  fip = 0;
-  fcs = 0;
-  fds = 0;
-  fdp = 0;
+    cwd = 0x037F;
+    swd = 0;
+    tos = 0;
+    twd = 0xFFFF;
+    foo = 0;
+    fip = 0;
+    fcs = 0;
+    fds = 0;
+    fdp = 0;
 }
 
 BX_CPP_INLINE void i387_t::reset()
 {
-  cwd = 0x0040;
-  swd = 0;
-  tos = 0;
-  twd = 0x5555;
-  foo = 0;
-  fip = 0;
-  fcs = 0;
-  fds = 0;
-  fdp = 0;
+    cwd = 0x0040;
+    swd = 0;
+    tos = 0;
+    twd = 0x5555;
+    foo = 0;
+    fip = 0;
+    fcs = 0;
+    fds = 0;
+    fdp = 0;
 
-  memset(st_space, 0, sizeof(floatx80)*8);
+    memset(st_space, 0, sizeof(floatx80) * 8);
 }
 
-typedef union bx_packed_reg_t {
-   Bit8s   _sbyte[8];
-   Bit16s  _s16[4];
-   Bit32s  _s32[2];
-   Bit64s  _s64;
-   Bit8u   _ubyte[8];
-   Bit16u  _u16[4];
-   Bit32u  _u32[2];
-   Bit64u  _u64;
+typedef union bx_packed_reg_t
+{
+    Bit8s   _sbyte[8];
+    Bit16s  _s16[4];
+    Bit32s  _s32[2];
+    Bit64s  _s64;
+    Bit8u   _ubyte[8];
+    Bit16u  _u16[4];
+    Bit32u  _u32[2];
+    Bit64u  _u64;
 public:
-   bx_packed_reg_t() {}
-   bx_packed_reg_t(Bit64u val): _u64(val) {}
-   bx_packed_reg_t(Bit64s val): _s64(val) {}
+    bx_packed_reg_t() {}
+    bx_packed_reg_t(Bit64u val) : _u64(val) {}
+    bx_packed_reg_t(Bit64s val) : _s64(val) {}
 } BxPackedRegister;
 
 typedef BxPackedRegister BxPackedMmxRegister;

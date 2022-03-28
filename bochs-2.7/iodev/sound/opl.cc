@@ -33,6 +33,7 @@
 // is used to know when we are exporting symbols and when we are importing.
 #define BX_PLUGGABLE
 
+#define _CRT_SECURE_NO_WARNINGS
 
 #include <math.h>
 #include <stdlib.h> // rand()

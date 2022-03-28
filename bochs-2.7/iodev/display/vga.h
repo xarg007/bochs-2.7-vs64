@@ -31,8 +31,12 @@
 
 #define VBE_DISPI_BANK_ADDRESS           0xA0000
 
-#define VBE_DISPI_MAX_XRES               2560
-#define VBE_DISPI_MAX_YRES               1600
+//#define VBE_DISPI_MAX_XRES               2560
+//#define VBE_DISPI_MAX_YRES               1600
+
+#define VBE_DISPI_MAX_XRES               800
+#define VBE_DISPI_MAX_YRES               600
+
 #define VBE_DISPI_MAX_BPP                32
 
 #define VBE_DISPI_IOPORT_INDEX           0x01CE
@@ -94,80 +98,82 @@
 #  define BX_VGA_THIS_PTR this
 #endif
 
-class bx_vga_c : public bx_vgacore_c {
+class bx_vga_c : public bx_vgacore_c
+{
 public:
-  bx_vga_c();
-  virtual ~bx_vga_c();
-  virtual void   reset(unsigned type);
-  BX_VGA_SMF bool mem_read_handler(bx_phy_address addr, unsigned len, void *data, void *param);
-  BX_VGA_SMF bool mem_write_handler(bx_phy_address addr, unsigned len, void *data, void *param);
-  virtual Bit8u  mem_read(bx_phy_address addr);
-  virtual void   mem_write(bx_phy_address addr, Bit8u value);
-  virtual void   register_state(void);
-  virtual void   after_restore_state(void);
+    bx_vga_c();
+    virtual ~bx_vga_c();
+    virtual void   reset(unsigned type);
+    BX_VGA_SMF bool mem_read_handler(bx_phy_address addr, unsigned len, void* data, void* param);
+    BX_VGA_SMF bool mem_write_handler(bx_phy_address addr, unsigned len, void* data, void* param);
+    virtual Bit8u  mem_read(bx_phy_address addr);
+    virtual void   mem_write(bx_phy_address addr, Bit8u value);
+    virtual void   register_state(void);
+    virtual void   after_restore_state(void);
 
-  virtual void   redraw_area(unsigned x0, unsigned y0,
-                             unsigned width, unsigned height);
+    virtual void   redraw_area(unsigned x0, unsigned y0,
+        unsigned width, unsigned height);
 
-  virtual bool init_vga_extension(void);
+    virtual bool init_vga_extension(void);
 
 #if BX_SUPPORT_PCI
-  virtual void pci_write_handler(Bit8u address, Bit32u value, unsigned io_len);
-  virtual void pci_bar_change_notify(void);
+    virtual void pci_write_handler(Bit8u address, Bit32u value, unsigned io_len);
+    virtual void pci_bar_change_notify(void);
 #endif
 #if BX_DEBUGGER
-  virtual void debug_dump(int argc, char **argv);
+    virtual void debug_dump(int argc, char** argv);
 #endif
 
 protected:
-  static void   write_handler(void *this_ptr, Bit32u address, Bit32u value, unsigned io_len);
+    static void   write_handler(void* this_ptr, Bit32u address, Bit32u value, unsigned io_len);
 #if BX_USE_VGA_SMF
-  static void   write_handler_no_log(void *this_ptr, Bit32u address, Bit32u value, unsigned io_len);
+    static void   write_handler_no_log(void* this_ptr, Bit32u address, Bit32u value, unsigned io_len);
 #endif
-  void  write(Bit32u address, Bit32u value, unsigned io_len, bool no_log);
+    void  write(Bit32u address, Bit32u value, unsigned io_len, bool no_log);
 
-  virtual void update(void);
+    virtual void update(void);
 
-  // Bochs VBE section
-  BX_VGA_SMF Bit8u vbe_mem_read(bx_phy_address addr) BX_CPP_AttrRegparmN(1);
-  BX_VGA_SMF void  vbe_mem_write(bx_phy_address addr, Bit8u value) BX_CPP_AttrRegparmN(2);
+    // Bochs VBE section
+    BX_VGA_SMF Bit8u vbe_mem_read(bx_phy_address addr) BX_CPP_AttrRegparmN(1);
+    BX_VGA_SMF void  vbe_mem_write(bx_phy_address addr, Bit8u value) BX_CPP_AttrRegparmN(2);
 
-  static Bit32u vbe_read_handler(void *this_ptr, Bit32u address, unsigned io_len);
-  static void   vbe_write_handler(void *this_ptr, Bit32u address, Bit32u value, unsigned io_len);
+    static Bit32u vbe_read_handler(void* this_ptr, Bit32u address, unsigned io_len);
+    static void   vbe_write_handler(void* this_ptr, Bit32u address, Bit32u value, unsigned io_len);
 
 #if BX_USE_VGA_SMF == 0
-  Bit32u vbe_read(Bit32u address, unsigned io_len);
-  void  vbe_write(Bit32u address, Bit32u value, unsigned io_len, bool no_log);
+    Bit32u vbe_read(Bit32u address, unsigned io_len);
+    void  vbe_write(Bit32u address, Bit32u value, unsigned io_len, bool no_log);
 #endif
 
 private:
-  bool vbe_present;
-  struct {
-    Bit16u  cur_dispi;
-    Bit32u  base_address;
-    Bit16u  xres;
-    Bit16u  yres;
-    Bit16u  bpp;
-    Bit16u  max_xres;
-    Bit16u  max_yres;
-    Bit16u  max_bpp;
-    Bit16u  bank[2];
-    Bit16u  bank_granularity_kb;
-    bool    enabled;
-    Bit16u  curindex;
-    Bit32u  visible_screen_size; /**< in bytes */
-    Bit16u  offset_x;            /**< Virtual screen x start (in pixels) */
-    Bit16u  offset_y;            /**< Virtual screen y start (in pixels) */
-    Bit16u  virtual_xres;
-    Bit16u  virtual_yres;
-    Bit32u  virtual_start;   /**< For dealing with bpp>8, this is where the virtual screen starts. */
-    Bit8u   bpp_multiplier;  /**< We have to save this b/c sometimes we need to recalculate stuff with it. */
-    bool    get_capabilities;
-    bool    dac_8bit;
-    bool    ddc_enabled;
-  } vbe;  // VBE state information
+    bool vbe_present;
+    struct
+    {
+        Bit16u  cur_dispi;
+        Bit32u  base_address;
+        Bit16u  xres;
+        Bit16u  yres;
+        Bit16u  bpp;
+        Bit16u  max_xres;
+        Bit16u  max_yres;
+        Bit16u  max_bpp;
+        Bit16u  bank[2];
+        Bit16u  bank_granularity_kb;
+        bool    enabled;
+        Bit16u  curindex;
+        Bit32u  visible_screen_size; /**< in bytes */
+        Bit16u  offset_x;            /**< Virtual screen x start (in pixels) */
+        Bit16u  offset_y;            /**< Virtual screen y start (in pixels) */
+        Bit16u  virtual_xres;
+        Bit16u  virtual_yres;
+        Bit32u  virtual_start;   /**< For dealing with bpp>8, this is where the virtual screen starts. */
+        Bit8u   bpp_multiplier;  /**< We have to save this b/c sometimes we need to recalculate stuff with it. */
+        bool    get_capabilities;
+        bool    dac_8bit;
+        bool    ddc_enabled;
+    } vbe;  // VBE state information
 
-  bx_ddc_c ddc;
+    bx_ddc_c ddc;
 };
 
 #endif

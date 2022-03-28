@@ -17,22 +17,22 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* As a special exception, you may create a larger work that contains
-   part or all of the Bison parser skeleton and distribute that work
-   under terms of your choice, so long as that work isn't itself a
-   parser generator using the skeleton or a modified version thereof
-   as a parser skeleton.  Alternatively, if you modify or redistribute
-   the parser skeleton itself, you may (at your option) remove this
-   special exception, which will cause the skeleton and the resulting
-   Bison output files to be licensed under the GNU General Public
-   License without this special exception.
+   /* As a special exception, you may create a larger work that contains
+      part or all of the Bison parser skeleton and distribute that work
+      under terms of your choice, so long as that work isn't itself a
+      parser generator using the skeleton or a modified version thereof
+      as a parser skeleton.  Alternatively, if you modify or redistribute
+      the parser skeleton itself, you may (at your option) remove this
+      special exception, which will cause the skeleton and the resulting
+      Bison output files to be licensed under the GNU General Public
+      License without this special exception.
 
-   This special exception was added by the Free Software Foundation in
-   version 2.2 of Bison.  */
+      This special exception was added by the Free Software Foundation in
+      version 2.2 of Bison.  */
 
 #ifndef YY_BX_Y_TAB_H_INCLUDED
 # define YY_BX_Y_TAB_H_INCLUDED
-/* Debug traces.  */
+      /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
 #endif
@@ -43,8 +43,8 @@ extern int bxdebug;
 /* Token type.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-  enum yytokentype
-  {
+enum yytokentype
+{
     BX_TOKEN_8BH_REG = 258,
     BX_TOKEN_8BL_REG = 259,
     BX_TOKEN_16B_REG = 260,
@@ -159,7 +159,7 @@ extern int bxdebug;
     NOT = 369,
     NEG = 370,
     INDIRECT = 371
-  };
+};
 #endif
 /* Tokens.  */
 #define BX_TOKEN_8BH_REG 258
@@ -284,9 +284,9 @@ union YYSTYPE
 {
 #line 14 "parser.y" /* yacc.c:1909  */
 
-  char    *sval;
-  Bit64u   uval;
-  unsigned bval;
+    char* sval;
+    Bit64u   uval;
+    unsigned bval;
 
 #line 292 "y.tab.h" /* yacc.c:1909  */
 };
@@ -299,6 +299,6 @@ typedef union YYSTYPE YYSTYPE;
 
 extern YYSTYPE bxlval;
 
-int bxparse (void);
+int bxparse(void);
 
 #endif /* !YY_BX_Y_TAB_H_INCLUDED  */

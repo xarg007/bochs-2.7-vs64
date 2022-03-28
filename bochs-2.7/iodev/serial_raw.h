@@ -51,9 +51,10 @@
 #define THREAD_RX_BUFSIZE 8192
 #define RX_BUFSIZE 256
 
-class serial_raw : public logfunctions {
+class serial_raw : public logfunctions
+{
 public:
-    serial_raw(const char *devname);
+    serial_raw(const char* devname);
     virtual ~serial_raw();
     void set_baudrate(int rate);
     void set_data_bits(int val);
@@ -70,7 +71,7 @@ public:
     void serial_thread();
 #endif
 
-  private:
+private:
     void setup_port();
 #ifdef WIN32_RECEIVE_RAW
     void enq_event(Bit16s event);

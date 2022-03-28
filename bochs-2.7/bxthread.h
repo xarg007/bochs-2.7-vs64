@@ -63,29 +63,29 @@
 typedef struct
 {
 #if defined(WIN32)
-  HANDLE event;
+    HANDLE event;
 #else
-  pthread_cond_t cond;
-  pthread_mutex_t lock;
+    pthread_cond_t cond;
+    pthread_mutex_t lock;
 #endif
 } bx_thread_event_t;
 
 typedef struct
 {
 #if defined(WIN32)
-  HANDLE sem;
+    HANDLE sem;
 #else
-  sem_t sem;
+    sem_t sem;
 #endif
 } bx_thread_sem_t;
 
-void BOCHSAPI_MSVCONLY bx_create_event(bx_thread_event_t *thread_ev);
-void BOCHSAPI_MSVCONLY bx_destroy_event(bx_thread_event_t *thread_ev);
-void BOCHSAPI_MSVCONLY bx_set_event(bx_thread_event_t *thread_ev);
-bool BOCHSAPI_MSVCONLY bx_wait_for_event(bx_thread_event_t *thread_ev);
-bool BOCHSAPI_MSVCONLY bx_create_sem(bx_thread_sem_t *thread_sem);
-void BOCHSAPI_MSVCONLY bx_destroy_sem(bx_thread_sem_t *thread_sem);
-void BOCHSAPI_MSVCONLY bx_wait_sem(bx_thread_sem_t *thread_sem);
-void BOCHSAPI_MSVCONLY bx_set_sem(bx_thread_sem_t *thread_sem);
+void BOCHSAPI_MSVCONLY bx_create_event(bx_thread_event_t* thread_ev);
+void BOCHSAPI_MSVCONLY bx_destroy_event(bx_thread_event_t* thread_ev);
+void BOCHSAPI_MSVCONLY bx_set_event(bx_thread_event_t* thread_ev);
+bool BOCHSAPI_MSVCONLY bx_wait_for_event(bx_thread_event_t* thread_ev);
+bool BOCHSAPI_MSVCONLY bx_create_sem(bx_thread_sem_t* thread_sem);
+void BOCHSAPI_MSVCONLY bx_destroy_sem(bx_thread_sem_t* thread_sem);
+void BOCHSAPI_MSVCONLY bx_wait_sem(bx_thread_sem_t* thread_sem);
+void BOCHSAPI_MSVCONLY bx_set_sem(bx_thread_sem_t* thread_sem);
 
 #endif

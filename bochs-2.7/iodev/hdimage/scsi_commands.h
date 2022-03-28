@@ -5,7 +5,7 @@
 /* scsi/commands.h
    Used only in cdrom_amigaos.cc.
 
-	Operation codes for SCSI-2 commands
+    Operation codes for SCSI-2 commands
 
    30 Nov 94   Peter Urbanec    Created file
    10 Jan 95   Peter Urbanec    Added SCSI_ prefix to all commands

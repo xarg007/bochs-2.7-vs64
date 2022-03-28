@@ -56,7 +56,7 @@
 #ifdef __CYGWIN__
 #define __USE_W32_SOCKETS
 #endif
-
+#define  _WINSOCK_DEPRECATED_NO_WARNINGS
 #include "bochs.h"
 #include "plugin.h"
 #include "pc_system.h"

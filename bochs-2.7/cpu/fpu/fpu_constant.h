@@ -31,9 +31,9 @@ these four paragraphs for those parts of this code that are retained.
  *            Stanislav Shwartsman [sshwarts at sourceforge net]
  * ==========================================================================*/
 
-//////////////////////////////
-// PI, PI/2, PI/4 constants
-//////////////////////////////
+ //////////////////////////////
+ // PI, PI/2, PI/4 constants
+ //////////////////////////////
 
 #define FLOATX80_PI_EXP  (0x4000)
 

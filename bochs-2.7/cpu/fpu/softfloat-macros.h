@@ -35,25 +35,28 @@ these four paragraphs for those parts of this code that are retained.
 #ifndef _SOFTFLOAT_MACROS_H_
 #define _SOFTFLOAT_MACROS_H_
 
-/*----------------------------------------------------------------------------
-| Shifts `a' right by the number of bits given in `count'.  If any nonzero
-| bits are shifted off, they are ``jammed'' into the least significant bit of
-| the result by setting the least significant bit to 1.  The value of `count'
-| can be arbitrarily large; in particular, if `count' is greater than 16, the
-| result will be either 0 or 1, depending on whether `a' is zero or nonzero.
-*----------------------------------------------------------------------------*/
+ /*----------------------------------------------------------------------------
+ | Shifts `a' right by the number of bits given in `count'.  If any nonzero
+ | bits are shifted off, they are ``jammed'' into the least significant bit of
+ | the result by setting the least significant bit to 1.  The value of `count'
+ | can be arbitrarily large; in particular, if `count' is greater than 16, the
+ | result will be either 0 or 1, depending on whether `a' is zero or nonzero.
+ *----------------------------------------------------------------------------*/
 
 BX_CPP_INLINE Bit16u shift16RightJamming(Bit16u a, int count)
 {
     Bit16u z;
 
-    if (count == 0) {
+    if (count == 0)
+    {
         z = a;
     }
-    else if (count < 16) {
-        z = (a>>count) | ((a<<((-count) & 15)) != 0);
+    else if (count < 16)
+    {
+        z = (a >> count) | ((a << ((-count) & 15)) != 0);
     }
-    else {
+    else
+    {
         z = (a != 0);
     }
 
@@ -72,13 +75,16 @@ BX_CPP_INLINE Bit32u shift32RightJamming(Bit32u a, int count)
 {
     Bit32u z;
 
-    if (count == 0) {
+    if (count == 0)
+    {
         z = a;
     }
-    else if (count < 32) {
-        z = (a>>count) | ((a<<((-count) & 31)) != 0);
+    else if (count < 32)
+    {
+        z = (a >> count) | ((a << ((-count) & 31)) != 0);
     }
-    else {
+    else
+    {
         z = (a != 0);
     }
 
@@ -97,13 +103,16 @@ BX_CPP_INLINE Bit64u shift64RightJamming(Bit64u a, int count)
 {
     Bit64u z;
 
-    if (count == 0) {
+    if (count == 0)
+    {
         z = a;
     }
-    else if (count < 64) {
-        z = (a>>count) | ((a << ((-count) & 63)) != 0);
+    else if (count < 64)
+    {
+        z = (a >> count) | ((a << ((-count) & 63)) != 0);
     }
-    else {
+    else
+    {
         z = (a != 0);
     }
 
@@ -127,24 +136,29 @@ BX_CPP_INLINE Bit64u shift64RightJamming(Bit64u a, int count)
 | described above, and is returned at the location pointed to by `z1Ptr'.)
 *----------------------------------------------------------------------------*/
 
-BX_CPP_INLINE void shift64ExtraRightJamming(Bit64u a0, Bit64u a1, int count, Bit64u *z0Ptr, Bit64u *z1Ptr)
+BX_CPP_INLINE void shift64ExtraRightJamming(Bit64u a0, Bit64u a1, int count, Bit64u* z0Ptr, Bit64u* z1Ptr)
 {
     Bit64u z0, z1;
     int negCount = (-count) & 63;
 
-    if (count == 0) {
+    if (count == 0)
+    {
         z1 = a1;
         z0 = a0;
     }
-    else if (count < 64) {
-        z1 = (a0<<negCount) | (a1 != 0);
-        z0 = a0>>count;
+    else if (count < 64)
+    {
+        z1 = (a0 << negCount) | (a1 != 0);
+        z0 = a0 >> count;
     }
-    else {
-        if (count == 64) {
+    else
+    {
+        if (count == 64)
+        {
             z1 = a0 | (a1 != 0);
         }
-        else {
+        else
+        {
             z1 = ((a0 | a1) != 0);
         }
         z0 = 0;
@@ -160,7 +174,7 @@ BX_CPP_INLINE void shift64ExtraRightJamming(Bit64u a0, Bit64u a1, int count, Bit
 | are stored at the locations pointed to by `z0Ptr' and `z1Ptr'.
 *----------------------------------------------------------------------------*/
 
-BX_CPP_INLINE void add128(Bit64u a0, Bit64u a1, Bit64u b0, Bit64u b1, Bit64u *z0Ptr, Bit64u *z1Ptr)
+BX_CPP_INLINE void add128(Bit64u a0, Bit64u a1, Bit64u b0, Bit64u b1, Bit64u* z0Ptr, Bit64u* z1Ptr)
 {
     Bit64u z1 = a1 + b1;
     *z1Ptr = z1;
@@ -176,7 +190,7 @@ BX_CPP_INLINE void add128(Bit64u a0, Bit64u a1, Bit64u b0, Bit64u b1, Bit64u *z0
 *----------------------------------------------------------------------------*/
 
 BX_CPP_INLINE void
- sub128(Bit64u a0, Bit64u a1, Bit64u b0, Bit64u b1, Bit64u *z0Ptr, Bit64u *z1Ptr)
+sub128(Bit64u a0, Bit64u a1, Bit64u b0, Bit64u b1, Bit64u* z0Ptr, Bit64u* z1Ptr)
 {
     *z1Ptr = a1 - b1;
     *z0Ptr = a0 - b0 - (a1 < b1);
@@ -188,21 +202,21 @@ BX_CPP_INLINE void
 | `z0Ptr' and `z1Ptr'.
 *----------------------------------------------------------------------------*/
 
-BX_CPP_INLINE void mul64To128(Bit64u a, Bit64u b, Bit64u *z0Ptr, Bit64u *z1Ptr)
+BX_CPP_INLINE void mul64To128(Bit64u a, Bit64u b, Bit64u* z0Ptr, Bit64u* z1Ptr)
 {
     Bit32u aHigh, aLow, bHigh, bLow;
     Bit64u z0, zMiddleA, zMiddleB, z1;
 
-    aLow = (Bit32u) a;
-    aHigh = (Bit32u)(a>>32);
-    bLow = (Bit32u) b;
-    bHigh = (Bit32u)(b>>32);
-    z1 = ((Bit64u) aLow) * bLow;
-    zMiddleA = ((Bit64u) aLow) * bHigh;
-    zMiddleB = ((Bit64u) aHigh) * bLow;
-    z0 = ((Bit64u) aHigh) * bHigh;
+    aLow = (Bit32u)a;
+    aHigh = (Bit32u)(a >> 32);
+    bLow = (Bit32u)b;
+    bHigh = (Bit32u)(b >> 32);
+    z1 = ((Bit64u)aLow) * bLow;
+    zMiddleA = ((Bit64u)aLow) * bHigh;
+    zMiddleB = ((Bit64u)aHigh) * bLow;
+    z0 = ((Bit64u)aHigh) * bHigh;
     zMiddleA += zMiddleB;
-    z0 += (((Bit64u) (zMiddleA < zMiddleB))<<32) + (zMiddleA>>32);
+    z0 += (((Bit64u)(zMiddleA < zMiddleB)) << 32) + (zMiddleA >> 32);
     zMiddleA <<= 32;
     z1 += zMiddleA;
     z0 += (z1 < zMiddleA);
@@ -227,17 +241,18 @@ static Bit64u estimateDiv128To64(Bit64u a0, Bit64u a1, Bit64u b)
     Bit64u z;
 
     if (b <= a0) return BX_CONST64(0xFFFFFFFFFFFFFFFF);
-    b0 = b>>32;
-    z = (b0<<32 <= a0) ? BX_CONST64(0xFFFFFFFF00000000) : (a0 / b0)<<32;
+    b0 = b >> 32;
+    z = (b0 << 32 <= a0) ? BX_CONST64(0xFFFFFFFF00000000) : (a0 / b0) << 32;
     mul64To128(b, z, &term0, &term1);
     sub128(a0, a1, term0, term1, &rem0, &rem1);
-    while (((Bit64s) rem0) < 0) {
+    while (((Bit64s)rem0) < 0)
+    {
         z -= BX_CONST64(0x100000000);
-        b1 = b<<32;
+        b1 = b << 32;
         add128(rem0, rem1, b0, b1, &rem0, &rem1);
     }
-    rem0 = (rem0<<32) | (rem1>>32);
-    z |= (b0<<32 <= rem0) ? 0xFFFFFFFF : rem0 / b0;
+    rem0 = (rem0 << 32) | (rem1 >> 32);
+    z |= (b0 << 32 <= rem0) ? 0xFFFFFFFF : rem0 / b0;
     return z;
 }
 #endif
@@ -265,19 +280,21 @@ static Bit32u estimateSqrt32(Bit16s aExp, Bit32u a)
     };
     Bit32u z;
 
-    int index = (a>>27) & 15;
-    if (aExp & 1) {
-        z = 0x4000 + (a>>17) - sqrtOddAdjustments[index];
-        z = ((a / z)<<14) + (z<<15);
+    int index = (a >> 27) & 15;
+    if (aExp & 1)
+    {
+        z = 0x4000 + (a >> 17) - sqrtOddAdjustments[index];
+        z = ((a / z) << 14) + (z << 15);
         a >>= 1;
     }
-    else {
-        z = 0x8000 + (a>>17) - sqrtEvenAdjustments[index];
+    else
+    {
+        z = 0x8000 + (a >> 17) - sqrtEvenAdjustments[index];
         z = a / z + z;
-        z = (0x20000 <= z) ? 0xFFFF8000 : (z<<15);
-        if (z <= a) return (Bit32u) (((Bit32s) a)>>1);
+        z = (0x20000 <= z) ? 0xFFFF8000 : (z << 15);
+        if (z <= a) return (Bit32u)(((Bit32s)a) >> 1);
     }
-    return ((Bit32u) ((((Bit64u) a)<<31) / z)) + (z>>1);
+    return ((Bit32u)((((Bit64u)a) << 31) / z)) + (z >> 1);
 }
 #endif
 
@@ -310,11 +327,12 @@ static const int countLeadingZeros8[] = {
 BX_CPP_INLINE int countLeadingZeros16(Bit16u a)
 {
     int shiftCount = 0;
-    if (a < 0x100) {
+    if (a < 0x100)
+    {
         shiftCount += 8;
         a <<= 8;
     }
-    shiftCount += countLeadingZeros8[a>>8];
+    shiftCount += countLeadingZeros8[a >> 8];
     return shiftCount;
 }
 
@@ -328,15 +346,17 @@ BX_CPP_INLINE int countLeadingZeros16(Bit16u a)
 BX_CPP_INLINE int countLeadingZeros32(Bit32u a)
 {
     int shiftCount = 0;
-    if (a < 0x10000) {
+    if (a < 0x10000)
+    {
         shiftCount += 16;
         a <<= 16;
     }
-    if (a < 0x1000000) {
+    if (a < 0x1000000)
+    {
         shiftCount += 8;
         a <<= 8;
     }
-    shiftCount += countLeadingZeros8[a>>24];
+    shiftCount += countLeadingZeros8[a >> 24];
     return shiftCount;
 }
 
@@ -348,10 +368,12 @@ BX_CPP_INLINE int countLeadingZeros32(Bit32u a)
 BX_CPP_INLINE int countLeadingZeros64(Bit64u a)
 {
     int shiftCount = 0;
-    if (a < BX_CONST64(0x100000000)) {
+    if (a < BX_CONST64(0x100000000))
+    {
         shiftCount += 32;
     }
-    else {
+    else
+    {
         a >>= 32;
     }
     shiftCount += countLeadingZeros32((Bit32u)(a));
@@ -368,21 +390,24 @@ BX_CPP_INLINE int countLeadingZeros64(Bit64u a)
 | which are stored at the locations pointed to by `z0Ptr' and `z1Ptr'.
 *----------------------------------------------------------------------------*/
 
-BX_CPP_INLINE void shift128Right(Bit64u a0, Bit64u a1, int count, Bit64u *z0Ptr, Bit64u *z1Ptr)
+BX_CPP_INLINE void shift128Right(Bit64u a0, Bit64u a1, int count, Bit64u* z0Ptr, Bit64u* z1Ptr)
 {
     Bit64u z0, z1;
     int negCount = (-count) & 63;
 
-    if (count == 0) {
+    if (count == 0)
+    {
         z1 = a1;
         z0 = a0;
     }
-    else if (count < 64) {
-        z1 = (a0<<negCount) | (a1>>count);
-        z0 = a0>>count;
+    else if (count < 64)
+    {
+        z1 = (a0 << negCount) | (a1 >> count);
+        z0 = a0 >> count;
     }
-    else {
-        z1 = (count < 128) ? (a0>>(count & 63)) : 0;
+    else
+    {
+        z1 = (count < 128) ? (a0 >> (count & 63)) : 0;
         z0 = 0;
     }
     *z1Ptr = z1;
@@ -400,27 +425,33 @@ BX_CPP_INLINE void shift128Right(Bit64u a0, Bit64u a1, int count, Bit64u *z0Ptr,
 | the locations pointed to by `z0Ptr' and `z1Ptr'.
 *----------------------------------------------------------------------------*/
 
-BX_CPP_INLINE void shift128RightJamming(Bit64u a0, Bit64u a1, int count, Bit64u *z0Ptr, Bit64u *z1Ptr)
+BX_CPP_INLINE void shift128RightJamming(Bit64u a0, Bit64u a1, int count, Bit64u* z0Ptr, Bit64u* z1Ptr)
 {
     Bit64u z0, z1;
     int negCount = (-count) & 63;
 
-    if (count == 0) {
+    if (count == 0)
+    {
         z1 = a1;
         z0 = a0;
     }
-    else if (count < 64) {
-        z1 = (a0<<negCount) | (a1>>count) | ((a1<<negCount) != 0);
-        z0 = a0>>count;
+    else if (count < 64)
+    {
+        z1 = (a0 << negCount) | (a1 >> count) | ((a1 << negCount) != 0);
+        z0 = a0 >> count;
     }
-    else {
-        if (count == 64) {
+    else
+    {
+        if (count == 64)
+        {
             z1 = a0 | (a1 != 0);
         }
-        else if (count < 128) {
-            z1 = (a0>>(count & 63)) | (((a0<<negCount) | a1) != 0);
+        else if (count < 128)
+        {
+            z1 = (a0 >> (count & 63)) | (((a0 << negCount) | a1) != 0);
         }
-        else {
+        else
+        {
             z1 = ((a0 | a1) != 0);
         }
         z0 = 0;
@@ -436,10 +467,10 @@ BX_CPP_INLINE void shift128RightJamming(Bit64u a0, Bit64u a1, int count, Bit64u 
 | pieces which are stored at the locations pointed to by `z0Ptr' and `z1Ptr'.
 *----------------------------------------------------------------------------*/
 
-BX_CPP_INLINE void shortShift128Left(Bit64u a0, Bit64u a1, int count, Bit64u *z0Ptr, Bit64u *z1Ptr)
+BX_CPP_INLINE void shortShift128Left(Bit64u a0, Bit64u a1, int count, Bit64u* z0Ptr, Bit64u* z1Ptr)
 {
-    *z1Ptr = a1<<count;
-    *z0Ptr = (count == 0) ? a0 : (a0<<count) | (a1>>((-count) & 63));
+    *z1Ptr = a1 << count;
+    *z0Ptr = (count == 0) ? a0 : (a0 << count) | (a1 >> ((-count) & 63));
 }
 
 /*----------------------------------------------------------------------------
@@ -451,15 +482,15 @@ BX_CPP_INLINE void shortShift128Left(Bit64u a0, Bit64u a1, int count, Bit64u *z0
 *----------------------------------------------------------------------------*/
 
 BX_CPP_INLINE void add192(
-     Bit64u a0,
-     Bit64u a1,
-     Bit64u a2,
-     Bit64u b0,
-     Bit64u b1,
-     Bit64u b2,
-     Bit64u *z0Ptr,
-     Bit64u *z1Ptr,
-     Bit64u *z2Ptr
+    Bit64u a0,
+    Bit64u a1,
+    Bit64u a2,
+    Bit64u b0,
+    Bit64u b1,
+    Bit64u b2,
+    Bit64u* z0Ptr,
+    Bit64u* z1Ptr,
+    Bit64u* z2Ptr
 )
 {
     Bit64u z0, z1, z2;
@@ -487,15 +518,15 @@ BX_CPP_INLINE void add192(
 *----------------------------------------------------------------------------*/
 
 BX_CPP_INLINE void sub192(
-     Bit64u a0,
-     Bit64u a1,
-     Bit64u a2,
-     Bit64u b0,
-     Bit64u b1,
-     Bit64u b2,
-     Bit64u *z0Ptr,
-     Bit64u *z1Ptr,
-     Bit64u *z2Ptr
+    Bit64u a0,
+    Bit64u a1,
+    Bit64u a2,
+    Bit64u b0,
+    Bit64u b1,
+    Bit64u b2,
+    Bit64u* z0Ptr,
+    Bit64u* z1Ptr,
+    Bit64u* z2Ptr
 )
 {
     Bit64u z0, z1, z2;
@@ -557,12 +588,12 @@ BX_CPP_INLINE int lt128(Bit64u a0, Bit64u a1, Bit64u b0, Bit64u b1)
 *----------------------------------------------------------------------------*/
 
 BX_CPP_INLINE void mul128By64To192(
-     Bit64u a0,
-     Bit64u a1,
-     Bit64u b,
-     Bit64u *z0Ptr,
-     Bit64u *z1Ptr,
-     Bit64u *z2Ptr
+    Bit64u a0,
+    Bit64u a1,
+    Bit64u b,
+    Bit64u* z0Ptr,
+    Bit64u* z1Ptr,
+    Bit64u* z2Ptr
 )
 {
     Bit64u z0, z1, z2, more1;
@@ -585,14 +616,14 @@ BX_CPP_INLINE void mul128By64To192(
 *----------------------------------------------------------------------------*/
 
 BX_CPP_INLINE void mul128To256(
-     Bit64u a0,
-     Bit64u a1,
-     Bit64u b0,
-     Bit64u b1,
-     Bit64u *z0Ptr,
-     Bit64u *z1Ptr,
-     Bit64u *z2Ptr,
-     Bit64u *z3Ptr
+    Bit64u a0,
+    Bit64u a1,
+    Bit64u b0,
+    Bit64u b1,
+    Bit64u* z0Ptr,
+    Bit64u* z1Ptr,
+    Bit64u* z2Ptr,
+    Bit64u* z3Ptr
 )
 {
     Bit64u z0, z1, z2, z3;
@@ -633,41 +664,49 @@ BX_CPP_INLINE void mul128To256(
 *----------------------------------------------------------------------------*/
 
 BX_CPP_INLINE void shift128ExtraRightJamming(
-     Bit64u a0,
-     Bit64u a1,
-     Bit64u a2,
-     int count,
-     Bit64u *z0Ptr,
-     Bit64u *z1Ptr,
-     Bit64u *z2Ptr
+    Bit64u a0,
+    Bit64u a1,
+    Bit64u a2,
+    int count,
+    Bit64u* z0Ptr,
+    Bit64u* z1Ptr,
+    Bit64u* z2Ptr
 )
 {
     Bit64u z0, z1, z2;
     int negCount = (-count) & 63;
 
-    if (count == 0) {
+    if (count == 0)
+    {
         z2 = a2;
         z1 = a1;
         z0 = a0;
     }
-    else {
-        if (count < 64) {
-            z2 = a1<<negCount;
-            z1 = (a0<<negCount) | (a1>>count);
-            z0 = a0>>count;
+    else
+    {
+        if (count < 64)
+        {
+            z2 = a1 << negCount;
+            z1 = (a0 << negCount) | (a1 >> count);
+            z0 = a0 >> count;
         }
-        else {
-            if (count == 64) {
+        else
+        {
+            if (count == 64)
+            {
                 z2 = a1;
                 z1 = a0;
             }
-            else {
+            else
+            {
                 a2 |= a1;
-                if (count < 128) {
-                    z2 = a0<<negCount;
-                    z1 = a0>>(count & 63);
+                if (count < 128)
+                {
+                    z2 = a0 << negCount;
+                    z1 = a0 >> (count & 63);
                 }
-                else {
+                else
+                {
                     z2 = (count == 128) ? a0 : (a0 != 0);
                     z1 = 0;
                 }

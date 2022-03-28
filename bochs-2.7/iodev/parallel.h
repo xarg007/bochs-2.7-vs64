@@ -35,52 +35,56 @@
 #define BX_PAR_STAT  1
 #define BX_PAR_CTRL  2
 
-typedef struct {
-  Bit8u data;
-  struct {
-    bool error;
-    bool slct;
-    bool pe;
-    bool ack;
-    bool busy;
-  } STATUS;
-  struct {
-    bool strobe;
-    bool autofeed;
-    bool init;
-    bool slct_in;
-    bool irq;
-    bool input;
-  } CONTROL;
-  Bit8u IRQ;
-  bx_param_string_c *file;
-  FILE *output;
-  bool file_changed;
-  bool initmode;
+typedef struct
+{
+    Bit8u data;
+    struct
+    {
+        bool error;
+        bool slct;
+        bool pe;
+        bool ack;
+        bool busy;
+    } STATUS;
+    struct
+    {
+        bool strobe;
+        bool autofeed;
+        bool init;
+        bool slct_in;
+        bool irq;
+        bool input;
+    } CONTROL;
+    Bit8u IRQ;
+    bx_param_string_c* file;
+    FILE* output;
+    bool file_changed;
+    bool initmode;
 } bx_par_t;
 
-class bx_parallel_c : public bx_devmodel_c {
+class bx_parallel_c : public bx_devmodel_c
+{
 public:
-  bx_parallel_c();
-  virtual ~bx_parallel_c();
-  virtual void init(void);
-  virtual void reset(unsigned type);
-  virtual void register_state(void);
+    bx_parallel_c();
+    virtual ~bx_parallel_c();
+    virtual void init(void);
+    virtual void reset(unsigned type);
+    virtual void register_state(void);
 
 private:
-  bx_par_t s[BX_PARPORT_MAXDEV];
+    bx_par_t s[BX_PARPORT_MAXDEV];
 
-  static void   virtual_printer(Bit8u port);
+    static void   virtual_printer(Bit8u port);
 
-  static Bit32u read_handler(void *this_ptr, Bit32u address, unsigned io_len);
-  static void   write_handler(void *this_ptr, Bit32u address, Bit32u value, unsigned io_len);
+    static Bit32u read_handler(void* this_ptr, Bit32u address, unsigned io_len);
+    static void   write_handler(void* this_ptr, Bit32u address, Bit32u value, unsigned io_len);
 #if !BX_USE_PAR_SMF
-  Bit32u read(Bit32u address, unsigned io_len);
-  void   write(Bit32u address, Bit32u value, unsigned io_len);
+    Bit32u read(Bit32u address, unsigned io_len);
+    void   write(Bit32u address, Bit32u value, unsigned io_len);
 #endif
-  static const char* parport_file_param_handler(bx_param_string_c *param, bool set,
-                                                const char *oldval, const char *val,
-                                                int maxlen);
+    static const char* parport_file_param_handler(bx_param_string_c* param, bool set,
+        const char* oldval, const char* val,
+        int maxlen);
 };
 
 #endif

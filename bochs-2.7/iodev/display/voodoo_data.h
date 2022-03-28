@@ -5,60 +5,60 @@
  *  Portion of this software comes with the following license
  */
 
-/***************************************************************************
+ /***************************************************************************
 
-    Copyright Aaron Giles
-    All rights reserved.
+     Copyright Aaron Giles
+     All rights reserved.
 
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions are
-    met:
+     Redistribution and use in source and binary forms, with or without
+     modification, are permitted provided that the following conditions are
+     met:
 
-        * Redistributions of source code must retain the above copyright
-          notice, this list of conditions and the following disclaimer.
-        * Redistributions in binary form must reproduce the above copyright
-          notice, this list of conditions and the following disclaimer in
-          the documentation and/or other materials provided with the
-          distribution.
-        * Neither the name 'MAME' nor the names of its contributors may be
-          used to endorse or promote products derived from this software
-          without specific prior written permission.
+         * Redistributions of source code must retain the above copyright
+           notice, this list of conditions and the following disclaimer.
+         * Redistributions in binary form must reproduce the above copyright
+           notice, this list of conditions and the following disclaimer in
+           the documentation and/or other materials provided with the
+           distribution.
+         * Neither the name 'MAME' nor the names of its contributors may be
+           used to endorse or promote products derived from this software
+           without specific prior written permission.
 
-    THIS SOFTWARE IS PROVIDED BY AARON GILES ''AS IS'' AND ANY EXPRESS OR
-    IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-    DISCLAIMED. IN NO EVENT SHALL AARON GILES BE LIABLE FOR ANY DIRECT,
-    INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-    STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
-    IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
+     THIS SOFTWARE IS PROVIDED BY AARON GILES ''AS IS'' AND ANY EXPRESS OR
+     IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+     DISCLAIMED. IN NO EVENT SHALL AARON GILES BE LIABLE FOR ANY DIRECT,
+     INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+     SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+     HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+     STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+     IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+     POSSIBILITY OF SUCH DAMAGE.
 
-***************************************************************************/
+ ***************************************************************************/
 
-/*************************************************************************
+ /*************************************************************************
 
-    3dfx Voodoo Graphics SST-1/2 emulator
+     3dfx Voodoo Graphics SST-1/2 emulator
 
-    emulator by Aaron Giles
+     emulator by Aaron Giles
 
-**************************************************************************/
+ **************************************************************************/
 
 
-/*************************************
- *
- *  Misc. constants
- *
- *************************************/
+ /*************************************
+  *
+  *  Misc. constants
+  *
+  *************************************/
 
-/* enumeration describing reasons we might be stalled */
+  /* enumeration describing reasons we might be stalled */
 enum
 {
-  NOT_STALLED = 0,
-  STALLED_UNTIL_FIFO_LWM,
-  STALLED_UNTIL_FIFO_EMPTY
+    NOT_STALLED = 0,
+    STALLED_UNTIL_FIFO_LWM,
+    STALLED_UNTIL_FIFO_EMPTY
 };
 
 /* maximum number of TMUs */
@@ -127,14 +127,14 @@ enum
  *
  *************************************/
 
-/* Codes to the right:
-    R = readable
-    W = writeable
-    P = pipelined
-    F = goes to FIFO
-*/
+ /* Codes to the right:
+     R = readable
+     W = writeable
+     P = pipelined
+     F = goes to FIFO
+ */
 
-/* 0x000 */
+ /* 0x000 */
 #define status      (0x000/4) /* R  P  */
 #define intrCtrl    (0x004/4) /* RW P   -- Voodoo2/Banshee only */
 #define vertexAx    (0x008/4) /*  W PF */
@@ -337,7 +337,7 @@ enum
 
 static const Bit8u register_alias_map[0x40] =
 {
-  status,   0x004/4,  vertexAx, vertexAy,
+  status,   0x004 / 4,  vertexAx, vertexAy,
   vertexBx, vertexBy, vertexCx, vertexCy,
   startR,   dRdX,   dRdY,   startG,
   dGdX,   dGdY,   startB,   dBdX,
@@ -346,7 +346,7 @@ static const Bit8u register_alias_map[0x40] =
   dSdX,   dSdY,   startT,   dTdX,
   dTdY,   startW,   dWdX,   dWdY,
 
-  triangleCMD,0x084/4,  fvertexAx,  fvertexAy,
+  triangleCMD,0x084 / 4,  fvertexAx,  fvertexAy,
   fvertexBx,  fvertexBy,  fvertexCx,  fvertexCy,
   fstartR,  fdRdX,    fdRdY,    fstartG,
   fdGdX,    fdGdY,    fstartB,  fdBdX,
@@ -365,274 +365,274 @@ static const Bit8u register_alias_map[0x40] =
 
 static const Bit8u voodoo_register_access[0x100] =
 {
-  /* 0x000 */
-  REG_RP,   0,        REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    /* 0x000 */
+    REG_RP,   0,        REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
 
-  /* 0x040 */
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    /* 0x040 */
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
 
-  /* 0x080 */
-  REG_WPF,  0,        REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    /* 0x080 */
+    REG_WPF,  0,        REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
 
-  /* 0x0c0 */
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    /* 0x0c0 */
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
 
-  /* 0x100 */
-  REG_WPF,  REG_RWPF, REG_RWPF, REG_RWPF,
-  REG_RWF,  REG_RWF,  REG_RWF,  REG_RWF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   0,        0,
+    /* 0x100 */
+    REG_WPF,  REG_RWPF, REG_RWPF, REG_RWPF,
+    REG_RWF,  REG_RWF,  REG_RWF,  REG_RWF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   0,        0,
 
-  /* 0x140 */
-  REG_RWF,  REG_RWF,  REG_RWF,  REG_R,
-  REG_R,    REG_R,    REG_R,    REG_R,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    /* 0x140 */
+    REG_RWF,  REG_RWF,  REG_RWF,  REG_R,
+    REG_R,    REG_R,    REG_R,    REG_R,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
 
-  /* 0x180 */
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    /* 0x180 */
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
 
-  /* 0x1c0 */
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  0,        0,        0,        0,
-  0,        0,        0,        0,
+    /* 0x1c0 */
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    0,        0,        0,        0,
+    0,        0,        0,        0,
 
-  /* 0x200 */
-  REG_RW,   REG_R,    REG_RW,   REG_RW,
-  REG_RW,   REG_RW,   REG_RW,   REG_RW,
-  REG_W,    REG_W,    REG_W,    REG_W,
-  REG_W,    0,        0,        0,
+    /* 0x200 */
+    REG_RW,   REG_R,    REG_RW,   REG_RW,
+    REG_RW,   REG_RW,   REG_RW,   REG_RW,
+    REG_W,    REG_W,    REG_W,    REG_W,
+    REG_W,    0,        0,        0,
 
-  /* 0x240 */
-  0,      0,      0,      0,
-  0,      0,      0,      0,
-  0,      0,      0,      0,
-  0,      0,      0,      0,
+    /* 0x240 */
+    0,      0,      0,      0,
+    0,      0,      0,      0,
+    0,      0,      0,      0,
+    0,      0,      0,      0,
 
-  /* 0x280 */
-  0,      0,      0,      0,
-  0,      0,      0,      0,
-  0,      0,      0,      0,
-  0,      0,      0,      0,
+    /* 0x280 */
+    0,      0,      0,      0,
+    0,      0,      0,      0,
+    0,      0,      0,      0,
+    0,      0,      0,      0,
 
-  /* 0x2c0 */
-  0,      0,      0,      0,
-  0,      0,      0,      0,
-  0,      0,      0,      0,
-  0,      0,      0,      0,
+    /* 0x2c0 */
+    0,      0,      0,      0,
+    0,      0,      0,      0,
+    0,      0,      0,      0,
+    0,      0,      0,      0,
 
-  /* 0x300 */
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    /* 0x300 */
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
 
-  /* 0x340 */
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    /* 0x340 */
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
 
-  /* 0x380 */
-  REG_WF
+    /* 0x380 */
+    REG_WF
 };
 
 
 static const Bit8u voodoo2_register_access[0x100] =
 {
-  /* 0x000 */
-  REG_RP,   REG_RWPT, REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    /* 0x000 */
+    REG_RP,   REG_RWPT, REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
 
-  /* 0x040 */
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    /* 0x040 */
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
 
-  /* 0x080 */
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    /* 0x080 */
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
 
-  /* 0x0c0 */
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    /* 0x0c0 */
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
 
-  /* 0x100 */
-  REG_WPF,  REG_RWPF, REG_RWPF, REG_RWPF,
-  REG_RWF,  REG_RWF,  REG_RWF,  REG_RWF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    /* 0x100 */
+    REG_WPF,  REG_RWPF, REG_RWPF, REG_RWPF,
+    REG_RWF,  REG_RWF,  REG_RWF,  REG_RWF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
 
-  /* 0x140 */
-  REG_RWF,  REG_RWF,  REG_RWF,  REG_R,
-  REG_R,    REG_R,    REG_R,    REG_R,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    /* 0x140 */
+    REG_RWF,  REG_RWF,  REG_RWF,  REG_R,
+    REG_R,    REG_R,    REG_R,    REG_R,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
 
-  /* 0x180 */
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    /* 0x180 */
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
 
-  /* 0x1c0 */
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_RWT,  REG_RWT,  REG_RWT,  REG_RWT,
-  REG_RWT,  REG_RWT,  REG_RWT,  REG_RW,
+    /* 0x1c0 */
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_RWT,  REG_RWT,  REG_RWT,  REG_RWT,
+    REG_RWT,  REG_RWT,  REG_RWT,  REG_RW,
 
-  /* 0x200 */
-  REG_RWT,  REG_R,    REG_RWT,  REG_RWT,
-  REG_RWT,  REG_RWT,  REG_RWT,  REG_RWT,
-  REG_WT,   REG_WT,   REG_WF,   REG_WT,
-  REG_WT,   REG_WT,   REG_WT,   REG_WT,
+    /* 0x200 */
+    REG_RWT,  REG_R,    REG_RWT,  REG_RWT,
+    REG_RWT,  REG_RWT,  REG_RWT,  REG_RWT,
+    REG_WT,   REG_WT,   REG_WF,   REG_WT,
+    REG_WT,   REG_WT,   REG_WT,   REG_WT,
 
-  /* 0x240 */
-  REG_R,    REG_RWT,  REG_RWT,  REG_RWT,
-  0,        0,        REG_R,    REG_R,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    /* 0x240 */
+    REG_R,    REG_RWT,  REG_RWT,  REG_RWT,
+    0,        0,        REG_R,    REG_R,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
 
-  /* 0x280 */
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  0,        0,
-  0,        0,        0,        0,
+    /* 0x280 */
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  0,        0,
+    0,        0,        0,        0,
 
-  /* 0x2c0 */
-  REG_RWPF, REG_RWPF, REG_RWPF, REG_RWPF,
-  REG_RWPF, REG_RWPF, REG_RWPF, REG_RWPF,
-  REG_RWPF, REG_RWPF, REG_RWPF, REG_RWPF,
-  REG_RWPF, REG_RWPF, REG_RWPF, REG_WPF,
+    /* 0x2c0 */
+    REG_RWPF, REG_RWPF, REG_RWPF, REG_RWPF,
+    REG_RWPF, REG_RWPF, REG_RWPF, REG_RWPF,
+    REG_RWPF, REG_RWPF, REG_RWPF, REG_RWPF,
+    REG_RWPF, REG_RWPF, REG_RWPF, REG_WPF,
 
-  /* 0x300 */
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    /* 0x300 */
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
 
-  /* 0x340 */
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    /* 0x340 */
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
 
-  /* 0x380 */
-  REG_WF
+    /* 0x380 */
+    REG_WF
 };
 
 
 static const Bit8u banshee_register_access[0x100] =
 {
-  /* 0x000 */
-  REG_RP,   REG_RWPT, REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    /* 0x000 */
+    REG_RP,   REG_RWPT, REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
 
-  /* 0x040 */
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    /* 0x040 */
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
 
-  /* 0x080 */
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    /* 0x080 */
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
 
-  /* 0x0c0 */
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    /* 0x0c0 */
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
 
-  /* 0x100 */
-  REG_WPF,  REG_RWPF, REG_RWPF, REG_RWPF,
-  REG_RWF,  REG_RWF,  REG_RWF,  REG_RWF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    /* 0x100 */
+    REG_WPF,  REG_RWPF, REG_RWPF, REG_RWPF,
+    REG_RWF,  REG_RWF,  REG_RWF,  REG_RWF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
 
-  /* 0x140 */
-  REG_RWF,  REG_RWF,  REG_RWF,  REG_R,
-  REG_R,    REG_R,    REG_R,    REG_R,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    /* 0x140 */
+    REG_RWF,  REG_RWF,  REG_RWF,  REG_R,
+    REG_R,    REG_R,    REG_R,    REG_R,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
 
-  /* 0x180 */
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    /* 0x180 */
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
 
-  /* 0x1c0 */
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  0,        0,        0,        REG_RWF,
-  REG_RWF,  REG_RWF,  REG_RWF,  0,
+    /* 0x1c0 */
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    0,        0,        0,        REG_RWF,
+    REG_RWF,  REG_RWF,  REG_RWF,  0,
 
-  /* 0x200 */
-  REG_RWF,  REG_RWF,  0,        0,
-  0,        0,        0,        0,
-  0,        0,        0,        0,
-  0,        0,        0,        0,
+    /* 0x200 */
+    REG_RWF,  REG_RWF,  0,        0,
+    0,        0,        0,        0,
+    0,        0,        0,        0,
+    0,        0,        0,        0,
 
-  /* 0x240 */
-  0,        0,        0,        REG_WT,
-  REG_RWF,  REG_RWF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_R,    REG_R,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    /* 0x240 */
+    0,        0,        0,        REG_WT,
+    REG_RWF,  REG_RWF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_R,    REG_R,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
 
-  /* 0x280 */
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  0,        0,
-  0,        0,        0,        0,
+    /* 0x280 */
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  0,        0,
+    0,        0,        0,        0,
 
-  /* 0x2c0 */
-  0,      0,      0,      0,
-  0,      0,      0,      0,
-  0,      0,      0,      0,
-  0,      0,      0,      0,
+    /* 0x2c0 */
+    0,      0,      0,      0,
+    0,      0,      0,      0,
+    0,      0,      0,      0,
+    0,      0,      0,      0,
 
-  /* 0x300 */
-  REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
-  REG_WPF,  REG_WPF,  REG_WPF,  0,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    /* 0x300 */
+    REG_WPF,  REG_WPF,  REG_WPF,  REG_WPF,
+    REG_WPF,  REG_WPF,  REG_WPF,  0,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
 
-  /* 0x340 */
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
-  REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    /* 0x340 */
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
+    REG_WF,   REG_WF,   REG_WF,   REG_WF,
 
-  /* 0x380 */
-  REG_WF
+    /* 0x380 */
+    REG_WF
 };
 
 
@@ -642,157 +642,157 @@ static const Bit8u banshee_register_access[0x100] =
  *
  *************************************/
 
-static const char *const voodoo_reg_name[0x100] =
+static const char* const voodoo_reg_name[0x100] =
 {
-  /* 0x000 */
-  "status",   "{intrCtrl}", "vertexAx",   "vertexAy",
-  "vertexBx",   "vertexBy",   "vertexCx",   "vertexCy",
-  "startR",   "startG",   "startB",   "startZ",
-  "startA",   "startS",   "startT",   "startW",
-  /* 0x040 */
-  "dRdX",     "dGdX",     "dBdX",     "dZdX",
-  "dAdX",     "dSdX",     "dTdX",     "dWdX",
-  "dRdY",     "dGdY",     "dBdY",     "dZdY",
-  "dAdY",     "dSdY",     "dTdY",     "dWdY",
-  /* 0x080 */
-  "triangleCMD",  "reserved084",  "fvertexAx",  "fvertexAy",
-  "fvertexBx",  "fvertexBy",  "fvertexCx",  "fvertexCy",
-  "fstartR",    "fstartG",    "fstartB",    "fstartZ",
-  "fstartA",    "fstartS",    "fstartT",    "fstartW",
-  /* 0x0c0 */
-  "fdRdX",    "fdGdX",    "fdBdX",    "fdZdX",
-  "fdAdX",    "fdSdX",    "fdTdX",    "fdWdX",
-  "fdRdY",    "fdGdY",    "fdBdY",    "fdZdY",
-  "fdAdY",    "fdSdY",    "fdTdY",    "fdWdY",
-  /* 0x100 */
-  "ftriangleCMD", "fbzColorPath", "fogMode",    "alphaMode",
-  "fbzMode",    "lfbMode",    "clipLeftRight","clipLowYHighY",
-  "nopCMD",   "fastfillCMD",  "swapbufferCMD","fogColor",
-  "zaColor",    "chromaKey",  "{chromaRange}","{userIntrCMD}",
-  /* 0x140 */
-  "stipple",    "color0",   "color1",   "fbiPixelsIn",
-  "fbiChromaFail","fbiZfuncFail", "fbiAfuncFail", "fbiPixelsOut",
-  "fogTable160",  "fogTable164",  "fogTable168",  "fogTable16c",
-  "fogTable170",  "fogTable174",  "fogTable178",  "fogTable17c",
-  /* 0x180 */
-  "fogTable180",  "fogTable184",  "fogTable188",  "fogTable18c",
-  "fogTable190",  "fogTable194",  "fogTable198",  "fogTable19c",
-  "fogTable1a0",  "fogTable1a4",  "fogTable1a8",  "fogTable1ac",
-  "fogTable1b0",  "fogTable1b4",  "fogTable1b8",  "fogTable1bc",
-  /* 0x1c0 */
-  "fogTable1c0",  "fogTable1c4",  "fogTable1c8",  "fogTable1cc",
-  "fogTable1d0",  "fogTable1d4",  "fogTable1d8",  "fogTable1dc",
-  "{cmdFifoBaseAddr}","{cmdFifoBump}","{cmdFifoRdPtr}","{cmdFifoAMin}",
-  "{cmdFifoAMax}","{cmdFifoDepth}","{cmdFifoHoles}","reserved1fc",
-  /* 0x200 */
-  "fbiInit4",   "vRetrace",   "backPorch",  "videoDimensions",
-  "fbiInit0",   "fbiInit1",   "fbiInit2",   "fbiInit3",
-  "hSync",    "vSync",    "clutData",   "dacData",
-  "maxRgbDelta",  "{hBorder}",  "{vBorder}",  "{borderColor}",
-  /* 0x240 */
-  "{hvRetrace}",  "{fbiInit5}", "{fbiInit6}", "{fbiInit7}",
-  "reserved250",  "reserved254",  "{fbiSwapHistory}","{fbiTrianglesOut}",
-  "{sSetupMode}", "{sVx}",    "{sVy}",    "{sARGB}",
-  "{sRed}",   "{sGreen}",   "{sBlue}",    "{sAlpha}",
-  /* 0x280 */
-  "{sVz}",    "{sWb}",    "{sWtmu0}",   "{sS/Wtmu0}",
-  "{sT/Wtmu0}", "{sWtmu1}",   "{sS/Wtmu1}", "{sT/Wtmu1}",
-  "{sDrawTriCMD}","{sBeginTriCMD}","reserved2a8", "reserved2ac",
-  "reserved2b0",  "reserved2b4",  "reserved2b8",  "reserved2bc",
-  /* 0x2c0 */
-  "{bltSrcBaseAddr}","{bltDstBaseAddr}","{bltXYStrides}","{bltSrcChromaRange}",
-  "{bltDstChromaRange}","{bltClipX}","{bltClipY}","reserved2dc",
-  "{bltSrcXY}", "{bltDstXY}", "{bltSize}",  "{bltRop}",
-  "{bltColor}", "reserved2f4",  "{bltCommand}", "{bltData}",
-  /* 0x300 */
-  "textureMode",  "tLOD",     "tDetail",    "texBaseAddr",
-  "texBaseAddr_1","texBaseAddr_2","texBaseAddr_3_8","trexInit0",
-  "trexInit1",  "nccTable0.0",  "nccTable0.1",  "nccTable0.2",
-  "nccTable0.3",  "nccTable0.4",  "nccTable0.5",  "nccTable0.6",
-  /* 0x340 */
-  "nccTable0.7",  "nccTable0.8",  "nccTable0.9",  "nccTable0.A",
-  "nccTable0.B",  "nccTable1.0",  "nccTable1.1",  "nccTable1.2",
-  "nccTable1.3",  "nccTable1.4",  "nccTable1.5",  "nccTable1.6",
-  "nccTable1.7",  "nccTable1.8",  "nccTable1.9",  "nccTable1.A",
-  /* 0x380 */
-  "nccTable1.B",  "reserved384",  "reserved388",  "reserved38c"
+    /* 0x000 */
+    "status",   "{intrCtrl}", "vertexAx",   "vertexAy",
+    "vertexBx",   "vertexBy",   "vertexCx",   "vertexCy",
+    "startR",   "startG",   "startB",   "startZ",
+    "startA",   "startS",   "startT",   "startW",
+    /* 0x040 */
+    "dRdX",     "dGdX",     "dBdX",     "dZdX",
+    "dAdX",     "dSdX",     "dTdX",     "dWdX",
+    "dRdY",     "dGdY",     "dBdY",     "dZdY",
+    "dAdY",     "dSdY",     "dTdY",     "dWdY",
+    /* 0x080 */
+    "triangleCMD",  "reserved084",  "fvertexAx",  "fvertexAy",
+    "fvertexBx",  "fvertexBy",  "fvertexCx",  "fvertexCy",
+    "fstartR",    "fstartG",    "fstartB",    "fstartZ",
+    "fstartA",    "fstartS",    "fstartT",    "fstartW",
+    /* 0x0c0 */
+    "fdRdX",    "fdGdX",    "fdBdX",    "fdZdX",
+    "fdAdX",    "fdSdX",    "fdTdX",    "fdWdX",
+    "fdRdY",    "fdGdY",    "fdBdY",    "fdZdY",
+    "fdAdY",    "fdSdY",    "fdTdY",    "fdWdY",
+    /* 0x100 */
+    "ftriangleCMD", "fbzColorPath", "fogMode",    "alphaMode",
+    "fbzMode",    "lfbMode",    "clipLeftRight","clipLowYHighY",
+    "nopCMD",   "fastfillCMD",  "swapbufferCMD","fogColor",
+    "zaColor",    "chromaKey",  "{chromaRange}","{userIntrCMD}",
+    /* 0x140 */
+    "stipple",    "color0",   "color1",   "fbiPixelsIn",
+    "fbiChromaFail","fbiZfuncFail", "fbiAfuncFail", "fbiPixelsOut",
+    "fogTable160",  "fogTable164",  "fogTable168",  "fogTable16c",
+    "fogTable170",  "fogTable174",  "fogTable178",  "fogTable17c",
+    /* 0x180 */
+    "fogTable180",  "fogTable184",  "fogTable188",  "fogTable18c",
+    "fogTable190",  "fogTable194",  "fogTable198",  "fogTable19c",
+    "fogTable1a0",  "fogTable1a4",  "fogTable1a8",  "fogTable1ac",
+    "fogTable1b0",  "fogTable1b4",  "fogTable1b8",  "fogTable1bc",
+    /* 0x1c0 */
+    "fogTable1c0",  "fogTable1c4",  "fogTable1c8",  "fogTable1cc",
+    "fogTable1d0",  "fogTable1d4",  "fogTable1d8",  "fogTable1dc",
+    "{cmdFifoBaseAddr}","{cmdFifoBump}","{cmdFifoRdPtr}","{cmdFifoAMin}",
+    "{cmdFifoAMax}","{cmdFifoDepth}","{cmdFifoHoles}","reserved1fc",
+    /* 0x200 */
+    "fbiInit4",   "vRetrace",   "backPorch",  "videoDimensions",
+    "fbiInit0",   "fbiInit1",   "fbiInit2",   "fbiInit3",
+    "hSync",    "vSync",    "clutData",   "dacData",
+    "maxRgbDelta",  "{hBorder}",  "{vBorder}",  "{borderColor}",
+    /* 0x240 */
+    "{hvRetrace}",  "{fbiInit5}", "{fbiInit6}", "{fbiInit7}",
+    "reserved250",  "reserved254",  "{fbiSwapHistory}","{fbiTrianglesOut}",
+    "{sSetupMode}", "{sVx}",    "{sVy}",    "{sARGB}",
+    "{sRed}",   "{sGreen}",   "{sBlue}",    "{sAlpha}",
+    /* 0x280 */
+    "{sVz}",    "{sWb}",    "{sWtmu0}",   "{sS/Wtmu0}",
+    "{sT/Wtmu0}", "{sWtmu1}",   "{sS/Wtmu1}", "{sT/Wtmu1}",
+    "{sDrawTriCMD}","{sBeginTriCMD}","reserved2a8", "reserved2ac",
+    "reserved2b0",  "reserved2b4",  "reserved2b8",  "reserved2bc",
+    /* 0x2c0 */
+    "{bltSrcBaseAddr}","{bltDstBaseAddr}","{bltXYStrides}","{bltSrcChromaRange}",
+    "{bltDstChromaRange}","{bltClipX}","{bltClipY}","reserved2dc",
+    "{bltSrcXY}", "{bltDstXY}", "{bltSize}",  "{bltRop}",
+    "{bltColor}", "reserved2f4",  "{bltCommand}", "{bltData}",
+    /* 0x300 */
+    "textureMode",  "tLOD",     "tDetail",    "texBaseAddr",
+    "texBaseAddr_1","texBaseAddr_2","texBaseAddr_3_8","trexInit0",
+    "trexInit1",  "nccTable0.0",  "nccTable0.1",  "nccTable0.2",
+    "nccTable0.3",  "nccTable0.4",  "nccTable0.5",  "nccTable0.6",
+    /* 0x340 */
+    "nccTable0.7",  "nccTable0.8",  "nccTable0.9",  "nccTable0.A",
+    "nccTable0.B",  "nccTable1.0",  "nccTable1.1",  "nccTable1.2",
+    "nccTable1.3",  "nccTable1.4",  "nccTable1.5",  "nccTable1.6",
+    "nccTable1.7",  "nccTable1.8",  "nccTable1.9",  "nccTable1.A",
+    /* 0x380 */
+    "nccTable1.B",  "reserved384",  "reserved388",  "reserved38c"
 };
 
 
-static const char *const banshee_reg_name[] =
+static const char* const banshee_reg_name[] =
 {
-  /* 0x000 */
-  "status",   "intrCtrl",   "vertexAx",   "vertexAy",
-  "vertexBx",   "vertexBy",   "vertexCx",   "vertexCy",
-  "startR",   "startG",   "startB",   "startZ",
-  "startA",   "startS",   "startT",   "startW",
-  /* 0x040 */
-  "dRdX",     "dGdX",     "dBdX",     "dZdX",
-  "dAdX",     "dSdX",     "dTdX",     "dWdX",
-  "dRdY",     "dGdY",     "dBdY",     "dZdY",
-  "dAdY",     "dSdY",     "dTdY",     "dWdY",
-  /* 0x080 */
-  "triangleCMD",  "reserved084",  "fvertexAx",  "fvertexAy",
-  "fvertexBx",  "fvertexBy",  "fvertexCx",  "fvertexCy",
-  "fstartR",    "fstartG",    "fstartB",    "fstartZ",
-  "fstartA",    "fstartS",    "fstartT",    "fstartW",
-  /* 0x0c0 */
-  "fdRdX",    "fdGdX",    "fdBdX",    "fdZdX",
-  "fdAdX",    "fdSdX",    "fdTdX",    "fdWdX",
-  "fdRdY",    "fdGdY",    "fdBdY",    "fdZdY",
-  "fdAdY",    "fdSdY",    "fdTdY",    "fdWdY",
-  /* 0x100 */
-  "ftriangleCMD", "fbzColorPath", "fogMode",    "alphaMode",
-  "fbzMode",    "lfbMode",    "clipLeftRight","clipLowYHighY",
-  "nopCMD",   "fastfillCMD",  "swapbufferCMD","fogColor",
-  "zaColor",    "chromaKey",  "chromaRange",  "userIntrCMD",
-  /* 0x140 */
-  "stipple",    "color0",   "color1",   "fbiPixelsIn",
-  "fbiChromaFail","fbiZfuncFail", "fbiAfuncFail", "fbiPixelsOut",
-  "fogTable160",  "fogTable164",  "fogTable168",  "fogTable16c",
-  "fogTable170",  "fogTable174",  "fogTable178",  "fogTable17c",
-  /* 0x180 */
-  "fogTable180",  "fogTable184",  "fogTable188",  "fogTable18c",
-  "fogTable190",  "fogTable194",  "fogTable198",  "fogTable19c",
-  "fogTable1a0",  "fogTable1a4",  "fogTable1a8",  "fogTable1ac",
-  "fogTable1b0",  "fogTable1b4",  "fogTable1b8",  "fogTable1bc",
-  /* 0x1c0 */
-  "fogTable1c0",  "fogTable1c4",  "fogTable1c8",  "fogTable1cc",
-  "fogTable1d0",  "fogTable1d4",  "fogTable1d8",  "fogTable1dc",
-  "reserved1e0",  "reserved1e4",  "reserved1e8",  "colBufferAddr",
-  "colBufferStride","auxBufferAddr","auxBufferStride","reserved1fc",
-  /* 0x200 */
-  "clipLeftRight1","clipTopBottom1","reserved208","reserved20c",
-  "reserved210",  "reserved214",  "reserved218",  "reserved21c",
-  "reserved220",  "reserved224",  "reserved228",  "reserved22c",
-  "reserved230",  "reserved234",  "reserved238",  "reserved23c",
-  /* 0x240 */
-  "reserved240",  "reserved244",  "reserved248",  "swapPending",
-  "leftOverlayBuf","rightOverlayBuf","fbiSwapHistory","fbiTrianglesOut",
-  "sSetupMode", "sVx",      "sVy",      "sARGB",
-  "sRed",     "sGreen",   "sBlue",    "sAlpha",
-  /* 0x280 */
-  "sVz",      "sWb",      "sWtmu0",   "sS/Wtmu0",
-  "sT/Wtmu0",   "sWtmu1",   "sS/Wtmu1",   "sT/Wtmu1",
-  "sDrawTriCMD",  "sBeginTriCMD", "reserved2a8",  "reserved2ac",
-  "reserved2b0",  "reserved2b4",  "reserved2b8",  "reserved2bc",
-  /* 0x2c0 */
-  "reserved2c0",  "reserved2c4",  "reserved2c8",  "reserved2cc",
-  "reserved2d0",  "reserved2d4",  "reserved2d8",  "reserved2dc",
-  "reserved2e0",  "reserved2e4",  "reserved2e8",  "reserved2ec",
-  "reserved2f0",  "reserved2f4",  "reserved2f8",  "reserved2fc",
-  /* 0x300 */
-  "textureMode",  "tLOD",     "tDetail",    "texBaseAddr",
-  "texBaseAddr_1","texBaseAddr_2","texBaseAddr_3_8","reserved31c",
-  "trexInit1",  "nccTable0.0",  "nccTable0.1",  "nccTable0.2",
-  "nccTable0.3",  "nccTable0.4",  "nccTable0.5",  "nccTable0.6",
-  /* 0x340 */
-  "nccTable0.7",  "nccTable0.8",  "nccTable0.9",  "nccTable0.A",
-  "nccTable0.B",  "nccTable1.0",  "nccTable1.1",  "nccTable1.2",
-  "nccTable1.3",  "nccTable1.4",  "nccTable1.5",  "nccTable1.6",
-  "nccTable1.7",  "nccTable1.8",  "nccTable1.9",  "nccTable1.A",
-  /* 0x380 */
-  "nccTable1.B"
+    /* 0x000 */
+    "status",   "intrCtrl",   "vertexAx",   "vertexAy",
+    "vertexBx",   "vertexBy",   "vertexCx",   "vertexCy",
+    "startR",   "startG",   "startB",   "startZ",
+    "startA",   "startS",   "startT",   "startW",
+    /* 0x040 */
+    "dRdX",     "dGdX",     "dBdX",     "dZdX",
+    "dAdX",     "dSdX",     "dTdX",     "dWdX",
+    "dRdY",     "dGdY",     "dBdY",     "dZdY",
+    "dAdY",     "dSdY",     "dTdY",     "dWdY",
+    /* 0x080 */
+    "triangleCMD",  "reserved084",  "fvertexAx",  "fvertexAy",
+    "fvertexBx",  "fvertexBy",  "fvertexCx",  "fvertexCy",
+    "fstartR",    "fstartG",    "fstartB",    "fstartZ",
+    "fstartA",    "fstartS",    "fstartT",    "fstartW",
+    /* 0x0c0 */
+    "fdRdX",    "fdGdX",    "fdBdX",    "fdZdX",
+    "fdAdX",    "fdSdX",    "fdTdX",    "fdWdX",
+    "fdRdY",    "fdGdY",    "fdBdY",    "fdZdY",
+    "fdAdY",    "fdSdY",    "fdTdY",    "fdWdY",
+    /* 0x100 */
+    "ftriangleCMD", "fbzColorPath", "fogMode",    "alphaMode",
+    "fbzMode",    "lfbMode",    "clipLeftRight","clipLowYHighY",
+    "nopCMD",   "fastfillCMD",  "swapbufferCMD","fogColor",
+    "zaColor",    "chromaKey",  "chromaRange",  "userIntrCMD",
+    /* 0x140 */
+    "stipple",    "color0",   "color1",   "fbiPixelsIn",
+    "fbiChromaFail","fbiZfuncFail", "fbiAfuncFail", "fbiPixelsOut",
+    "fogTable160",  "fogTable164",  "fogTable168",  "fogTable16c",
+    "fogTable170",  "fogTable174",  "fogTable178",  "fogTable17c",
+    /* 0x180 */
+    "fogTable180",  "fogTable184",  "fogTable188",  "fogTable18c",
+    "fogTable190",  "fogTable194",  "fogTable198",  "fogTable19c",
+    "fogTable1a0",  "fogTable1a4",  "fogTable1a8",  "fogTable1ac",
+    "fogTable1b0",  "fogTable1b4",  "fogTable1b8",  "fogTable1bc",
+    /* 0x1c0 */
+    "fogTable1c0",  "fogTable1c4",  "fogTable1c8",  "fogTable1cc",
+    "fogTable1d0",  "fogTable1d4",  "fogTable1d8",  "fogTable1dc",
+    "reserved1e0",  "reserved1e4",  "reserved1e8",  "colBufferAddr",
+    "colBufferStride","auxBufferAddr","auxBufferStride","reserved1fc",
+    /* 0x200 */
+    "clipLeftRight1","clipTopBottom1","reserved208","reserved20c",
+    "reserved210",  "reserved214",  "reserved218",  "reserved21c",
+    "reserved220",  "reserved224",  "reserved228",  "reserved22c",
+    "reserved230",  "reserved234",  "reserved238",  "reserved23c",
+    /* 0x240 */
+    "reserved240",  "reserved244",  "reserved248",  "swapPending",
+    "leftOverlayBuf","rightOverlayBuf","fbiSwapHistory","fbiTrianglesOut",
+    "sSetupMode", "sVx",      "sVy",      "sARGB",
+    "sRed",     "sGreen",   "sBlue",    "sAlpha",
+    /* 0x280 */
+    "sVz",      "sWb",      "sWtmu0",   "sS/Wtmu0",
+    "sT/Wtmu0",   "sWtmu1",   "sS/Wtmu1",   "sT/Wtmu1",
+    "sDrawTriCMD",  "sBeginTriCMD", "reserved2a8",  "reserved2ac",
+    "reserved2b0",  "reserved2b4",  "reserved2b8",  "reserved2bc",
+    /* 0x2c0 */
+    "reserved2c0",  "reserved2c4",  "reserved2c8",  "reserved2cc",
+    "reserved2d0",  "reserved2d4",  "reserved2d8",  "reserved2dc",
+    "reserved2e0",  "reserved2e4",  "reserved2e8",  "reserved2ec",
+    "reserved2f0",  "reserved2f4",  "reserved2f8",  "reserved2fc",
+    /* 0x300 */
+    "textureMode",  "tLOD",     "tDetail",    "texBaseAddr",
+    "texBaseAddr_1","texBaseAddr_2","texBaseAddr_3_8","reserved31c",
+    "trexInit1",  "nccTable0.0",  "nccTable0.1",  "nccTable0.2",
+    "nccTable0.3",  "nccTable0.4",  "nccTable0.5",  "nccTable0.6",
+    /* 0x340 */
+    "nccTable0.7",  "nccTable0.8",  "nccTable0.9",  "nccTable0.A",
+    "nccTable0.B",  "nccTable1.0",  "nccTable1.1",  "nccTable1.2",
+    "nccTable1.3",  "nccTable1.4",  "nccTable1.5",  "nccTable1.6",
+    "nccTable1.7",  "nccTable1.8",  "nccTable1.9",  "nccTable1.A",
+    /* 0x380 */
+    "nccTable1.B"
 };
 
 
@@ -803,7 +803,7 @@ static const char *const banshee_reg_name[] =
  *
  *************************************/
 
-/* 0x000 */
+ /* 0x000 */
 #define io_status             (0x000/4) /*  */
 #define io_pciInit0           (0x004/4) /*  */
 #define io_sipMonitor         (0x008/4) /*  */
@@ -882,31 +882,31 @@ static const char *const banshee_reg_name[] =
  *
  *************************************/
 
-static const char *const banshee_io_reg_name[] =
+static const char* const banshee_io_reg_name[] =
 {
-  /* 0x000 */
-  "status",   "pciInit0",   "sipMonitor", "lfbMemoryConfig",
-  "miscInit0",  "miscInit1",  "dramInit0",  "dramInit1",
-  "agpInit",    "tmuGbeInit", "vgaInit0",   "vgaInit1",
-  "dramCommand",  "dramData",   "strapInfo", "reserved3c",
+    /* 0x000 */
+    "status",   "pciInit0",   "sipMonitor", "lfbMemoryConfig",
+    "miscInit0",  "miscInit1",  "dramInit0",  "dramInit1",
+    "agpInit",    "tmuGbeInit", "vgaInit0",   "vgaInit1",
+    "dramCommand",  "dramData",   "strapInfo", "reserved3c",
 
-  /* 0x040 */
-  "pllCtrl0",   "pllCtrl1",   "pllCtrl2",   "dacMode",
-  "dacAddr",    "dacData",    "rgbMaxDelta",  "vidProcCfg",
-  "hwCurPatAddr", "hwCurLoc",   "hwCurC0",    "hwCurC1",
-  "vidInFormat",  "vidInStatus",  "vidSerialParallelPort","vidInXDecimDeltas",
+    /* 0x040 */
+    "pllCtrl0",   "pllCtrl1",   "pllCtrl2",   "dacMode",
+    "dacAddr",    "dacData",    "rgbMaxDelta",  "vidProcCfg",
+    "hwCurPatAddr", "hwCurLoc",   "hwCurC0",    "hwCurC1",
+    "vidInFormat",  "vidInStatus",  "vidSerialParallelPort","vidInXDecimDeltas",
 
-  /* 0x080 */
-  "vidInDecimInitErrs","vidInYDecimDeltas","vidPixelBufThold","vidChromaMin",
-  "vidChromaMax", "vidCurrentLine","vidScreenSize","vidOverlayStartCoords",
-  "vidOverlayEndScreenCoord","vidOverlayDudx","vidOverlayDudxOffsetSrcWidth","vidOverlayDvdy",
-  "vga[b0]",    "vga[b4]",    "vga[b8]",    "vga[bc]",
+    /* 0x080 */
+    "vidInDecimInitErrs","vidInYDecimDeltas","vidPixelBufThold","vidChromaMin",
+    "vidChromaMax", "vidCurrentLine","vidScreenSize","vidOverlayStartCoords",
+    "vidOverlayEndScreenCoord","vidOverlayDudx","vidOverlayDudxOffsetSrcWidth","vidOverlayDvdy",
+    "vga[b0]",    "vga[b4]",    "vga[b8]",    "vga[bc]",
 
-  /* 0x0c0 */
-  "vga[c0]",    "vga[c4]",    "vga[c8]",    "vga[cc]",
-  "vga[d0]",    "vga[d4]",    "vga[d8]",    "vga[dc]",
-  "vidOverlayDvdyOffset","vidDesktopStartAddr","vidDesktopOverlayStride","vidInAddr0",
-  "vidInAddr1", "vidInAddr2", "vidInStride",  "vidCurrOverlayStartAddr"
+    /* 0x0c0 */
+    "vga[c0]",    "vga[c4]",    "vga[c8]",    "vga[cc]",
+    "vga[d0]",    "vga[d4]",    "vga[d8]",    "vga[dc]",
+    "vidOverlayDvdyOffset","vidDesktopStartAddr","vidDesktopOverlayStride","vidInAddr0",
+    "vidInAddr1", "vidInAddr2", "vidInStride",  "vidCurrOverlayStartAddr"
 };
 
 
@@ -917,7 +917,7 @@ static const char *const banshee_io_reg_name[] =
  *
  *************************************/
 
-/* 0x000 */
+ /* 0x000 */
 #define agpReqSize        (0x000/4) /*  */
 #define agpHostAddressLow   (0x004/4) /*  */
 #define agpHostAddressHigh    (0x008/4) /*  */
@@ -965,37 +965,37 @@ static const char *const banshee_io_reg_name[] =
  *
  *************************************/
 
-static const char *const banshee_agp_reg_name[] =
+static const char* const banshee_agp_reg_name[] =
 {
-  /* 0x000 */
-  "agpReqSize", "agpHostAddressLow","agpHostAddressHigh","agpGraphicsAddress",
-  "agpGraphicsStride","agpMoveCMD","reserved18",  "reserved1c",
-  "cmdBaseAddr0", "cmdBaseSize0", "cmdBump0",   "cmdRdPtrL0",
-  "cmdRdPtrH0", "cmdAMin0",   "reserved38", "cmdAMax0",
+    /* 0x000 */
+    "agpReqSize", "agpHostAddressLow","agpHostAddressHigh","agpGraphicsAddress",
+    "agpGraphicsStride","agpMoveCMD","reserved18",  "reserved1c",
+    "cmdBaseAddr0", "cmdBaseSize0", "cmdBump0",   "cmdRdPtrL0",
+    "cmdRdPtrH0", "cmdAMin0",   "reserved38", "cmdAMax0",
 
-  /* 0x040 */
-  "reserved40", "cmdFifoDepth0","cmdHoleCnt0",  "reserved4c",
-  "cmdBaseAddr1", "cmdBaseSize1", "cmdBump1",   "cmdRdPtrL1",
-  "cmdRdPtrH1", "cmdAMin1",   "reserved68", "cmdAMax1",
-  "reserved70", "cmdFifoDepth1","cmdHoleCnt1",  "reserved7c",
+    /* 0x040 */
+    "reserved40", "cmdFifoDepth0","cmdHoleCnt0",  "reserved4c",
+    "cmdBaseAddr1", "cmdBaseSize1", "cmdBump1",   "cmdRdPtrL1",
+    "cmdRdPtrH1", "cmdAMin1",   "reserved68", "cmdAMax1",
+    "reserved70", "cmdFifoDepth1","cmdHoleCnt1",  "reserved7c",
 
-  /* 0x080 */
-  "cmdFifoThresh","cmdHoleInt", "reserved88", "reserved8c",
-  "reserved90", "reserved94", "reserved98", "reserved9c",
-  "reserveda0", "reserveda4", "reserveda8", "reservedac",
-  "reservedb0", "reservedb4", "reservedb8", "reservedbc",
+    /* 0x080 */
+    "cmdFifoThresh","cmdHoleInt", "reserved88", "reserved8c",
+    "reserved90", "reserved94", "reserved98", "reserved9c",
+    "reserveda0", "reserveda4", "reserveda8", "reservedac",
+    "reservedb0", "reservedb4", "reservedb8", "reservedbc",
 
-  /* 0x0c0 */
-  "reservedc0", "reservedc4", "reservedc8", "reservedcc",
-  "reservedd0", "reservedd4", "reservedd8", "reserveddc",
-  "reservede0", "reservede4", "reservede8", "reservedec",
-  "reservedf0", "reservedf4", "reservedf8", "reservedfc",
+    /* 0x0c0 */
+    "reservedc0", "reservedc4", "reservedc8", "reservedcc",
+    "reservedd0", "reservedd4", "reservedd8", "reserveddc",
+    "reservede0", "reservede4", "reservede8", "reservedec",
+    "reservedf0", "reservedf4", "reservedf8", "reservedfc",
 
-  /* 0x100 */
-  "yuvBaseAddress","yuvStride", "reserved108",  "reserved10c",
-  "reserved110",  "reserved114",  "reserved118",  "reserved11c",
-  "crc1",     "reserved124",  "reserved128",  "reserved12c",
-  "crc2",     "reserved134",  "reserved138",  "reserved13c"
+    /* 0x100 */
+    "yuvBaseAddress","yuvStride", "reserved108",  "reserved10c",
+    "reserved110",  "reserved114",  "reserved118",  "reserved11c",
+    "crc1",     "reserved124",  "reserved128",  "reserved12c",
+    "crc2",     "reserved134",  "reserved138",  "reserved13c"
 };
 
 
@@ -1006,7 +1006,7 @@ static const char *const banshee_agp_reg_name[] =
  *
  *************************************/
 
-/* 0x000 */
+ /* 0x000 */
 #define blt_status         (0x000/4) /*  */
 #define blt_intrCtrl       (0x004/4) /*  */
 #define blt_clip0Min       (0x008/4) /*  */
@@ -1047,19 +1047,19 @@ static const char *const banshee_agp_reg_name[] =
  *
  *************************************/
 
-static const char *const banshee_blt_reg_name[] =
+static const char* const banshee_blt_reg_name[] =
 {
-  /* 0x000 */
-  "status", "intrCtrl", "clip0Min", "clip0Max",
-  "dstBaseAddr", "dstFormat", "srcColorkeyMin", "srcColorkeyMax",
-  "dstColorkeyMin", "dstColorkeyMax", "bresError0", "bresError1",
-  "rop", "srcBaseAddr", "commandExtra", "lineStipple",
+    /* 0x000 */
+    "status", "intrCtrl", "clip0Min", "clip0Max",
+    "dstBaseAddr", "dstFormat", "srcColorkeyMin", "srcColorkeyMax",
+    "dstColorkeyMin", "dstColorkeyMax", "bresError0", "bresError1",
+    "rop", "srcBaseAddr", "commandExtra", "lineStipple",
 
-  /* 0x040 */
- "lineStyle", "pattern0Alias", "pattern1Alias", "clip1Min",
- "clip1Max", "srcFormat", "srcSize", "srcXY",
- "colorBack", "colorFore", "dstSize", "dstXY",
- "command", "RESERVED", "RESERVED", "RESERVED"
+    /* 0x040 */
+   "lineStyle", "pattern0Alias", "pattern1Alias", "clip1Min",
+   "clip1Max", "srcFormat", "srcSize", "srcXY",
+   "colorBack", "colorFore", "dstSize", "dstXY",
+   "command", "RESERVED", "RESERVED", "RESERVED"
 };
 
 
@@ -1146,13 +1146,13 @@ static const Bit8u dither_matrix_2x2[16] =
 
 
 
-/*************************************
- *
- *  Misc. macros
- *
- *************************************/
+ /*************************************
+  *
+  *  Misc. macros
+  *
+  *************************************/
 
-/* macro for clamping a value between minimum and maximum values */
+  /* macro for clamping a value between minimum and maximum values */
 #define CLAMP(val,min,max)    do { if ((val) < (min)) { (val) = (min); } else if ((val) > (max)) { (val) = (max); } } while (0)
 
 /* macro to compute the base 2 log for LOD calculations */
@@ -1434,11 +1434,11 @@ static const Bit8u dither_matrix_2x2[16] =
 #define TREXINIT_SEND_TMU_CONFIG(val)   (((val) >> 18) & 1)
 
 
-/*************************************
- *
- *  Core types
- *
- *************************************/
+ /*************************************
+  *
+  *  Core types
+  *
+  *************************************/
 
 typedef struct _voodoo_state voodoo_state;
 typedef struct _poly_extra_data poly_extra_data;
@@ -1450,9 +1450,9 @@ typedef struct _rgba rgba;
 struct _rgba
 {
 #ifdef LSB_FIRST
-  Bit8u b, g, r, a;
+    Bit8u b, g, r, a;
 #else
-  Bit8u a, r, g, b;
+    Bit8u a, r, g, b;
 #endif
 };
 
@@ -1460,10 +1460,10 @@ struct _rgba
 typedef union _voodoo_reg voodoo_reg;
 union _voodoo_reg
 {
-  Bit32s  i;
-  Bit32u  u;
-  float   f;
-  rgba    rgb;
+    Bit32s  i;
+    Bit32u  u;
+    float   f;
+    rgba    rgb;
 };
 
 
@@ -1474,247 +1474,247 @@ typedef voodoo_reg rgb_union;
 typedef struct _stats_block stats_block;
 struct _stats_block
 {
-  Bit32s  pixels_in;        /* pixels in statistic */
-  Bit32s  pixels_out;       /* pixels out statistic */
-  Bit32s  chroma_fail;      /* chroma test fail statistic */
-  Bit32s  zfunc_fail;       /* z function test fail statistic */
-  Bit32s  afunc_fail;       /* alpha function test fail statistic */
-  Bit32s  clip_fail;        /* clipping fail statistic */
-  Bit32s  stipple_count;    /* stipple statistic */
-  Bit32s  filler[64/4 - 7]; /* pad this structure to 64 bytes */
+    Bit32s  pixels_in;        /* pixels in statistic */
+    Bit32s  pixels_out;       /* pixels out statistic */
+    Bit32s  chroma_fail;      /* chroma test fail statistic */
+    Bit32s  zfunc_fail;       /* z function test fail statistic */
+    Bit32s  afunc_fail;       /* alpha function test fail statistic */
+    Bit32s  clip_fail;        /* clipping fail statistic */
+    Bit32s  stipple_count;    /* stipple statistic */
+    Bit32s  filler[64 / 4 - 7]; /* pad this structure to 64 bytes */
 };
 
 
 typedef struct _fifo_state fifo_state;
 struct _fifo_state
 {
-  bool enabled; /* enabled? */
-  Bit32u* base; /* base of the FIFO */
-  Bit32s  size; /* size of the FIFO */
-  Bit32s  in;   /* input pointer */
-  Bit32s  out;  /* output pointer */
+    bool enabled; /* enabled? */
+    Bit32u* base; /* base of the FIFO */
+    Bit32s  size; /* size of the FIFO */
+    Bit32s  in;   /* input pointer */
+    Bit32s  out;  /* output pointer */
 };
 
 
 typedef struct _cmdfifo_info cmdfifo_info;
 struct _cmdfifo_info
 {
-  bool    enabled;      /* enabled? */
-  bool    count_holes;  /* count holes? */
-  Bit32u  base;         /* base address in framebuffer RAM */
-  Bit32u  end;          /* end address in framebuffer RAM */
-  Bit32u  rdptr;        /* current read pointer */
-  Bit32u  amin;         /* minimum address */
-  Bit32u  amax;         /* maximum address */
-  Bit32u  depth;        /* current depth */
-  Bit32u  depth_needed; /* depth needed for command */
-  Bit32u  holes;        /* number of holes */
-  bool    cmd_ready;
+    bool    enabled;      /* enabled? */
+    bool    count_holes;  /* count holes? */
+    Bit32u  base;         /* base address in framebuffer RAM */
+    Bit32u  end;          /* end address in framebuffer RAM */
+    Bit32u  rdptr;        /* current read pointer */
+    Bit32u  amin;         /* minimum address */
+    Bit32u  amax;         /* maximum address */
+    Bit32u  depth;        /* current depth */
+    Bit32u  depth_needed; /* depth needed for command */
+    Bit32u  holes;        /* number of holes */
+    bool    cmd_ready;
 };
 
 
 typedef struct _pci_state pci_state;
 struct _pci_state
 {
-  fifo_state  fifo;           /* PCI FIFO */
-  Bit32u      init_enable;    /* initEnable value */
-  Bit8u       stall_state;    /* state of the system if we're stalled */
-  Bit16u      op_pending;     /* number of operations pending */
-  Bit32u      fifo_mem[64*2]; /* memory backing the PCI FIFO */
+    fifo_state  fifo;           /* PCI FIFO */
+    Bit32u      init_enable;    /* initEnable value */
+    Bit8u       stall_state;    /* state of the system if we're stalled */
+    Bit16u      op_pending;     /* number of operations pending */
+    Bit32u      fifo_mem[64 * 2]; /* memory backing the PCI FIFO */
 };
 
 
 typedef struct _ncc_table ncc_table;
 struct _ncc_table
 {
-  bool        dirty;        /* is the texel lookup dirty? */
-  voodoo_reg* reg;          /* pointer to our registers */
-  Bit32s      ir[4], ig[4], ib[4];  /* I values for R,G,B */
-  Bit32s      qr[4], qg[4], qb[4];  /* Q values for R,G,B */
-  Bit32s      y[16];        /* Y values */
-  rgb_t *     palette;      /* pointer to associated RGB palette */
-  rgb_t *     palettea;     /* pointer to associated ARGB palette */
-  rgb_t       texel[256];   /* texel lookup */
+    bool        dirty;        /* is the texel lookup dirty? */
+    voodoo_reg* reg;          /* pointer to our registers */
+    Bit32s      ir[4], ig[4], ib[4];  /* I values for R,G,B */
+    Bit32s      qr[4], qg[4], qb[4];  /* Q values for R,G,B */
+    Bit32s      y[16];        /* Y values */
+    rgb_t* palette;      /* pointer to associated RGB palette */
+    rgb_t* palettea;     /* pointer to associated ARGB palette */
+    rgb_t       texel[256];   /* texel lookup */
 };
 
 
 typedef struct _tmu_state tmu_state;
 struct _tmu_state
 {
-  Bit8u*      ram;            /* pointer to our RAM */
-  Bit32u      mask;           /* mask to apply to pointers */
-  voodoo_reg* reg;            /* pointer to our register base */
-  bool        regdirty;       /* true if the LOD/mode/base registers have changed */
+    Bit8u* ram;            /* pointer to our RAM */
+    Bit32u      mask;           /* mask to apply to pointers */
+    voodoo_reg* reg;            /* pointer to our register base */
+    bool        regdirty;       /* true if the LOD/mode/base registers have changed */
 
-  Bit32u      texaddr_mask;   /* mask for texture address */
-  Bit8u       texaddr_shift;  /* shift for texture address */
+    Bit32u      texaddr_mask;   /* mask for texture address */
+    Bit8u       texaddr_shift;  /* shift for texture address */
 
-  Bit64s      starts, startt; /* starting S,T (14.18) */
-  Bit64s      startw;         /* starting W (2.30) */
-  Bit64s      dsdx, dtdx;     /* delta S,T per X */
-  Bit64s      dwdx;           /* delta W per X */
-  Bit64s      dsdy, dtdy;     /* delta S,T per Y */
-  Bit64s      dwdy;           /* delta W per Y */
+    Bit64s      starts, startt; /* starting S,T (14.18) */
+    Bit64s      startw;         /* starting W (2.30) */
+    Bit64s      dsdx, dtdx;     /* delta S,T per X */
+    Bit64s      dwdx;           /* delta W per X */
+    Bit64s      dsdy, dtdy;     /* delta S,T per Y */
+    Bit64s      dwdy;           /* delta W per Y */
 
-  Bit32s      lodmin, lodmax; /* min, max LOD values */
-  Bit32s      lodbias;        /* LOD bias */
-  Bit32u      lodmask;        /* mask of available LODs */
-  Bit32u      lodoffset[9];   /* offset of texture base for each LOD */
-  Bit32s      detailmax;      /* detail clamp */
-  Bit32s      detailbias;     /* detail bias */
-  Bit8u       detailscale;    /* detail scale */
+    Bit32s      lodmin, lodmax; /* min, max LOD values */
+    Bit32s      lodbias;        /* LOD bias */
+    Bit32u      lodmask;        /* mask of available LODs */
+    Bit32u      lodoffset[9];   /* offset of texture base for each LOD */
+    Bit32s      detailmax;      /* detail clamp */
+    Bit32s      detailbias;     /* detail bias */
+    Bit8u       detailscale;    /* detail scale */
 
-  Bit32u      wmask;          /* mask for the current texture width */
-  Bit32u      hmask;          /* mask for the current texture height */
+    Bit32u      wmask;          /* mask for the current texture width */
+    Bit32u      hmask;          /* mask for the current texture height */
 
-  Bit32u      bilinear_mask;  /* mask for bilinear resolution (0xf0 for V1, 0xff for V2) */
+    Bit32u      bilinear_mask;  /* mask for bilinear resolution (0xf0 for V1, 0xff for V2) */
 
-  ncc_table   ncc[2];         /* two NCC tables */
+    ncc_table   ncc[2];         /* two NCC tables */
 
-  rgb_t *     lookup;         /* currently selected lookup */
-  rgb_t *     texel[16];      /* texel lookups for each format */
+    rgb_t* lookup;         /* currently selected lookup */
+    rgb_t* texel[16];      /* texel lookups for each format */
 
-  rgb_t       palette[256];   /* palette lookup table */
-  rgb_t       palettea[256];  /* palette+alpha lookup table */
+    rgb_t       palette[256];   /* palette lookup table */
+    rgb_t       palettea[256];  /* palette+alpha lookup table */
 };
 
 
 typedef struct _tmu_shared_state tmu_shared_state;
 struct _tmu_shared_state
 {
-  rgb_t rgb332[256];     /* RGB 3-3-2 lookup table */
-  rgb_t alpha8[256];     /* alpha 8-bit lookup table */
-  rgb_t int8[256];       /* intensity 8-bit lookup table */
-  rgb_t ai44[256];       /* alpha, intensity 4-4 lookup table */
+    rgb_t rgb332[256];     /* RGB 3-3-2 lookup table */
+    rgb_t alpha8[256];     /* alpha 8-bit lookup table */
+    rgb_t int8[256];       /* intensity 8-bit lookup table */
+    rgb_t ai44[256];       /* alpha, intensity 4-4 lookup table */
 
-  rgb_t rgb565[65536];   /* RGB 5-6-5 lookup table */
-  rgb_t argb1555[65536]; /* ARGB 1-5-5-5 lookup table */
-  rgb_t argb4444[65536]; /* ARGB 4-4-4-4 lookup table */
+    rgb_t rgb565[65536];   /* RGB 5-6-5 lookup table */
+    rgb_t argb1555[65536]; /* ARGB 1-5-5-5 lookup table */
+    rgb_t argb4444[65536]; /* ARGB 4-4-4-4 lookup table */
 };
 
 
 typedef struct _setup_vertex setup_vertex;
 struct _setup_vertex
 {
-  float x, y;       /* X, Y coordinates */
-  float a, r, g, b; /* A, R, G, B values */
-  float z, wb;      /* Z and broadcast W values */
-  float w0, s0, t0; /* W, S, T for TMU 0 */
-  float w1, s1, t1; /* W, S, T for TMU 1 */
+    float x, y;       /* X, Y coordinates */
+    float a, r, g, b; /* A, R, G, B values */
+    float z, wb;      /* Z and broadcast W values */
+    float w0, s0, t0; /* W, S, T for TMU 0 */
+    float w1, s1, t1; /* W, S, T for TMU 1 */
 };
 
 
 typedef struct _fbi_state fbi_state;
 struct _fbi_state
 {
-  Bit8u *       ram;            /* pointer to frame buffer RAM */
-  Bit32u        mask;           /* mask to apply to pointers */
-  Bit32u        rgboffs[3];     /* word offset to 3 RGB buffers */
-  Bit32u        auxoffs;        /* word offset to 1 aux buffer */
+    Bit8u* ram;            /* pointer to frame buffer RAM */
+    Bit32u        mask;           /* mask to apply to pointers */
+    Bit32u        rgboffs[3];     /* word offset to 3 RGB buffers */
+    Bit32u        auxoffs;        /* word offset to 1 aux buffer */
 
-  Bit8u         frontbuf;       /* front buffer index */
-  Bit8u         backbuf;        /* back buffer index */
-  Bit8u         swaps_pending;  /* number of pending swaps */
-  bool          video_changed;  /* did the frontbuffer video change? */
+    Bit8u         frontbuf;       /* front buffer index */
+    Bit8u         backbuf;        /* back buffer index */
+    Bit8u         swaps_pending;  /* number of pending swaps */
+    bool          video_changed;  /* did the frontbuffer video change? */
 
-  Bit32u        yorigin;        /* Y origin subtract value */
-  Bit32u        lfb_base;       /* base of LFB in memory */
-  Bit8u         lfb_stride;     /* stride of LFB accesses in bits */
+    Bit32u        yorigin;        /* Y origin subtract value */
+    Bit32u        lfb_base;       /* base of LFB in memory */
+    Bit8u         lfb_stride;     /* stride of LFB accesses in bits */
 
-  Bit32u        width;          /* width of current frame buffer */
-  Bit32u        height;         /* height of current frame buffer */
-  Bit32u        xoffs;          /* horizontal offset (back porch) */
-  Bit32u        yoffs;          /* vertical offset (back porch) */
-  Bit32u        vsyncscan;      /* vertical sync scanline */
-  Bit32u        rowpixels;      /* pixels per row */
-  Bit32u        tile_width;     /* width of video tiles */
-  Bit32u        tile_height;    /* height of video tiles */
-  Bit32u        x_tiles;        /* number of tiles in the X direction */
+    Bit32u        width;          /* width of current frame buffer */
+    Bit32u        height;         /* height of current frame buffer */
+    Bit32u        xoffs;          /* horizontal offset (back porch) */
+    Bit32u        yoffs;          /* vertical offset (back porch) */
+    Bit32u        vsyncscan;      /* vertical sync scanline */
+    Bit32u        rowpixels;      /* pixels per row */
+    Bit32u        tile_width;     /* width of video tiles */
+    Bit32u        tile_height;    /* height of video tiles */
+    Bit32u        x_tiles;        /* number of tiles in the X direction */
 
-  Bit8u         vblank;         /* VBLANK state */
-  Bit8u         vblank_count;   /* number of VBLANKs since last swap */
-  bool          vblank_swap_pending; /* a swap is pending, waiting for a vblank */
-  Bit8u         vblank_swap;    /* swap when we hit this count */
-  Bit8u         vblank_dont_swap; /* don't actually swap when we hit this point */
+    Bit8u         vblank;         /* VBLANK state */
+    Bit8u         vblank_count;   /* number of VBLANKs since last swap */
+    bool          vblank_swap_pending; /* a swap is pending, waiting for a vblank */
+    Bit8u         vblank_swap;    /* swap when we hit this count */
+    Bit8u         vblank_dont_swap; /* don't actually swap when we hit this point */
 
-  /* triangle setup info */
-  bool          cheating_allowed; /* allow cheating? */
-  Bit32s        sign;           /* triangle sign */
-  Bit16s        ax, ay;         /* vertex A x,y (12.4) */
-  Bit16s        bx, by;         /* vertex B x,y (12.4) */
-  Bit16s        cx, cy;         /* vertex C x,y (12.4) */
-  Bit32s        startr, startg, startb, starta; /* starting R,G,B,A (12.12) */
-  Bit32s        startz;         /* starting Z (20.12) */
-  Bit64s        startw;         /* starting W (16.32) */
-  Bit32s        drdx, dgdx, dbdx, dadx; /* delta R,G,B,A per X */
-  Bit32s        dzdx;           /* delta Z per X */
-  Bit64s        dwdx;           /* delta W per X */
-  Bit32s        drdy, dgdy, dbdy, dady; /* delta R,G,B,A per Y */
-  Bit32s        dzdy;           /* delta Z per Y */
-  Bit64s        dwdy;           /* delta W per Y */
+    /* triangle setup info */
+    bool          cheating_allowed; /* allow cheating? */
+    Bit32s        sign;           /* triangle sign */
+    Bit16s        ax, ay;         /* vertex A x,y (12.4) */
+    Bit16s        bx, by;         /* vertex B x,y (12.4) */
+    Bit16s        cx, cy;         /* vertex C x,y (12.4) */
+    Bit32s        startr, startg, startb, starta; /* starting R,G,B,A (12.12) */
+    Bit32s        startz;         /* starting Z (20.12) */
+    Bit64s        startw;         /* starting W (16.32) */
+    Bit32s        drdx, dgdx, dbdx, dadx; /* delta R,G,B,A per X */
+    Bit32s        dzdx;           /* delta Z per X */
+    Bit64s        dwdx;           /* delta W per X */
+    Bit32s        drdy, dgdy, dbdy, dady; /* delta R,G,B,A per Y */
+    Bit32s        dzdy;           /* delta Z per Y */
+    Bit64s        dwdy;           /* delta W per Y */
 
-  stats_block   lfb_stats;      /* LFB-access statistics */
+    stats_block   lfb_stats;      /* LFB-access statistics */
 
-  Bit8u         sverts;         /* number of vertices ready */
-  setup_vertex  svert[3];       /* 3 setup vertices */
+    Bit8u         sverts;         /* number of vertices ready */
+    setup_vertex  svert[3];       /* 3 setup vertices */
 
-  fifo_state    fifo;           /* framebuffer memory fifo */
-  cmdfifo_info  cmdfifo[2];     /* command FIFOs */
+    fifo_state    fifo;           /* framebuffer memory fifo */
+    cmdfifo_info  cmdfifo[2];     /* command FIFOs */
 
-  Bit8u         fogblend[64];   /* 64-entry fog table */
-  Bit8u         fogdelta[64];   /* 64-entry fog table */
-  Bit8u         fogdelta_mask;  /* mask for for delta (0xff for V1, 0xfc for V2) */
+    Bit8u         fogblend[64];   /* 64-entry fog table */
+    Bit8u         fogdelta[64];   /* 64-entry fog table */
+    Bit8u         fogdelta_mask;  /* mask for for delta (0xff for V1, 0xfc for V2) */
 
-  rgb_t         pen[65536];     /* mapping from pixels to pens */
-  rgb_t         clut[512];      /* clut gamma data */
-  bool          clut_dirty;     /* do we need to recompute? */
+    rgb_t         pen[65536];     /* mapping from pixels to pens */
+    rgb_t         clut[512];      /* clut gamma data */
+    bool          clut_dirty;     /* do we need to recompute? */
 };
 
 
 typedef struct _dac_state dac_state;
 struct _dac_state
 {
-  Bit8u reg[8];       /* 8 registers */
-  Bit8u read_result;  /* pending read result */
-  Bit8u data_size;
-  Bit8u clk0_m;
-  Bit8u clk0_n;
-  Bit8u clk0_p;
+    Bit8u reg[8];       /* 8 registers */
+    Bit8u read_result;  /* pending read result */
+    Bit8u data_size;
+    Bit8u clk0_m;
+    Bit8u clk0_n;
+    Bit8u clk0_p;
 };
 
 
 struct _poly_extra_data
 {
-  voodoo_state* state;        /* pointer back to the voodoo state */
+    voodoo_state* state;        /* pointer back to the voodoo state */
 
-  Bit16s        ax, ay;       /* vertex A x,y (12.4) */
-  Bit32s        startr, startg, startb, starta; /* starting R,G,B,A (12.12) */
-  Bit32s        startz;       /* starting Z (20.12) */
-  Bit64s        startw;       /* starting W (16.32) */
-  Bit32s        drdx, dgdx, dbdx, dadx; /* delta R,G,B,A per X */
-  Bit32s        dzdx;         /* delta Z per X */
-  Bit64s        dwdx;         /* delta W per X */
-  Bit32s        drdy, dgdy, dbdy, dady; /* delta R,G,B,A per Y */
-  Bit32s        dzdy;         /* delta Z per Y */
-  Bit64s        dwdy;         /* delta W per Y */
+    Bit16s        ax, ay;       /* vertex A x,y (12.4) */
+    Bit32s        startr, startg, startb, starta; /* starting R,G,B,A (12.12) */
+    Bit32s        startz;       /* starting Z (20.12) */
+    Bit64s        startw;       /* starting W (16.32) */
+    Bit32s        drdx, dgdx, dbdx, dadx; /* delta R,G,B,A per X */
+    Bit32s        dzdx;         /* delta Z per X */
+    Bit64s        dwdx;         /* delta W per X */
+    Bit32s        drdy, dgdy, dbdy, dady; /* delta R,G,B,A per Y */
+    Bit32s        dzdy;         /* delta Z per Y */
+    Bit64s        dwdy;         /* delta W per Y */
 
-  Bit64s        starts0, startt0; /* starting S,T (14.18) */
-  Bit64s        startw0;      /* starting W (2.30) */
-  Bit64s        ds0dx, dt0dx; /* delta S,T per X */
-  Bit64s        dw0dx;        /* delta W per X */
-  Bit64s        ds0dy, dt0dy; /* delta S,T per Y */
-  Bit64s        dw0dy;        /* delta W per Y */
-  Bit32s        lodbase0;     /* used during rasterization */
+    Bit64s        starts0, startt0; /* starting S,T (14.18) */
+    Bit64s        startw0;      /* starting W (2.30) */
+    Bit64s        ds0dx, dt0dx; /* delta S,T per X */
+    Bit64s        dw0dx;        /* delta W per X */
+    Bit64s        ds0dy, dt0dy; /* delta S,T per Y */
+    Bit64s        dw0dy;        /* delta W per Y */
+    Bit32s        lodbase0;     /* used during rasterization */
 
-  Bit64s        starts1, startt1; /* starting S,T (14.18) */
-  Bit64s        startw1;      /* starting W (2.30) */
-  Bit64s        ds1dx, dt1dx; /* delta S,T per X */
-  Bit64s        dw1dx;        /* delta W per X */
-  Bit64s        ds1dy, dt1dy; /* delta S,T per Y */
-  Bit64s        dw1dy;        /* delta W per Y */
-  Bit32s        lodbase1;     /* used during rasterization */
+    Bit64s        starts1, startt1; /* starting S,T (14.18) */
+    Bit64s        startw1;      /* starting W (2.30) */
+    Bit64s        ds1dx, dt1dx; /* delta S,T per X */
+    Bit64s        dw1dx;        /* delta W per X */
+    Bit64s        ds1dy, dt1dy; /* delta S,T per Y */
+    Bit64s        dw1dy;        /* delta W per Y */
+    Bit32s        lodbase1;     /* used during rasterization */
 
-  Bit16u        dither[16];   /* dither matrix, for fastfill */
+    Bit16u        dither[16];   /* dither matrix, for fastfill */
 };
 
 
@@ -1723,140 +1723,143 @@ struct _poly_extra_data
 typedef struct _banshee_info banshee_info;
 struct _banshee_info
 {
-  Bit32u io[0x40];   /* I/O registers */
-  Bit32u agp[0x80];  /* AGP registers */
-  Bit8u  crtc[0x27]; /* VGA CRTC registers */
-  Bit8u  disp_bpp;
-  bool half_mode;
-  bool dac_8bit;
-  bool desktop_tiled;
-  struct {
-    bool enabled;
-    bool mode;
-    Bit32u addr;
-    Bit16u x;
-    Bit16u y;
-    Bit32u color[2];
-  } hwcursor;
-  struct {
-    Bit32u reg[0x20];  /* 2D registers */
-    Bit8u  cpat[0x40][4];
-    bool   busy;
-    Bit8u  cmd;
-    bool   immed;
-    bool   x_dir;
-    bool   y_dir;
-    bool   transp;
-    Bit8u  patsx;
-    Bit8u  patsy;
-    bool   clip_sel;
-    Bit8u  rop[4];
-    bx_bitblt_rop_t rop_fn[4];
-    bx_bitblt_rop_t rop_handler[2][0x100];
-    Bit8u  rop_flags[0x100];
-    bool   pattern_blt;
-    Bit32u src_base;
-    bool   src_tiled;
-    Bit8u  src_fmt;
-    Bit16u src_pitch;
-    Bit8u  src_swizzle;
-    Bit16u src_x;
-    Bit16u src_y;
-    Bit16u src_w;
-    Bit16u src_h;
-    Bit32u dst_base;
-    bool   dst_tiled;
-    Bit8u  dst_fmt;
-    Bit16u dst_pitch;
-    Bit16s dst_x;
-    Bit16s dst_y;
-    Bit16u dst_w;
-    Bit16u dst_h;
-    Bit8u  fgcolor[4];
-    Bit8u  bgcolor[4];
-    Bit16u clipx0[2];
-    Bit16u clipy0[2];
-    Bit16u clipx1[2];
-    Bit16u clipy1[2];
-    Bit16u h2s_pitch;
-    Bit8u  h2s_pxstart;
-    bool   pgn_init;
-    Bit32u pgn_val;
-    Bit16u pgn_l0x;
-    Bit16u pgn_l0y;
-    Bit16u pgn_l1x;
-    Bit16u pgn_l1y;
-    Bit16u pgn_r0x;
-    Bit16u pgn_r0y;
-    Bit16u pgn_r1x;
-    Bit16u pgn_r1y;
-    Bit32u lacnt;
-    Bit32u laidx;
-    Bit8u *lamem;
-  } blt;
+    Bit32u io[0x40];   /* I/O registers */
+    Bit32u agp[0x80];  /* AGP registers */
+    Bit8u  crtc[0x27]; /* VGA CRTC registers */
+    Bit8u  disp_bpp;
+    bool half_mode;
+    bool dac_8bit;
+    bool desktop_tiled;
+    struct
+    {
+        bool enabled;
+        bool mode;
+        Bit32u addr;
+        Bit16u x;
+        Bit16u y;
+        Bit32u color[2];
+    } hwcursor;
+    struct
+    {
+        Bit32u reg[0x20];  /* 2D registers */
+        Bit8u  cpat[0x40][4];
+        bool   busy;
+        Bit8u  cmd;
+        bool   immed;
+        bool   x_dir;
+        bool   y_dir;
+        bool   transp;
+        Bit8u  patsx;
+        Bit8u  patsy;
+        bool   clip_sel;
+        Bit8u  rop[4];
+        bx_bitblt_rop_t rop_fn[4];
+        bx_bitblt_rop_t rop_handler[2][0x100];
+        Bit8u  rop_flags[0x100];
+        bool   pattern_blt;
+        Bit32u src_base;
+        bool   src_tiled;
+        Bit8u  src_fmt;
+        Bit16u src_pitch;
+        Bit8u  src_swizzle;
+        Bit16u src_x;
+        Bit16u src_y;
+        Bit16u src_w;
+        Bit16u src_h;
+        Bit32u dst_base;
+        bool   dst_tiled;
+        Bit8u  dst_fmt;
+        Bit16u dst_pitch;
+        Bit16s dst_x;
+        Bit16s dst_y;
+        Bit16u dst_w;
+        Bit16u dst_h;
+        Bit8u  fgcolor[4];
+        Bit8u  bgcolor[4];
+        Bit16u clipx0[2];
+        Bit16u clipy0[2];
+        Bit16u clipx1[2];
+        Bit16u clipy1[2];
+        Bit16u h2s_pitch;
+        Bit8u  h2s_pxstart;
+        bool   pgn_init;
+        Bit32u pgn_val;
+        Bit16u pgn_l0x;
+        Bit16u pgn_l0y;
+        Bit16u pgn_l1x;
+        Bit16u pgn_l1y;
+        Bit16u pgn_r0x;
+        Bit16u pgn_r0y;
+        Bit16u pgn_r1x;
+        Bit16u pgn_r1y;
+        Bit32u lacnt;
+        Bit32u laidx;
+        Bit8u* lamem;
+    } blt;
 };
 
 
 /* typedef struct _voodoo_state voodoo_state; -- declared above */
 struct _voodoo_state
 {
-  Bit8u       index;         /* index of board */
-  Bit8u       type;         /* type of system */
-  Bit8u       chipmask;     /* mask for which chips are available */
-  Bit32u      freq;         /* operating frequency */
-  Bit32u      extra_cycles; /* extra cycles not yet accounted for */
-  int         trigger;      /* trigger used for stalling */
+    Bit8u       index;         /* index of board */
+    Bit8u       type;         /* type of system */
+    Bit8u       chipmask;     /* mask for which chips are available */
+    Bit32u      freq;         /* operating frequency */
+    Bit32u      extra_cycles; /* extra cycles not yet accounted for */
+    int         trigger;      /* trigger used for stalling */
 
-  voodoo_reg  reg[0x400];   /* raw registers */
-  const Bit8u *regaccess;   /* register access array */
-  const char *const *regnames; /* register names array */
-  Bit8u       alt_regmap;   /* enable alternate register map? */
+    voodoo_reg  reg[0x400];   /* raw registers */
+    const Bit8u* regaccess;   /* register access array */
+    const char* const* regnames; /* register names array */
+    Bit8u       alt_regmap;   /* enable alternate register map? */
 
-  pci_state   pci;           /* PCI state */
-  dac_state   dac;           /* DAC state */
-  float       vidclk;        /* video clock */
-  float       vertfreq;      /* vertical frequency */
-  bool        vtimer_running; /* vertical timer running */
+    pci_state   pci;           /* PCI state */
+    dac_state   dac;           /* DAC state */
+    float       vidclk;        /* video clock */
+    float       vertfreq;      /* vertical frequency */
+    bool        vtimer_running; /* vertical timer running */
 
-  fbi_state   fbi;           /* FBI states */
-  tmu_state   tmu[MAX_TMU];  /* TMU states */
-  tmu_shared_state tmushare; /* TMU shared state */
-  banshee_info banshee;      /* Banshee state */
+    fbi_state   fbi;           /* FBI states */
+    tmu_state   tmu[MAX_TMU];  /* TMU states */
+    tmu_shared_state tmushare; /* TMU shared state */
+    banshee_info banshee;      /* Banshee state */
 
-  struct {
-    Bit8u   bgcolor[2];
-    Bit8u   chroma_en;
-    bool    clip_en;
-    Bit16u  clipx0;
-    Bit16u  clipx1;
-    Bit16u  clipy0;
-    Bit16u  clipy1;
-    Bit16u  cur_x;
-    Bit32u  dst_base;
-    Bit16u  dst_h;
-    Bit16u  dst_pitch;
-    Bit16u  dst_w;
-    Bit16u  dst_x;
-    Bit16u  dst_y;
-    Bit16u  dst_col_min;
-    Bit16u  dst_col_max;
-    Bit8u   fgcolor[2];
-    bool    h2s_mode;
-    Bit8u   rop[4];
-    Bit16u  src_col_min;
-    Bit16u  src_col_max;
-    Bit8u   src_fmt;
-    Bit8u   src_swizzle;
-    bool    transp;
-  } blt;
+    struct
+    {
+        Bit8u   bgcolor[2];
+        Bit8u   chroma_en;
+        bool    clip_en;
+        Bit16u  clipx0;
+        Bit16u  clipx1;
+        Bit16u  clipy0;
+        Bit16u  clipy1;
+        Bit16u  cur_x;
+        Bit32u  dst_base;
+        Bit16u  dst_h;
+        Bit16u  dst_pitch;
+        Bit16u  dst_w;
+        Bit16u  dst_x;
+        Bit16u  dst_y;
+        Bit16u  dst_col_min;
+        Bit16u  dst_col_max;
+        Bit8u   fgcolor[2];
+        bool    h2s_mode;
+        Bit8u   rop[4];
+        Bit16u  src_col_min;
+        Bit16u  src_col_max;
+        Bit8u   src_fmt;
+        Bit8u   src_swizzle;
+        bool    transp;
+    } blt;
 
-  Bit32u      send_config;
-  Bit32u      tmu_config;
+    Bit32u      send_config;
+    Bit32u      tmu_config;
 
-  stats_block *   thread_stats; /* per-thread statistics */
+    stats_block* thread_stats; /* per-thread statistics */
 
-  Bit32u      last_status_pc;   /* PC of last status description (for logging) */
-  Bit32u      last_status_value; /* value of last status read (for logging) */
+    Bit32u      last_status_pc;   /* PC of last status description (for logging) */
+    Bit32u      last_status_value; /* value of last status read (for logging) */
 
 };
 
@@ -1874,7 +1877,7 @@ extern bx_thread_sem_t fifo_not_full;
  *
  *************************************/
 
-/* fifo content defines */
+ /* fifo content defines */
 #define FIFO_TYPES  (7 << 29)
 #define FIFO_WR_REG     (1U << 29)
 #define FIFO_WR_TEX     (2U << 29)
@@ -1882,125 +1885,129 @@ extern bx_thread_sem_t fifo_not_full;
 #define FIFO_WR_FBI_16L (4U << 29)
 #define FIFO_WR_FBI_16H (5U << 29)
 
-BX_CPP_INLINE void fifo_reset(fifo_state *f)
+BX_CPP_INLINE void fifo_reset(fifo_state* f)
 {
-  BX_LOCK(fifo_mutex);
-  f->in = f->out = 0;
-  bx_set_sem(&fifo_not_full);
-  BX_UNLOCK(fifo_mutex);
-}
-
-
-BX_CPP_INLINE bool fifo_full(fifo_state *f)
-{
-  return (f->in + 2 == f->out || (f->in == f->size - 2 && f->out == 0));
-}
-
-
-BX_CPP_INLINE Bit32s fifo_items(fifo_state *f)
-{
-  Bit32s items = f->in - f->out;
-  if (items < 0)
-    items += f->size;
-  return items;
-}
-
-
-BX_CPP_INLINE Bit32s fifo_space(fifo_state *f)
-{
-  Bit32s items = f->in - f->out;
-  if (items < 0)
-    items += f->size;
-  Bit32s fspace = f->size - 1 - items;
-  return fspace;
-}
-
-
-BX_CPP_INLINE void fifo_add(fifo_state *f, Bit32u offset, Bit32u data)
-{
-  Bit32s next_in;
-
-  if (fifo_full(f)) {
-    bx_set_sem(&fifo_wakeup);
-    BX_UNLOCK(fifo_mutex);
-    bx_wait_sem(&fifo_not_full);
     BX_LOCK(fifo_mutex);
-  }
-  /* compute the value of 'in' after we add this item */
-  next_in = f->in + 2;
-  if (next_in >= f->size)
-    next_in = 0;
-
-  /* as long as it's not equal to the output pointer, we can do it */
-  if (next_in != f->out)
-  {
-    f->base[f->in] = offset;
-    f->base[f->in + 1] = data;
-    f->in = next_in;
-  }
-}
-
-
-BX_CPP_INLINE Bit32u fifo_remove(fifo_state *f, Bit32u *offset, Bit32u *data)
-{
-  Bit32u type = 0;
-
-  /* as long as we have data, we can do it */
-  if (f->out != f->in)
-  {
-    Bit32s next_out;
-
-    /* fetch the data */
-    *offset = f->base[f->out];
-    type = *offset & FIFO_TYPES;
-    *offset &= 0xffffff;
-    *data = f->base[f->out + 1];
-
-    /* advance the output pointer */
-    next_out = f->out + 2;
-    if (next_out >= f->size)
-      next_out = 0;
-    f->out = next_out;
-  }
-  if (fifo_space(f) > 15) {
+    f->in = f->out = 0;
     bx_set_sem(&fifo_not_full);
-  }
-  return type;
-}
-
-
-BX_CPP_INLINE bool fifo_empty(fifo_state *f)
-{
-  return (f->in == f->out);
-}
-
-
-BX_CPP_INLINE bool fifo_empty_locked(fifo_state *f)
-{
-  BX_LOCK(fifo_mutex);
-  bool ret = (f->in == f->out);
-  BX_UNLOCK(fifo_mutex);
-  return ret;
-}
-
-
-BX_CPP_INLINE void fifo_move(fifo_state *f1, fifo_state *f2)
-{
-  if (fifo_full(f2)) {
-    bx_set_sem(&fifo_wakeup);
     BX_UNLOCK(fifo_mutex);
-    bx_wait_sem(&fifo_not_full);
+}
+
+
+BX_CPP_INLINE bool fifo_full(fifo_state* f)
+{
+    return (f->in + 2 == f->out || (f->in == f->size - 2 && f->out == 0));
+}
+
+
+BX_CPP_INLINE Bit32s fifo_items(fifo_state* f)
+{
+    Bit32s items = f->in - f->out;
+    if (items < 0)
+        items += f->size;
+    return items;
+}
+
+
+BX_CPP_INLINE Bit32s fifo_space(fifo_state* f)
+{
+    Bit32s items = f->in - f->out;
+    if (items < 0)
+        items += f->size;
+    Bit32s fspace = f->size - 1 - items;
+    return fspace;
+}
+
+
+BX_CPP_INLINE void fifo_add(fifo_state* f, Bit32u offset, Bit32u data)
+{
+    Bit32s next_in;
+
+    if (fifo_full(f))
+    {
+        bx_set_sem(&fifo_wakeup);
+        BX_UNLOCK(fifo_mutex);
+        bx_wait_sem(&fifo_not_full);
+        BX_LOCK(fifo_mutex);
+    }
+    /* compute the value of 'in' after we add this item */
+    next_in = f->in + 2;
+    if (next_in >= f->size)
+        next_in = 0;
+
+    /* as long as it's not equal to the output pointer, we can do it */
+    if (next_in != f->out)
+    {
+        f->base[f->in] = offset;
+        f->base[f->in + 1] = data;
+        f->in = next_in;
+    }
+}
+
+
+BX_CPP_INLINE Bit32u fifo_remove(fifo_state* f, Bit32u* offset, Bit32u* data)
+{
+    Bit32u type = 0;
+
+    /* as long as we have data, we can do it */
+    if (f->out != f->in)
+    {
+        Bit32s next_out;
+
+        /* fetch the data */
+        *offset = f->base[f->out];
+        type = *offset & FIFO_TYPES;
+        *offset &= 0xffffff;
+        *data = f->base[f->out + 1];
+
+        /* advance the output pointer */
+        next_out = f->out + 2;
+        if (next_out >= f->size)
+            next_out = 0;
+        f->out = next_out;
+    }
+    if (fifo_space(f) > 15)
+    {
+        bx_set_sem(&fifo_not_full);
+    }
+    return type;
+}
+
+
+BX_CPP_INLINE bool fifo_empty(fifo_state* f)
+{
+    return (f->in == f->out);
+}
+
+
+BX_CPP_INLINE bool fifo_empty_locked(fifo_state* f)
+{
     BX_LOCK(fifo_mutex);
-  }
-  Bit32s items1 = fifo_items(f1);
-  Bit32s space2 = fifo_space(f2);
-  while ((items1 > 0) && (space2 > 0)) {
-    f2->base[f2->in++] = f1->base[f1->out++];
-    if (f2->in >= f2->size) f2->in = 0;
-    if (f1->out >= f1->size) f1->out = 0;
-    items1--;
-    space2--;
-  }
+    bool ret = (f->in == f->out);
+    BX_UNLOCK(fifo_mutex);
+    return ret;
+}
+
+
+BX_CPP_INLINE void fifo_move(fifo_state* f1, fifo_state* f2)
+{
+    if (fifo_full(f2))
+    {
+        bx_set_sem(&fifo_wakeup);
+        BX_UNLOCK(fifo_mutex);
+        bx_wait_sem(&fifo_not_full);
+        BX_LOCK(fifo_mutex);
+    }
+    Bit32s items1 = fifo_items(f1);
+    Bit32s space2 = fifo_space(f2);
+    while ((items1 > 0) && (space2 > 0))
+    {
+        f2->base[f2->in++] = f1->base[f1->out++];
+        if (f2->in >= f2->size) f2->in = 0;
+        if (f1->out >= f1->size) f1->out = 0;
+        items1--;
+        space2--;
+    }
 }
 
 
@@ -2008,14 +2015,15 @@ BX_CPP_INLINE void fifo_move(fifo_state *f1, fifo_state *f2)
 #define count_leading_zeros _count_leading_zeros
 BX_CPP_INLINE Bit8u _count_leading_zeros(Bit32u value)
 {
-  Bit32s result = 32;
+    Bit32s result = 32;
 
-  while(value > 0) {
-    result--;
-    value >>= 1;
-  }
+    while (value > 0)
+    {
+        result--;
+        value >>= 1;
+    }
 
-  return result;
+    return result;
 }
 #endif
 
@@ -2038,74 +2046,74 @@ BX_CPP_INLINE Bit8u _count_leading_zeros(Bit32u value)
  *
  *************************************/
 
-BX_CPP_INLINE Bit32s fast_reciplog(Bit64s value, Bit32s *log2)
+BX_CPP_INLINE Bit32s fast_reciplog(Bit64s value, Bit32s* log2)
 {
-  extern Bit32u voodoo_reciplog[];
-  Bit32u temp, recip, rlog;
-  Bit32u interp;
-  Bit32u *table;
-  int neg = false;
-  int lz, exp = 0;
+    extern Bit32u voodoo_reciplog[];
+    Bit32u temp, recip, rlog;
+    Bit32u interp;
+    Bit32u* table;
+    int neg = false;
+    int lz, exp = 0;
 
-  /* always work with unsigned numbers */
-  if (value < 0)
-  {
-    value = -value;
-    neg = true;
-  }
+    /* always work with unsigned numbers */
+    if (value < 0)
+    {
+        value = -value;
+        neg = true;
+    }
 
-  /* if we've spilled out of 32 bits, push it down under 32 */
-  if (value & BX_CONST64(0xffff00000000))
-  {
-    temp = (Bit32u)(value >> 16);
-    exp -= 16;
-  }
-  else
-    temp = (Bit32u)value;
+    /* if we've spilled out of 32 bits, push it down under 32 */
+    if (value & BX_CONST64(0xffff00000000))
+    {
+        temp = (Bit32u)(value >> 16);
+        exp -= 16;
+    }
+    else
+        temp = (Bit32u)value;
 
-  /* if the resulting value is 0, the reciprocal is infinite */
-  if (temp == 0)
-  {
-    *log2 = 1000 << LOG_OUTPUT_PREC;
-    return neg ? 0x80000000 : 0x7fffffff;
-  }
+    /* if the resulting value is 0, the reciprocal is infinite */
+    if (temp == 0)
+    {
+        *log2 = 1000 << LOG_OUTPUT_PREC;
+        return neg ? 0x80000000 : 0x7fffffff;
+    }
 
-  /* determine how many leading zeros in the value and shift it up high */
-  lz = count_leading_zeros(temp);
-  temp <<= lz;
-  exp += lz;
+    /* determine how many leading zeros in the value and shift it up high */
+    lz = count_leading_zeros(temp);
+    temp <<= lz;
+    exp += lz;
 
-  /* compute a pointer to the table entries we want */
-  /* math is a bit funny here because we shift one less than we need to in order */
-  /* to account for the fact that there are two Bit32u's per table entry */
-  table = &voodoo_reciplog[(temp >> (31 - RECIPLOG_LOOKUP_BITS - 1)) & ((2 << RECIPLOG_LOOKUP_BITS) - 2)];
+    /* compute a pointer to the table entries we want */
+    /* math is a bit funny here because we shift one less than we need to in order */
+    /* to account for the fact that there are two Bit32u's per table entry */
+    table = &voodoo_reciplog[(temp >> (31 - RECIPLOG_LOOKUP_BITS - 1)) & ((2 << RECIPLOG_LOOKUP_BITS) - 2)];
 
-  /* compute the interpolation value */
-  interp = (temp >> (31 - RECIPLOG_LOOKUP_BITS - 8)) & 0xff;
+    /* compute the interpolation value */
+    interp = (temp >> (31 - RECIPLOG_LOOKUP_BITS - 8)) & 0xff;
 
-  /* do a linear interpolatation between the two nearest table values */
-  /* for both the log and the reciprocal */
-  rlog = (table[1] * (0x100 - interp) + table[3] * interp) >> 8;
-  recip = (table[0] * (0x100 - interp) + table[2] * interp) >> 8;
+    /* do a linear interpolatation between the two nearest table values */
+    /* for both the log and the reciprocal */
+    rlog = (table[1] * (0x100 - interp) + table[3] * interp) >> 8;
+    recip = (table[0] * (0x100 - interp) + table[2] * interp) >> 8;
 
-  /* the log result is the fractional part of the log; round it to the output precision */
-  rlog = (rlog + (1 << (RECIPLOG_LOOKUP_PREC - LOG_OUTPUT_PREC - 1))) >> (RECIPLOG_LOOKUP_PREC - LOG_OUTPUT_PREC);
+    /* the log result is the fractional part of the log; round it to the output precision */
+    rlog = (rlog + (1 << (RECIPLOG_LOOKUP_PREC - LOG_OUTPUT_PREC - 1))) >> (RECIPLOG_LOOKUP_PREC - LOG_OUTPUT_PREC);
 
-  /* the exponent is the non-fractional part of the log; normally, we would subtract it from rlog */
-  /* but since we want the log(1/value) = -log(value), we subtract rlog from the exponent */
-  *log2 = ((exp - (31 - RECIPLOG_INPUT_PREC)) << LOG_OUTPUT_PREC) - rlog;
+    /* the exponent is the non-fractional part of the log; normally, we would subtract it from rlog */
+    /* but since we want the log(1/value) = -log(value), we subtract rlog from the exponent */
+    *log2 = ((exp - (31 - RECIPLOG_INPUT_PREC)) << LOG_OUTPUT_PREC) - rlog;
 
-  /* adjust the exponent to account for all the reciprocal-related parameters to arrive at a final shift amount */
-  exp += (RECIP_OUTPUT_PREC - RECIPLOG_LOOKUP_PREC) - (31 - RECIPLOG_INPUT_PREC);
+    /* adjust the exponent to account for all the reciprocal-related parameters to arrive at a final shift amount */
+    exp += (RECIP_OUTPUT_PREC - RECIPLOG_LOOKUP_PREC) - (31 - RECIPLOG_INPUT_PREC);
 
-  /* shift by the exponent */
-  if (exp < 0)
-    recip >>= -exp;
-  else
-    recip <<= exp;
+    /* shift by the exponent */
+    if (exp < 0)
+        recip >>= -exp;
+    else
+        recip <<= exp;
 
-  /* on the way out, apply the original sign to the reciprocal */
-  return neg ? -((Bit32s)recip) : recip;
+    /* on the way out, apply the original sign to the reciprocal */
+    return neg ? -((Bit32s)recip) : recip;
 }
 
 
@@ -2118,49 +2126,49 @@ BX_CPP_INLINE Bit32s fast_reciplog(Bit64s value, Bit32s *log2)
 
 BX_CPP_INLINE Bit32s float_to_Bit32s(Bit32u data, int fixedbits)
 {
-  int exponent = ((data >> 23) & 0xff) - 127 - 23 + fixedbits;
-  Bit32s result = (data & 0x7fffff) | 0x800000;
-  if (exponent < 0)
-  {
-    if (exponent > -32)
-      result >>= -exponent;
+    int exponent = ((data >> 23) & 0xff) - 127 - 23 + fixedbits;
+    Bit32s result = (data & 0x7fffff) | 0x800000;
+    if (exponent < 0)
+    {
+        if (exponent > -32)
+            result >>= -exponent;
+        else
+            result = 0;
+    }
     else
-      result = 0;
-  }
-  else
-  {
-    if (exponent < 32)
-      result <<= exponent;
-    else
-      result = 0x7fffffff;
-  }
-  if (data & 0x80000000)
-    result = -result;
-  return result;
+    {
+        if (exponent < 32)
+            result <<= exponent;
+        else
+            result = 0x7fffffff;
+    }
+    if (data & 0x80000000)
+        result = -result;
+    return result;
 }
 
 
 BX_CPP_INLINE Bit64s float_to_Bit64s(Bit32u data, int fixedbits)
 {
-  int exponent = ((data >> 23) & 0xff) - 127 - 23 + fixedbits;
-  Bit64s result = (data & 0x7fffff) | 0x800000;
-  if (exponent < 0)
-  {
-    if (exponent > -64)
-      result >>= -exponent;
+    int exponent = ((data >> 23) & 0xff) - 127 - 23 + fixedbits;
+    Bit64s result = (data & 0x7fffff) | 0x800000;
+    if (exponent < 0)
+    {
+        if (exponent > -64)
+            result >>= -exponent;
+        else
+            result = 0;
+    }
     else
-      result = 0;
-  }
-  else
-  {
-    if (exponent < 64)
-      result <<= exponent;
-    else
-      result = BX_CONST64(0x7fffffffffffffff);
-  }
-  if (data & 0x80000000)
-    result = -result;
-  return result;
+    {
+        if (exponent < 64)
+            result <<= exponent;
+        else
+            result = BX_CONST64(0x7fffffffffffffff);
+    }
+    if (data & 0x80000000)
+        result = -result;
+    return result;
 }
 
 
@@ -2173,63 +2181,63 @@ BX_CPP_INLINE Bit64s float_to_Bit64s(Bit32u data, int fixedbits)
 
 BX_CPP_INLINE Bit32u normalize_color_path(Bit32u eff_color_path)
 {
-  /* ignore the subpixel adjust and texture enable flags */
-  eff_color_path &= ~((1 << 26) | (1 << 27));
+    /* ignore the subpixel adjust and texture enable flags */
+    eff_color_path &= ~((1 << 26) | (1 << 27));
 
-  return eff_color_path;
+    return eff_color_path;
 }
 
 
 BX_CPP_INLINE Bit32u normalize_alpha_mode(Bit32u eff_alpha_mode)
 {
-  /* always ignore alpha ref value */
-  eff_alpha_mode &= ~(0xff << 24);
+    /* always ignore alpha ref value */
+    eff_alpha_mode &= ~(0xff << 24);
 
-  /* if not doing alpha testing, ignore the alpha function and ref value */
-  if (!ALPHAMODE_ALPHATEST(eff_alpha_mode))
-    eff_alpha_mode &= ~(7 << 1);
+    /* if not doing alpha testing, ignore the alpha function and ref value */
+    if (!ALPHAMODE_ALPHATEST(eff_alpha_mode))
+        eff_alpha_mode &= ~(7 << 1);
 
-  /* if not doing alpha blending, ignore the source and dest blending factors */
-  if (!ALPHAMODE_ALPHABLEND(eff_alpha_mode))
-    eff_alpha_mode &= ~((15 << 8) | (15 << 12) | (15 << 16) | (15 << 20));
+    /* if not doing alpha blending, ignore the source and dest blending factors */
+    if (!ALPHAMODE_ALPHABLEND(eff_alpha_mode))
+        eff_alpha_mode &= ~((15 << 8) | (15 << 12) | (15 << 16) | (15 << 20));
 
-  return eff_alpha_mode;
+    return eff_alpha_mode;
 }
 
 
 BX_CPP_INLINE Bit32u normalize_fog_mode(Bit32u eff_fog_mode)
 {
-  /* if not doing fogging, ignore all the other fog bits */
-  if (!FOGMODE_ENABLE_FOG(eff_fog_mode))
-    eff_fog_mode = 0;
+    /* if not doing fogging, ignore all the other fog bits */
+    if (!FOGMODE_ENABLE_FOG(eff_fog_mode))
+        eff_fog_mode = 0;
 
-  return eff_fog_mode;
+    return eff_fog_mode;
 }
 
 
 BX_CPP_INLINE Bit32u normalize_fbz_mode(Bit32u eff_fbz_mode)
 {
-  /* ignore the draw buffer */
-  eff_fbz_mode &= ~(3 << 14);
+    /* ignore the draw buffer */
+    eff_fbz_mode &= ~(3 << 14);
 
-  return eff_fbz_mode;
+    return eff_fbz_mode;
 }
 
 
 BX_CPP_INLINE Bit32u normalize_tex_mode(Bit32u eff_tex_mode)
 {
-  /* ignore the NCC table and seq_8_downld flags */
-  eff_tex_mode &= ~((1 << 5) | (1 << 31));
+    /* ignore the NCC table and seq_8_downld flags */
+    eff_tex_mode &= ~((1 << 5) | (1 << 31));
 
-  /* classify texture formats into 3 format categories */
-  if (TEXMODE_FORMAT(eff_tex_mode) < 8)
-    eff_tex_mode = (eff_tex_mode & ~(0xf << 8)) | (0 << 8);
-  else if (TEXMODE_FORMAT(eff_tex_mode) >= 10 && TEXMODE_FORMAT(eff_tex_mode) <= 12)
-    eff_tex_mode = (eff_tex_mode & ~(0xf << 8)) | (10 << 8);
-  else
-    eff_tex_mode = (eff_tex_mode & ~(0xf << 8)) | (8 << 8);
+    /* classify texture formats into 3 format categories */
+    if (TEXMODE_FORMAT(eff_tex_mode) < 8)
+        eff_tex_mode = (eff_tex_mode & ~(0xf << 8)) | (0 << 8);
+    else if (TEXMODE_FORMAT(eff_tex_mode) >= 10 && TEXMODE_FORMAT(eff_tex_mode) <= 12)
+        eff_tex_mode = (eff_tex_mode & ~(0xf << 8)) | (10 << 8);
+    else
+        eff_tex_mode = (eff_tex_mode & ~(0xf << 8)) | (8 << 8);
 
-  return eff_tex_mode;
+    return eff_tex_mode;
 }
 
 
@@ -2239,8 +2247,8 @@ BX_CPP_INLINE Bit32u normalize_tex_mode(Bit32u eff_tex_mode)
  *
  *************************************/
 
-/* note that these equations and the dither matrixes have
-   been confirmed to be exact matches to the real hardware */
+ /* note that these equations and the dither matrixes have
+    been confirmed to be exact matches to the real hardware */
 #define DITHER_RB(val,dith) ((((val) << 1) - ((val) >> 4) + ((val) >> 7) + (dith)) >> 1)
 #define DITHER_G(val,dith)  ((((val) << 2) - ((val) >> 4) + ((val) >> 6) + (dith)) >> 2)
 
@@ -2296,11 +2304,11 @@ while (0)
 
 
 
-/*************************************
- *
- *  Clamping macros
- *
- *************************************/
+    /*************************************
+     *
+     *  Clamping macros
+     *
+     *************************************/
 
 #define CLAMPED_ARGB(ITERR, ITERG, ITERB, ITERA, FBZCP, RESULT)   \
 do                                                                \
@@ -2395,11 +2403,11 @@ while (0)
 
 
 
-/*************************************
- *
- *  Chroma keying macro
- *
- *************************************/
+     /*************************************
+      *
+      *  Chroma keying macro
+      *
+      *************************************/
 
 #define APPLY_CHROMAKEY(VV, STATS, FBZMODE, COLOR)                      \
 do                                                                      \
@@ -2469,11 +2477,11 @@ while (0)
 
 
 
-/*************************************
- *
- *  Alpha masking macro
- *
- *************************************/
+      /*************************************
+       *
+       *  Alpha masking macro
+       *
+       *************************************/
 
 #define APPLY_ALPHAMASK(VV, STATS, FBZMODE, AA)                         \
 do                                                                      \
@@ -2491,11 +2499,11 @@ while (0)
 
 
 
-/*************************************
- *
- *  Alpha testing macro
- *
- *************************************/
+       /*************************************
+        *
+        *  Alpha testing macro
+        *
+        *************************************/
 
 #define APPLY_ALPHATEST(VV, STATS, ALPHAMODE, AA)                       \
 do                                                                      \
@@ -2566,11 +2574,11 @@ while (0)
 
 
 
-/*************************************
- *
- *  Alpha blending macro
- *
- *************************************/
+        /*************************************
+         *
+         *  Alpha blending macro
+         *
+         *************************************/
 
 #define APPLY_ALPHA_BLEND(FBZMODE, ALPHAMODE, XX, DITHER, RR, GG, BB, AA)        \
 do                                                                               \
@@ -2731,11 +2739,11 @@ while (0)
 
 
 
-/*************************************
- *
- *  Fogging macro
- *
- *************************************/
+         /*************************************
+          *
+          *  Fogging macro
+          *
+          *************************************/
 
 #define APPLY_FOGGING(VV, FOGMODE, FBZCP, XX, DITHER4, RR, GG, BB, ITERZ, ITERW, ITERAXXX) \
 do                                                                               \
@@ -2848,11 +2856,11 @@ while (0)
 
 
 
-/*************************************
- *
- *  Texture pipeline macro
- *
- *************************************/
+          /*************************************
+           *
+           *  Texture pipeline macro
+           *
+           *************************************/
 
 #define TEXTURE_PIPELINE(TT, XX, DITHER4, TEXMODE, COTHER, LOOKUP, LODBASE, ITERS, ITERT, ITERW, RESULT) \
 do                                                                               \
@@ -3187,11 +3195,11 @@ while (0)
 
 
 
-/*************************************
- *
- *  Pixel pipeline macros
- *
- *************************************/
+           /*************************************
+            *
+            *  Pixel pipeline macros
+            *
+            *************************************/
 
 #define PIXEL_PIPELINE_BEGIN(VV, STATS, XX, YY, FBZCOLORPATH, FBZMODE, ITERZ, ITERW)  \
 do                                                                               \
@@ -3388,49 +3396,49 @@ while (0)
 
 
 
-/*************************************
- *
- *  Colorpath pipeline macro
- *
- *************************************/
+            /*************************************
+             *
+             *  Colorpath pipeline macro
+             *
+             *************************************/
 
-/*
+             /*
 
-    c_other_is_used:
+                 c_other_is_used:
 
-        if (FBZMODE_ENABLE_CHROMAKEY(FBZMODE) ||
-            FBZCP_CC_ZERO_OTHER(FBZCOLORPATH) == 0)
+                     if (FBZMODE_ENABLE_CHROMAKEY(FBZMODE) ||
+                         FBZCP_CC_ZERO_OTHER(FBZCOLORPATH) == 0)
 
-    c_local_is_used:
+                 c_local_is_used:
 
-        if (FBZCP_CC_SUB_CLOCAL(FBZCOLORPATH) ||
-            FBZCP_CC_MSELECT(FBZCOLORPATH) == 1 ||
-            FBZCP_CC_ADD_ACLOCAL(FBZCOLORPATH) == 1)
+                     if (FBZCP_CC_SUB_CLOCAL(FBZCOLORPATH) ||
+                         FBZCP_CC_MSELECT(FBZCOLORPATH) == 1 ||
+                         FBZCP_CC_ADD_ACLOCAL(FBZCOLORPATH) == 1)
 
-    NEEDS_ITER_RGB:
+                 NEEDS_ITER_RGB:
 
-        if ((c_other_is_used && FBZCP_CC_RGBSELECT(FBZCOLORPATH) == 0) ||
-            (c_local_is_used && (FBZCP_CC_LOCALSELECT_OVERRIDE(FBZCOLORPATH) != 0 || FBZCP_CC_LOCALSELECT(FBZCOLORPATH) == 0))
+                     if ((c_other_is_used && FBZCP_CC_RGBSELECT(FBZCOLORPATH) == 0) ||
+                         (c_local_is_used && (FBZCP_CC_LOCALSELECT_OVERRIDE(FBZCOLORPATH) != 0 || FBZCP_CC_LOCALSELECT(FBZCOLORPATH) == 0))
 
-    NEEDS_ITER_A:
+                 NEEDS_ITER_A:
 
-        if ((a_other_is_used && FBZCP_CC_ASELECT(FBZCOLORPATH) == 0) ||
-            (a_local_is_used && FBZCP_CCA_LOCALSELECT(FBZCOLORPATH) == 0))
+                     if ((a_other_is_used && FBZCP_CC_ASELECT(FBZCOLORPATH) == 0) ||
+                         (a_local_is_used && FBZCP_CCA_LOCALSELECT(FBZCOLORPATH) == 0))
 
-    NEEDS_ITER_Z:
+                 NEEDS_ITER_Z:
 
-        if (FBZMODE_WBUFFER_SELECT(FBZMODE) == 0 ||
-            FBZMODE_DEPTH_FLOAT_SELECT(FBZMODE) != 0 ||
-            FBZCP_CCA_LOCALSELECT(FBZCOLORPATH) == 2)
+                     if (FBZMODE_WBUFFER_SELECT(FBZMODE) == 0 ||
+                         FBZMODE_DEPTH_FLOAT_SELECT(FBZMODE) != 0 ||
+                         FBZCP_CCA_LOCALSELECT(FBZCOLORPATH) == 2)
 
 
-*/
+             */
 
-/*
-    Expects the following declarations to be outside of this scope:
+             /*
+                 Expects the following declarations to be outside of this scope:
 
-    Bit32s r, g, b, a;
-*/
+                 Bit32s r, g, b, a;
+             */
 #define COLORPATH_PIPELINE(VV, STATS, FBZCOLORPATH, FBZMODE, ALPHAMODE, TEXELARGB, ITERZ, ITERW, ITERARGB) \
 do                                        \
 {                                                                                \

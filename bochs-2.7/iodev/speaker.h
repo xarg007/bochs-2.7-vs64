@@ -31,7 +31,8 @@
 
 class bx_soundlow_waveout_c;
 
-class bx_speaker_c : public bx_speaker_stub_c {
+class bx_speaker_c : public bx_speaker_stub_c
+{
 public:
     bx_speaker_c();
     virtual ~bx_speaker_c();
@@ -43,9 +44,9 @@ public:
     void beep_off();
     void set_line(bool level);
 #if BX_SUPPORT_SOUNDLOW
-    Bit32u beep_generator(Bit16u rate, Bit8u *buffer, Bit32u len);
+    Bit32u beep_generator(Bit16u rate, Bit8u* buffer, Bit32u len);
 #if BX_HAVE_REALTIME_USEC
-    Bit32u dsp_generator(Bit16u rate, Bit8u *buffer, Bit32u len);
+    Bit32u dsp_generator(Bit16u rate, Bit8u* buffer, Bit32u len);
 #endif
 #endif
 private:
@@ -59,17 +60,17 @@ private:
     Bit64u usec_start;
 #endif
 #if BX_SUPPORT_SOUNDLOW
-  bx_soundlow_waveout_c *waveout;
-  int beep_callback_id;
-  bool beep_active;
-  Bit16s beep_level;
-  Bit8u beep_volume;
+    bx_soundlow_waveout_c* waveout;
+    int beep_callback_id;
+    bool beep_active;
+    Bit16s beep_level;
+    Bit8u beep_volume;
 #if BX_HAVE_REALTIME_USEC
-  bool dsp_active;
-  Bit64u dsp_start_usec;
-  Bit64u dsp_cb_usec;
-  Bit32u dsp_count;
-  Bit64u dsp_event_buffer[500];
+    bool dsp_active;
+    Bit64u dsp_start_usec;
+    Bit64u dsp_cb_usec;
+    Bit32u dsp_count;
+    Bit64u dsp_event_buffer[500];
 #endif
 #endif
 };

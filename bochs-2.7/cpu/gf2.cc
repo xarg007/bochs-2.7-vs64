@@ -67,94 +67,99 @@ static const Bit8u GF256_Inv[256] = {
 
 BX_CPP_INLINE Bit8u affine_byte(Bit64u src2qw, Bit8u src1byte, Bit8u imm8)
 {
-  Bit8u result = 0;
-  for (int i=7; i >= 0; i--) {
-    result |= parity_byte((src2qw & 0xff) & src1byte) << i;
-    src2qw >>= 8;
-  }
-  return result ^ imm8;
+    Bit8u result = 0;
+    for (int i = 7; i >= 0; i--)
+    {
+        result |= parity_byte((src2qw & 0xff) & src1byte) << i;
+        src2qw >>= 8;
+    }
+    return result ^ imm8;
 }
 
-BX_CPP_INLINE void xmm_gf2p8affineqb(BxPackedXmmRegister *dst, const BxPackedXmmRegister *src, Bit8u imm8)
+BX_CPP_INLINE void xmm_gf2p8affineqb(BxPackedXmmRegister* dst, const BxPackedXmmRegister* src, Bit8u imm8)
 {
-  for (unsigned i=0; i < 16; i++) {
-    dst->xmmubyte(i) = affine_byte(src->xmm64u(i/8), dst->xmmubyte(i), imm8);
-  }
+    for (unsigned i = 0; i < 16; i++)
+    {
+        dst->xmmubyte(i) = affine_byte(src->xmm64u(i / 8), dst->xmmubyte(i), imm8);
+    }
 }
 
 BX_CPP_INLINE Bit8u affine_inverse_byte(Bit64u src2qw, Bit8u src1byte, Bit8u imm8)
 {
-  return affine_byte(src2qw, GF256_Inv[src1byte], imm8);
+    return affine_byte(src2qw, GF256_Inv[src1byte], imm8);
 }
 
-BX_CPP_INLINE void xmm_gf2p8affineinvqb(BxPackedXmmRegister *dst, const BxPackedXmmRegister *src, Bit8u imm8)
+BX_CPP_INLINE void xmm_gf2p8affineinvqb(BxPackedXmmRegister* dst, const BxPackedXmmRegister* src, Bit8u imm8)
 {
-  for (unsigned i=0; i < 16; i++) {
-    dst->xmmubyte(i) = affine_inverse_byte(src->xmm64u(i/8), dst->xmmubyte(i), imm8);
-  }
+    for (unsigned i = 0; i < 16; i++)
+    {
+        dst->xmmubyte(i) = affine_inverse_byte(src->xmm64u(i / 8), dst->xmmubyte(i), imm8);
+    }
 }
 
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::GF2P8AFFINEINVQB_VdqWdqIbR(bxInstruction_c *i)
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::GF2P8AFFINEINVQB_VdqWdqIbR(bxInstruction_c* i)
 {
-  BxPackedXmmRegister dst = BX_READ_XMM_REG(i->dst()), src = BX_READ_XMM_REG(i->src());
+    BxPackedXmmRegister dst = BX_READ_XMM_REG(i->dst()), src = BX_READ_XMM_REG(i->src());
 
-  xmm_gf2p8affineinvqb(&dst, &src, i->Ib());
+    xmm_gf2p8affineinvqb(&dst, &src, i->Ib());
 
-  BX_WRITE_XMM_REG(i->dst(), dst);
+    BX_WRITE_XMM_REG(i->dst(), dst);
 
-  BX_NEXT_INSTR(i);
-}
-
-#if BX_SUPPORT_AVX
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::VGF2P8AFFINEINVQB_VdqHdqWdqIbR(bxInstruction_c *i)
-{
-  BxPackedAvxRegister dst = BX_READ_AVX_REG(i->src1()), src2 = BX_READ_AVX_REG(i->src2());
-  unsigned len = i->getVL();
-
-  for (unsigned n=0; n < len; n++) {
-    xmm_gf2p8affineinvqb(&dst.vmm128(n), &src2.vmm128(n), i->Ib());
-  }
-
-#if BX_SUPPORT_EVEX
-  if (i->opmask())
-    avx512_write_regq_masked(i, &dst, len, BX_READ_8BIT_OPMASK(i->opmask()));
-  else
-#endif
-    BX_WRITE_AVX_REGZ(i->dst(), dst, len);
-
-  BX_NEXT_INSTR(i);
-}
-#endif
-
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::GF2P8AFFINEQB_VdqWdqIbR(bxInstruction_c *i)
-{
-  BxPackedXmmRegister dst = BX_READ_XMM_REG(i->dst()), src = BX_READ_XMM_REG(i->src());
-
-  xmm_gf2p8affineqb(&dst, &src, i->Ib());
-
-  BX_WRITE_XMM_REG(i->dst(), dst);
-
-  BX_NEXT_INSTR(i);
+    BX_NEXT_INSTR(i);
 }
 
 #if BX_SUPPORT_AVX
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::VGF2P8AFFINEQB_VdqHdqWdqIbR(bxInstruction_c *i)
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::VGF2P8AFFINEINVQB_VdqHdqWdqIbR(bxInstruction_c* i)
 {
-  BxPackedAvxRegister dst = BX_READ_AVX_REG(i->src1()), src2 = BX_READ_AVX_REG(i->src2());
-  unsigned len = i->getVL();
+    BxPackedAvxRegister dst = BX_READ_AVX_REG(i->src1()), src2 = BX_READ_AVX_REG(i->src2());
+    unsigned len = i->getVL();
 
-  for (unsigned n=0; n < len; n++) {
-    xmm_gf2p8affineqb(&dst.vmm128(n), &src2.vmm128(n), i->Ib());
-  }
+    for (unsigned n = 0; n < len; n++)
+    {
+        xmm_gf2p8affineinvqb(&dst.vmm128(n), &src2.vmm128(n), i->Ib());
+    }
 
 #if BX_SUPPORT_EVEX
-  if (i->opmask())
-    avx512_write_regq_masked(i, &dst, len, BX_READ_8BIT_OPMASK(i->opmask()));
-  else
+    if (i->opmask())
+        avx512_write_regq_masked(i, &dst, len, BX_READ_8BIT_OPMASK(i->opmask()));
+    else
 #endif
-    BX_WRITE_AVX_REGZ(i->dst(), dst, len);
+        BX_WRITE_AVX_REGZ(i->dst(), dst, len);
 
-  BX_NEXT_INSTR(i);
+    BX_NEXT_INSTR(i);
+}
+#endif
+
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::GF2P8AFFINEQB_VdqWdqIbR(bxInstruction_c* i)
+{
+    BxPackedXmmRegister dst = BX_READ_XMM_REG(i->dst()), src = BX_READ_XMM_REG(i->src());
+
+    xmm_gf2p8affineqb(&dst, &src, i->Ib());
+
+    BX_WRITE_XMM_REG(i->dst(), dst);
+
+    BX_NEXT_INSTR(i);
+}
+
+#if BX_SUPPORT_AVX
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::VGF2P8AFFINEQB_VdqHdqWdqIbR(bxInstruction_c* i)
+{
+    BxPackedAvxRegister dst = BX_READ_AVX_REG(i->src1()), src2 = BX_READ_AVX_REG(i->src2());
+    unsigned len = i->getVL();
+
+    for (unsigned n = 0; n < len; n++)
+    {
+        xmm_gf2p8affineqb(&dst.vmm128(n), &src2.vmm128(n), i->Ib());
+    }
+
+#if BX_SUPPORT_EVEX
+    if (i->opmask())
+        avx512_write_regq_masked(i, &dst, len, BX_READ_8BIT_OPMASK(i->opmask()));
+    else
+#endif
+        BX_WRITE_AVX_REGZ(i->dst(), dst, len);
+
+    BX_NEXT_INSTR(i);
 }
 #endif
 
@@ -170,7 +175,7 @@ Bit8u GF256_Exp[256] = {
   0x4c, 0xd4, 0x67, 0xa9, 0xe0, 0x3b, 0x4d, 0xd7,
   0x62, 0xa6, 0xf1, 0x08, 0x18, 0x28, 0x78, 0x88,
   0x83, 0x9e, 0xb9, 0xd0, 0x6b, 0xbd, 0xdc, 0x7f,
-  0x81, 0x98, 0xb3, 0xce, 0x49, 0xdb, 0x76, 0x9a, 
+  0x81, 0x98, 0xb3, 0xce, 0x49, 0xdb, 0x76, 0x9a,
   0xb5, 0xc4, 0x57, 0xf9, 0x10, 0x30, 0x50, 0xf0,
   0x0b, 0x1d, 0x27, 0x69, 0xbb, 0xd6, 0x61, 0xa3,
   0xfe, 0x19, 0x2b, 0x7d, 0x87, 0x92, 0xad, 0xec,
@@ -257,45 +262,46 @@ BX_CPP_INLINE Bit8u gf2p8mul(Bit8u a, Bit8u b)
 // https://www.gamedev.net/forums/topic/546942-c-can-this-be-optimized/
 BX_CPP_INLINE Bit8u gf2p8mul(Bit8u a, Bit8u b)
 {
-  if (a == 0 || b == 0) return 0;
+    if (a == 0 || b == 0) return 0;
 
-  Bit16u tmp = GF256_Log[a] + GF256_Log[b];
-  if (tmp > 255)
-    tmp = tmp - 255;
-  
-  return GF256_Exp[tmp];
+    Bit16u tmp = GF256_Log[a] + GF256_Log[b];
+    if (tmp > 255)
+        tmp = tmp - 255;
+
+    return GF256_Exp[tmp];
 }
 
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::GF2P8MULB_VdqWdqR(bxInstruction_c *i)
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::GF2P8MULB_VdqWdqR(bxInstruction_c* i)
 {
-  BxPackedXmmRegister dst = BX_READ_XMM_REG(i->dst()), src = BX_READ_XMM_REG(i->src());
+    BxPackedXmmRegister dst = BX_READ_XMM_REG(i->dst()), src = BX_READ_XMM_REG(i->src());
 
-  for (unsigned n=0; n < 16; n++)
-    dst.xmmubyte(n) = gf2p8mul(dst.xmmubyte(n), src.xmmubyte(n));
+    for (unsigned n = 0; n < 16; n++)
+        dst.xmmubyte(n) = gf2p8mul(dst.xmmubyte(n), src.xmmubyte(n));
 
-  BX_WRITE_XMM_REG(i->dst(), dst);
+    BX_WRITE_XMM_REG(i->dst(), dst);
 
-  BX_NEXT_INSTR(i);
+    BX_NEXT_INSTR(i);
 }
 
 #if BX_SUPPORT_AVX
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::VGF2P8MULB_VdqHdqWdqR(bxInstruction_c *i)
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::VGF2P8MULB_VdqHdqWdqR(bxInstruction_c* i)
 {
-  BxPackedAvxRegister dst = BX_READ_AVX_REG(i->src1()), src = BX_READ_AVX_REG(i->src2());
-  unsigned len = i->getVL();
+    BxPackedAvxRegister dst = BX_READ_AVX_REG(i->src1()), src = BX_READ_AVX_REG(i->src2());
+    unsigned len = i->getVL();
 
-  for (unsigned n=0; n < BYTE_ELEMENTS(len); n++) {
-    dst.vmmubyte(n) = gf2p8mul(dst.vmmubyte(n), src.vmmubyte(n));
-  }
+    for (unsigned n = 0; n < BYTE_ELEMENTS(len); n++)
+    {
+        dst.vmmubyte(n) = gf2p8mul(dst.vmmubyte(n), src.vmmubyte(n));
+    }
 
 #if BX_SUPPORT_EVEX
-  if (i->opmask())
-    avx512_write_regb_masked(i, &dst, len, BX_READ_OPMASK(i->opmask()));
-  else
+    if (i->opmask())
+        avx512_write_regb_masked(i, &dst, len, BX_READ_OPMASK(i->opmask()));
+    else
 #endif
-    BX_WRITE_AVX_REGZ(i->dst(), dst, len);
+        BX_WRITE_AVX_REGZ(i->dst(), dst, len);
 
-  BX_NEXT_INSTR(i);
+    BX_NEXT_INSTR(i);
 }
 #endif
 

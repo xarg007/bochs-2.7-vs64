@@ -28,10 +28,10 @@ these four paragraphs for those parts of this code that are retained.
 #include "softfloatx80.h"
 #include "softfloat-round-pack.h"
 
-static const floatx80 floatx80_negone  = packFloatx80(1, 0x3fff, BX_CONST64(0x8000000000000000));
+static const floatx80 floatx80_negone = packFloatx80(1, 0x3fff, BX_CONST64(0x8000000000000000));
 static const floatx80 floatx80_neghalf = packFloatx80(1, 0x3ffe, BX_CONST64(0x8000000000000000));
-static const float128 float128_ln2     =
-    packFloat128(BX_CONST64(0x3ffe62e42fefa39e), BX_CONST64(0xf35793c7673007e6));
+static const float128 float128_ln2 =
+packFloat128(BX_CONST64(0x3ffe62e42fefa39e), BX_CONST64(0xf35793c7673007e6));
 
 #ifdef BETTER_THAN_PENTIUM
 
@@ -66,32 +66,32 @@ static float128 exp_arr[EXP_ARR_SIZE] =
     PACK_FLOAT_128(0x3fd6ae7f3e733b81, 0xf11d8656b0ee8cb0)  /* 15 */
 };
 
-extern float128 EvalPoly(float128 x, float128 *arr, int n, float_status_t &status);
+extern float128 EvalPoly(float128 x, float128* arr, int n, float_status_t& status);
 
 /* required -1 < x < 1 */
-static float128 poly_exp(float128 x, float_status_t &status)
+static float128 poly_exp(float128 x, float_status_t& status)
 {
-/*
-    //               2     3     4     5     6     7     8     9
-    //  x           x     x     x     x     x     x     x     x
-    // e - 1 ~ x + --- + --- + --- + --- + --- + --- + --- + --- + ...
-    //              2!    3!    4!    5!    6!    7!    8!    9!
-    //
-    //                     2     3     4     5     6     7     8
-    //              x     x     x     x     x     x     x     x
-    //   = x [ 1 + --- + --- + --- + --- + --- + --- + --- + --- + ... ]
-    //              2!    3!    4!    5!    6!    7!    8!    9!
-    //
-    //           8                          8
-    //          --       2k                --        2k+1
-    //   p(x) = >  C  * x           q(x) = >  C   * x
-    //          --  2k                     --  2k+1
-    //          k=0                        k=0
-    //
-    //    x
-    //   e  - 1 ~ x * [ p(x) + x * q(x) ]
-    //
-*/
+    /*
+        //               2     3     4     5     6     7     8     9
+        //  x           x     x     x     x     x     x     x     x
+        // e - 1 ~ x + --- + --- + --- + --- + --- + --- + --- + --- + ...
+        //              2!    3!    4!    5!    6!    7!    8!    9!
+        //
+        //                     2     3     4     5     6     7     8
+        //              x     x     x     x     x     x     x     x
+        //   = x [ 1 + --- + --- + --- + --- + --- + --- + --- + --- + ... ]
+        //              2!    3!    4!    5!    6!    7!    8!    9!
+        //
+        //           8                          8
+        //          --       2k                --        2k+1
+        //   p(x) = >  C  * x           q(x) = >  C   * x
+        //          --  2k                     --  2k+1
+        //          k=0                        k=0
+        //
+        //    x
+        //   e  - 1 ~ x * [ p(x) + x * q(x) ]
+        //
+    */
     float128 t = EvalPoly(x, exp_arr, EXP_ARR_SIZE, status);
     return float128_mul(t, x, status);
 }
@@ -115,7 +115,7 @@ static float128 poly_exp(float128 x, float_status_t &status)
 //               1!    2!    3!    4!    5!          n!
 //
 
-floatx80 f2xm1(floatx80 a, float_status_t &status)
+floatx80 f2xm1(floatx80 a, float_status_t& status)
 {
     Bit64u zSig0, zSig1, zSig2;
 
@@ -130,21 +130,24 @@ floatx80 f2xm1(floatx80 a, float_status_t &status)
     Bit32s aExp = extractFloatx80Exp(a);
     int aSign = extractFloatx80Sign(a);
 
-    if (aExp == 0x7FFF) {
-        if ((Bit64u) (aSig<<1))
+    if (aExp == 0x7FFF)
+    {
+        if ((Bit64u)(aSig << 1))
             return propagateFloatx80NaN(a, status);
 
         return (aSign) ? floatx80_negone : a;
     }
 
-    if (aExp == 0) {
+    if (aExp == 0)
+    {
         if (aSig == 0) return a;
         float_raise(status, float_flag_denormal | float_flag_inexact);
         normalizeFloatx80Subnormal(aSig, &aExp, &aSig);
 
     tiny_argument:
         mul128By64To192(LN2_SIG_HI, LN2_SIG_LO, aSig, &zSig0, &zSig1, &zSig2);
-        if (0 < (Bit64s) zSig0) {
+        if (0 < (Bit64s)zSig0)
+        {
             shortShift128Left(zSig0, zSig1, 1, &zSig0, &zSig1);
             --aExp;
         }
@@ -156,7 +159,7 @@ floatx80 f2xm1(floatx80 a, float_status_t &status)
 
     if (aExp < 0x3FFF)
     {
-        if (aExp < FLOATX80_EXP_BIAS-68)
+        if (aExp < FLOATX80_EXP_BIAS - 68)
             goto tiny_argument;
 
         /* ******************************** */
@@ -170,8 +173,8 @@ floatx80 f2xm1(floatx80 a, float_status_t &status)
     }
     else
     {
-        if (a.exp == 0xBFFF && ! (aSig<<1))
-           return floatx80_neghalf;
+        if (a.exp == 0xBFFF && !(aSig << 1))
+            return floatx80_neghalf;
 
         return a;
     }

@@ -32,18 +32,19 @@
 #endif
 
 
-class bx_extfpuirq_c : public bx_devmodel_c {
+class bx_extfpuirq_c : public bx_devmodel_c
+{
 public:
-  bx_extfpuirq_c();
-  virtual ~bx_extfpuirq_c();
-  virtual void   init(void);
-  virtual void   reset(unsigned type);
+    bx_extfpuirq_c();
+    virtual ~bx_extfpuirq_c();
+    virtual void   init(void);
+    virtual void   reset(unsigned type);
 
 private:
 
-  static void   write_handler(void *this_ptr, Bit32u address, Bit32u value, unsigned io_len);
+    static void   write_handler(void* this_ptr, Bit32u address, Bit32u value, unsigned io_len);
 #if !BX_USE_EFI_SMF
-  void   write(Bit32u address, Bit32u value, unsigned io_len);
+    void   write(Bit32u address, Bit32u value, unsigned io_len);
 #endif
 };
 

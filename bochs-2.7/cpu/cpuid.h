@@ -24,127 +24,133 @@
 #ifndef BX_CPU_MODEL_SPECIFIC
 #define BX_CPU_MODEL_SPECIFIC
 
-struct cpuid_function_t {
-  Bit32u eax;
-  Bit32u ebx;
-  Bit32u ecx;
-  Bit32u edx;
+struct cpuid_function_t
+{
+    Bit32u eax;
+    Bit32u ebx;
+    Bit32u ecx;
+    Bit32u edx;
 };
 
 class VMCS_Mapping;
 
-class bx_cpuid_t {
+class bx_cpuid_t
+{
 public:
-  bx_cpuid_t(BX_CPU_C *_cpu);
+    bx_cpuid_t(BX_CPU_C* _cpu);
 #if BX_SUPPORT_VMX
-  bx_cpuid_t(BX_CPU_C *_cpu, Bit32u vmcs_revision);
-  bx_cpuid_t(BX_CPU_C *_cpu, Bit32u vmcs_revision, const char *filename);
+    bx_cpuid_t(BX_CPU_C* _cpu, Bit32u vmcs_revision);
+    bx_cpuid_t(BX_CPU_C* _cpu, Bit32u vmcs_revision, const char* filename);
 #endif
-  virtual ~bx_cpuid_t() {}
+    virtual ~bx_cpuid_t() {}
 
-  void init();
+    void init();
 
-  // return CPU name
-  virtual const char *get_name(void) const = 0;
+    // return CPU name
+    virtual const char* get_name(void) const = 0;
 
-  BX_CPP_INLINE void get_cpu_extensions(Bit32u *extensions) const {
-    for (unsigned n=0; n < BX_ISA_EXTENSIONS_ARRAY_SIZE; n++)
-       extensions[n] = ia_extensions_bitmask[n];
-  }
+    BX_CPP_INLINE void get_cpu_extensions(Bit32u* extensions) const
+    {
+        for (unsigned n = 0; n < BX_ISA_EXTENSIONS_ARRAY_SIZE; n++)
+            extensions[n] = ia_extensions_bitmask[n];
+    }
 
-  BX_CPP_INLINE bool is_cpu_extension_supported(unsigned extension) const {
-    assert(extension < BX_ISA_EXTENSION_LAST);
-    return ia_extensions_bitmask[extension / 32] & (1 << (extension % 32));
-  }
+    BX_CPP_INLINE bool is_cpu_extension_supported(unsigned extension) const
+    {
+        assert(extension < BX_ISA_EXTENSION_LAST);
+        return ia_extensions_bitmask[extension / 32] & (1 << (extension % 32));
+    }
 
 #if BX_SUPPORT_VMX
-  virtual Bit32u get_vmx_extensions_bitmask(void) const { return 0; }
+    virtual Bit32u get_vmx_extensions_bitmask(void) const { return 0; }
 #endif
 #if BX_SUPPORT_SVM
-  virtual Bit32u get_svm_extensions_bitmask(void) const { return 0; }
+    virtual Bit32u get_svm_extensions_bitmask(void) const { return 0; }
 #endif
 
-  virtual void get_cpuid_leaf(Bit32u function, Bit32u subfunction, cpuid_function_t *leaf) const = 0;
+    virtual void get_cpuid_leaf(Bit32u function, Bit32u subfunction, cpuid_function_t* leaf) const = 0;
 
-  virtual void dump_cpuid(void) const = 0;
+    virtual void dump_cpuid(void) const = 0;
 
-  void dump_features() const;
+    void dump_features() const;
 
 #if BX_CPU_LEVEL >= 5
-  virtual int rdmsr(Bit32u index, Bit64u *msr) { return -1; }
-  virtual int wrmsr(Bit32u index, Bit64u  msr) { return -1; }
+    virtual int rdmsr(Bit32u index, Bit64u* msr) { return -1; }
+    virtual int wrmsr(Bit32u index, Bit64u  msr) { return -1; }
 #endif
 
 #if BX_SUPPORT_VMX
-  VMCS_Mapping* get_vmcs() { return &vmcs_map; }
+    VMCS_Mapping* get_vmcs() { return &vmcs_map; }
 #endif
 
 protected:
-  BX_CPU_C *cpu;
+    BX_CPU_C* cpu;
 
-  unsigned nprocessors;
-  unsigned ncores;
-  unsigned nthreads;
+    unsigned nprocessors;
+    unsigned ncores;
+    unsigned nthreads;
 
-  Bit32u ia_extensions_bitmask[BX_ISA_EXTENSIONS_ARRAY_SIZE];
+    Bit32u ia_extensions_bitmask[BX_ISA_EXTENSIONS_ARRAY_SIZE];
 
-  BX_CPP_INLINE void enable_cpu_extension(unsigned extension) {
-    assert(extension < BX_ISA_EXTENSION_LAST);
-    ia_extensions_bitmask[extension / 32] |=  (1 << (extension % 32));
-    warning_messages(extension);
-  }
+    BX_CPP_INLINE void enable_cpu_extension(unsigned extension)
+    {
+        assert(extension < BX_ISA_EXTENSION_LAST);
+        ia_extensions_bitmask[extension / 32] |= (1 << (extension % 32));
+        warning_messages(extension);
+    }
 
-  BX_CPP_INLINE void disable_cpu_extension(unsigned extension) {
-    assert(extension < BX_ISA_EXTENSION_LAST);
-    ia_extensions_bitmask[extension / 32] &= ~(1 << (extension % 32));
-  }
+    BX_CPP_INLINE void disable_cpu_extension(unsigned extension)
+    {
+        assert(extension < BX_ISA_EXTENSION_LAST);
+        ia_extensions_bitmask[extension / 32] &= ~(1 << (extension % 32));
+    }
 
-  void get_leaf_0(unsigned max_leaf, const char *vendor_string, cpuid_function_t *leaf, unsigned limited_max_leaf = 0x02) const;
-  void get_ext_cpuid_brand_string_leaf(const char *brand_string, Bit32u function, cpuid_function_t *leaf) const;
-  void get_cpuid_hidden_level(cpuid_function_t *leaf, const char *magic_string) const;
+    void get_leaf_0(unsigned max_leaf, const char* vendor_string, cpuid_function_t* leaf, unsigned limited_max_leaf = 0x02) const;
+    void get_ext_cpuid_brand_string_leaf(const char* brand_string, Bit32u function, cpuid_function_t* leaf) const;
+    void get_cpuid_hidden_level(cpuid_function_t* leaf, const char* magic_string) const;
 
 #if BX_SUPPORT_APIC
-  void get_std_cpuid_extended_topology_leaf(Bit32u subfunction, cpuid_function_t *leaf) const;
+    void get_std_cpuid_extended_topology_leaf(Bit32u subfunction, cpuid_function_t* leaf) const;
 #endif
 
 #if BX_CPU_LEVEL >= 6
-  void get_std_cpuid_xsave_leaf(Bit32u subfunction, cpuid_function_t *leaf) const;
+    void get_std_cpuid_xsave_leaf(Bit32u subfunction, cpuid_function_t* leaf) const;
 #endif
 
-  Bit32u get_std_cpuid_leaf_7_ebx(Bit32u extra = 0) const;
-  Bit32u get_std_cpuid_leaf_7_ecx(Bit32u extra = 0) const;
+    Bit32u get_std_cpuid_leaf_7_ebx(Bit32u extra = 0) const;
+    Bit32u get_std_cpuid_leaf_7_ecx(Bit32u extra = 0) const;
 
-  void get_ext_cpuid_leaf_8(cpuid_function_t *leaf) const;
+    void get_ext_cpuid_leaf_8(cpuid_function_t* leaf) const;
 
-  BX_CPP_INLINE void get_leaf(cpuid_function_t *leaf, Bit32u eax, Bit32u ebx, Bit32u ecx, Bit32u edx)
-  {
-    leaf->eax = eax;
-    leaf->ebx = ebx;
-    leaf->ecx = ecx;
-    leaf->edx = edx;
-  }
+    BX_CPP_INLINE void get_leaf(cpuid_function_t* leaf, Bit32u eax, Bit32u ebx, Bit32u ecx, Bit32u edx)
+    {
+        leaf->eax = eax;
+        leaf->ebx = ebx;
+        leaf->ecx = ecx;
+        leaf->edx = edx;
+    }
 
-  BX_CPP_INLINE void get_reserved_leaf(cpuid_function_t *leaf) const
-  {
-    leaf->eax = 0;
-    leaf->ebx = 0;
-    leaf->ecx = 0;
-    leaf->edx = 0;
-  }
+    BX_CPP_INLINE void get_reserved_leaf(cpuid_function_t* leaf) const
+    {
+        leaf->eax = 0;
+        leaf->ebx = 0;
+        leaf->ecx = 0;
+        leaf->edx = 0;
+    }
 
-  void dump_cpuid_leaf(unsigned function, unsigned subfunction = 0) const;
-  void dump_cpuid(unsigned max_std_leaf, unsigned max_ext_leaf) const;
+    void dump_cpuid_leaf(unsigned function, unsigned subfunction = 0) const;
+    void dump_cpuid(unsigned max_std_leaf, unsigned max_ext_leaf) const;
 
-  void warning_messages(unsigned extension) const;
+    void warning_messages(unsigned extension) const;
 
 #if BX_SUPPORT_VMX
-  VMCS_Mapping vmcs_map;
+    VMCS_Mapping vmcs_map;
 #endif
 };
 
-extern const char *get_cpu_feature_name(unsigned feature);
+extern const char* get_cpu_feature_name(unsigned feature);
 
-typedef bx_cpuid_t* (*bx_create_cpuid_method)(BX_CPU_C *cpu);
+typedef bx_cpuid_t* (*bx_create_cpuid_method)(BX_CPU_C* cpu);
 
 // cpuid VMX features
 #define BX_VMX_TPR_SHADOW                       (1 <<  0)   /* TPR shadow */

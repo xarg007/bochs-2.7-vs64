@@ -25,9 +25,9 @@
 
 #if BX_USE_WIN32CONFIG
 
-int AskFilename(HWND hwnd, bx_param_filename_c *param, char *buffer);
-INT_PTR win32ParamDialog(HWND parent, const char *menu);
-INT_PTR win32FloppyParamDialog(HWND parent, const char *menu);
+int AskFilename(HWND hwnd, bx_param_filename_c* param, char* buffer);
+INT_PTR win32ParamDialog(HWND parent, const char* menu);
+INT_PTR win32FloppyParamDialog(HWND parent, const char* menu);
 
 #endif
 

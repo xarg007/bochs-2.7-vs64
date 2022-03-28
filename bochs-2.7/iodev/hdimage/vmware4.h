@@ -64,45 +64,45 @@ VM4_Header;
 
 class vmware4_image_t : public device_image_t
 {
-    public:
-        vmware4_image_t();
-        virtual ~vmware4_image_t();
+public:
+    vmware4_image_t();
+    virtual ~vmware4_image_t();
 
-        int open(const char* pathname, int flags);
-        void close();
-        Bit64s lseek(Bit64s offset, int whence);
-        ssize_t read(void* buf, size_t count);
-        ssize_t write(const void* buf, size_t count);
+    int open(const char* pathname, int flags);
+    void close();
+    Bit64s lseek(Bit64s offset, int whence);
+    ssize_t read(void* buf, size_t count);
+    ssize_t write(const void* buf, size_t count);
 
-        Bit32u get_capabilities();
-        static int check_format(int fd, Bit64u imgsize);
+    Bit32u get_capabilities();
+    static int check_format(int fd, Bit64u imgsize);
 
 #ifdef BXIMAGE
-        int create_image(const char *pathname, Bit64u size);
+    int create_image(const char* pathname, Bit64u size);
 #else
-        bool save_state(const char *backup_fname);
-        void restore_state(const char *backup_fname);
+    bool save_state(const char* backup_fname);
+    void restore_state(const char* backup_fname);
 #endif
 
-    private:
-        static const off_t INVALID_OFFSET;
-        static const int SECTOR_SIZE;
+private:
+    static const off_t INVALID_OFFSET;
+    static const int SECTOR_SIZE;
 
-        bool is_open() const;
+    bool is_open() const;
 
-        bool read_header();
-        off_t perform_seek();
-        void flush();
-        Bit32u read_block_index(Bit64u sector, Bit32u index);
-        void write_block_index(Bit64u sector, Bit32u index, Bit32u block_sector);
+    bool read_header();
+    off_t perform_seek();
+    void flush();
+    Bit32u read_block_index(Bit64u sector, Bit32u index);
+    void write_block_index(Bit64u sector, Bit32u index, Bit32u block_sector);
 
-        int file_descriptor;
-        VM4_Header header;
-        Bit8u* tlb;
-        off_t tlb_offset;
-        off_t current_offset;
-        bool is_dirty;
-        const char *pathname;
+    int file_descriptor;
+    VM4_Header header;
+    Bit8u* tlb;
+    off_t tlb_offset;
+    off_t current_offset;
+    bool is_dirty;
+    const char* pathname;
 };
 
 #endif

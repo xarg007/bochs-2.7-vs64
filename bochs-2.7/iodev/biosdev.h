@@ -32,30 +32,32 @@
 #  define BX_BIOS_THIS this->
 #endif
 
-class bx_biosdev_c : public bx_devmodel_c {
+class bx_biosdev_c : public bx_devmodel_c
+{
 public:
-  bx_biosdev_c();
-  virtual ~bx_biosdev_c();
+    bx_biosdev_c();
+    virtual ~bx_biosdev_c();
 
-  virtual void init(void);
-  virtual void reset(unsigned type) {}
+    virtual void init(void);
+    virtual void reset(unsigned type) {}
 
 private:
 
-  static void   write_handler(void *this_ptr, Bit32u address, Bit32u value, unsigned io_len);
+    static void   write_handler(void* this_ptr, Bit32u address, Bit32u value, unsigned io_len);
 #if !BX_USE_BIOS_SMF
-  void   write(Bit32u address, Bit32u value, unsigned io_len);
+    void   write(Bit32u address, Bit32u value, unsigned io_len);
 #endif
 
-  struct {
-    Bit8u bios_message[BX_BIOS_MESSAGE_SIZE];
-    unsigned int bios_message_i;
-    bool bios_panic_flag;
+    struct
+    {
+        Bit8u bios_message[BX_BIOS_MESSAGE_SIZE];
+        unsigned int bios_message_i;
+        bool bios_panic_flag;
 
-    Bit8u vgabios_message[BX_BIOS_MESSAGE_SIZE];
-    unsigned int vgabios_message_i;
-    bool vgabios_panic_flag;
-  } s;  // state information
+        Bit8u vgabios_message[BX_BIOS_MESSAGE_SIZE];
+        unsigned int vgabios_message_i;
+        bool vgabios_panic_flag;
+    } s;  // state information
 };
 
 #endif

@@ -14,8 +14,8 @@ typedef Bit32u offs_t;
 typedef struct _poly_param_extent poly_param_extent;
 struct _poly_param_extent
 {
-  float   start;            /* parameter value at starting X,Y */
-  float   dpdx;           /* dp/dx relative to starting X */
+    float   start;            /* parameter value at starting X,Y */
+    float   dpdx;           /* dp/dx relative to starting X */
 };
 
 
@@ -24,9 +24,9 @@ struct _poly_param_extent
 typedef struct _poly_extent poly_extent;
 struct _poly_extent
 {
-  Bit16s    startx;           /* starting X coordinate (inclusive) */
-  Bit16s    stopx;            /* ending X coordinate (exclusive) */
-  poly_param_extent param[MAX_VERTEX_PARAMS]; /* starting and dx values for each parameter */
+    Bit16s    startx;           /* starting X coordinate (inclusive) */
+    Bit16s    stopx;            /* ending X coordinate (exclusive) */
+    poly_param_extent param[MAX_VERTEX_PARAMS]; /* starting and dx values for each parameter */
 };
 
 #ifndef TRUE
@@ -68,7 +68,7 @@ typedef Bit16u rgb15_t;
 
 BX_CPP_INLINE rgb15_t rgb_to_rgb15(rgb_t rgb)
 {
-  return ((RGB_RED(rgb) >> 3) << 10) | ((RGB_GREEN(rgb) >> 3) << 5) | ((RGB_BLUE(rgb) >> 3) << 0);
+    return ((RGB_RED(rgb) >> 3) << 10) | ((RGB_GREEN(rgb) >> 3) << 5) | ((RGB_BLUE(rgb) >> 3) << 0);
 }
 
 
@@ -78,11 +78,11 @@ BX_CPP_INLINE rgb15_t rgb_to_rgb15(rgb_t rgb)
 
 BX_CPP_INLINE Bit8u rgb_clamp(Bit32s value)
 {
-  if (value < 0)
-    return 0;
-  if (value > 255)
-    return 255;
-  return value;
+    if (value < 0)
+        return 0;
+    if (value > 255)
+        return 255;
+    return value;
 }
 
 
@@ -92,7 +92,7 @@ BX_CPP_INLINE Bit8u rgb_clamp(Bit32s value)
 
 BX_CPP_INLINE Bit8u pal1bit(Bit8u bits)
 {
-  return (bits & 1) ? 0xff : 0x00;
+    return (bits & 1) ? 0xff : 0x00;
 }
 
 
@@ -102,8 +102,8 @@ BX_CPP_INLINE Bit8u pal1bit(Bit8u bits)
 
 BX_CPP_INLINE Bit8u pal2bit(Bit8u bits)
 {
-  bits &= 3;
-  return (bits << 6) | (bits << 4) | (bits << 2) | bits;
+    bits &= 3;
+    return (bits << 6) | (bits << 4) | (bits << 2) | bits;
 }
 
 
@@ -113,8 +113,8 @@ BX_CPP_INLINE Bit8u pal2bit(Bit8u bits)
 
 BX_CPP_INLINE Bit8u pal3bit(Bit8u bits)
 {
-  bits &= 7;
-  return (bits << 5) | (bits << 2) | (bits >> 1);
+    bits &= 7;
+    return (bits << 5) | (bits << 2) | (bits >> 1);
 }
 
 
@@ -124,8 +124,8 @@ BX_CPP_INLINE Bit8u pal3bit(Bit8u bits)
 
 BX_CPP_INLINE Bit8u pal4bit(Bit8u bits)
 {
-  bits &= 0xf;
-  return (bits << 4) | bits;
+    bits &= 0xf;
+    return (bits << 4) | bits;
 }
 
 
@@ -135,8 +135,8 @@ BX_CPP_INLINE Bit8u pal4bit(Bit8u bits)
 
 BX_CPP_INLINE Bit8u pal5bit(Bit8u bits)
 {
-  bits &= 0x1f;
-  return (bits << 3) | (bits >> 2);
+    bits &= 0x1f;
+    return (bits << 3) | (bits >> 2);
 }
 
 
@@ -146,8 +146,8 @@ BX_CPP_INLINE Bit8u pal5bit(Bit8u bits)
 
 BX_CPP_INLINE Bit8u pal6bit(Bit8u bits)
 {
-  bits &= 0x3f;
-  return (bits << 2) | (bits >> 4);
+    bits &= 0x3f;
+    return (bits << 2) | (bits >> 4);
 }
 
 
@@ -157,8 +157,8 @@ BX_CPP_INLINE Bit8u pal6bit(Bit8u bits)
 
 BX_CPP_INLINE Bit8u pal7bit(Bit8u bits)
 {
-  bits &= 0x7f;
-  return (bits << 1) | (bits >> 6);
+    bits &= 0x7f;
+    return (bits << 1) | (bits >> 6);
 }
 
 
@@ -168,10 +168,10 @@ BX_CPP_INLINE Bit8u pal7bit(Bit8u bits)
 typedef struct _rectangle rectangle;
 struct _rectangle
 {
-  int       min_x;      /* minimum X, or left coordinate */
-  int       max_x;      /* maximum X, or right coordinate (inclusive) */
-  int       min_y;      /* minimum Y, or top coordinate */
-  int       max_y;      /* maximum Y, or bottom coordinate (inclusive) */
+    int       min_x;      /* minimum X, or left coordinate */
+    int       max_x;      /* maximum X, or right coordinate (inclusive) */
+    int       min_y;      /* minimum Y, or top coordinate */
+    int       max_y;      /* maximum Y, or bottom coordinate (inclusive) */
 };
 
 /* Standard MIN/MAX macros */
@@ -185,12 +185,13 @@ struct _rectangle
 
 BX_CPP_INLINE float u2f(Bit32u v)
 {
-  union {
-    float ff;
-    Bit32u vv;
-  } u;
-  u.vv = v;
-  return u.ff;
+    union
+    {
+        float ff;
+        Bit32u vv;
+    } u;
+    u.vv = v;
+    return u.ff;
 }
 
 
@@ -200,8 +201,8 @@ BX_CPP_INLINE float u2f(Bit32u v)
 // constants for expression endianness
 enum endianness_t
 {
-  ENDIANNESS_LITTLE,
-  ENDIANNESS_BIG
+    ENDIANNESS_LITTLE,
+    ENDIANNESS_BIG
 };
 const endianness_t ENDIANNESS_NATIVE = ENDIANNESS_LITTLE;
 #define ENDIAN_VALUE_LE_BE(endian,leval,beval)  (((endian) == ENDIANNESS_LITTLE) ? (leval) : (beval))
@@ -220,52 +221,52 @@ const endianness_t ENDIANNESS_NATIVE = ENDIANNESS_LITTLE;
 #define mul_32x32_shift _mul_32x32_shift
 BX_CPP_INLINE Bit32s _mul_32x32_shift(Bit32s a, Bit32s b, Bit8s shift)
 {
-  Bit64s tmp = (Bit64s)a * (Bit64s)b;
-  tmp >>= shift;
-  Bit32s result = (Bit32s)tmp;
+    Bit64s tmp = (Bit64s)a * (Bit64s)b;
+    tmp >>= shift;
+    Bit32s result = (Bit32s)tmp;
 
-  return result;
+    return result;
 }
 
 
 BX_CPP_INLINE rgb_t rgba_bilinear_filter(rgb_t rgb00, rgb_t rgb01, rgb_t rgb10, rgb_t rgb11, Bit8u u, Bit8u v)
 {
-  Bit32u ag0, ag1, rb0, rb1;
+    Bit32u ag0, ag1, rb0, rb1;
 
-  rb0 = (rgb00 & 0x00ff00ff) + ((((rgb01 & 0x00ff00ff) - (rgb00 & 0x00ff00ff)) * u) >> 8);
-  rb1 = (rgb10 & 0x00ff00ff) + ((((rgb11 & 0x00ff00ff) - (rgb10 & 0x00ff00ff)) * u) >> 8);
-  rgb00 >>= 8;
-  rgb01 >>= 8;
-  rgb10 >>= 8;
-  rgb11 >>= 8;
-  ag0 = (rgb00 & 0x00ff00ff) + ((((rgb01 & 0x00ff00ff) - (rgb00 & 0x00ff00ff)) * u) >> 8);
-  ag1 = (rgb10 & 0x00ff00ff) + ((((rgb11 & 0x00ff00ff) - (rgb10 & 0x00ff00ff)) * u) >> 8);
+    rb0 = (rgb00 & 0x00ff00ff) + ((((rgb01 & 0x00ff00ff) - (rgb00 & 0x00ff00ff)) * u) >> 8);
+    rb1 = (rgb10 & 0x00ff00ff) + ((((rgb11 & 0x00ff00ff) - (rgb10 & 0x00ff00ff)) * u) >> 8);
+    rgb00 >>= 8;
+    rgb01 >>= 8;
+    rgb10 >>= 8;
+    rgb11 >>= 8;
+    ag0 = (rgb00 & 0x00ff00ff) + ((((rgb01 & 0x00ff00ff) - (rgb00 & 0x00ff00ff)) * u) >> 8);
+    ag1 = (rgb10 & 0x00ff00ff) + ((((rgb11 & 0x00ff00ff) - (rgb10 & 0x00ff00ff)) * u) >> 8);
 
-  rb0 = (rb0 & 0x00ff00ff) + ((((rb1 & 0x00ff00ff) - (rb0 & 0x00ff00ff)) * v) >> 8);
-  ag0 = (ag0 & 0x00ff00ff) + ((((ag1 & 0x00ff00ff) - (ag0 & 0x00ff00ff)) * v) >> 8);
+    rb0 = (rb0 & 0x00ff00ff) + ((((rb1 & 0x00ff00ff) - (rb0 & 0x00ff00ff)) * v) >> 8);
+    ag0 = (ag0 & 0x00ff00ff) + ((((ag1 & 0x00ff00ff) - (ag0 & 0x00ff00ff)) * v) >> 8);
 
-  return ((ag0 << 8) & 0xff00ff00) | (rb0 & 0x00ff00ff);
+    return ((ag0 << 8) & 0xff00ff00) | (rb0 & 0x00ff00ff);
 }
 
 typedef struct _poly_vertex poly_vertex;
 struct _poly_vertex
 {
-  float   x;              /* X coordinate */
-  float   y;              /* Y coordinate */
-  float   p[MAX_VERTEX_PARAMS];   /* interpolated parameter values */
+    float   x;              /* X coordinate */
+    float   y;              /* Y coordinate */
+    float   p[MAX_VERTEX_PARAMS];   /* interpolated parameter values */
 };
 
 
 typedef struct _tri_extent tri_extent;
 struct _tri_extent
 {
-  Bit16s    startx;           /* starting X coordinate (inclusive) */
-  Bit16s    stopx;            /* ending X coordinate (exclusive) */
+    Bit16s    startx;           /* starting X coordinate (inclusive) */
+    Bit16s    stopx;            /* ending X coordinate (exclusive) */
 };
 
 /* tri_work_unit is a triangle-specific work-unit */
 typedef struct _tri_work_unit tri_work_unit;
 struct _tri_work_unit
 {
-  tri_extent      extent[8]; /* array of scanline extents */
+    tri_extent      extent[8]; /* array of scanline extents */
 };

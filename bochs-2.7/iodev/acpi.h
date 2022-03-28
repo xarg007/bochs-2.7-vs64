@@ -32,54 +32,57 @@
 #  define BX_ACPI_THIS_PTR this
 #endif
 
-class bx_acpi_ctrl_c : public bx_acpi_ctrl_stub_c {
+class bx_acpi_ctrl_c : public bx_acpi_ctrl_stub_c
+{
 public:
-  bx_acpi_ctrl_c();
-  virtual ~bx_acpi_ctrl_c();
-  virtual void init(void);
-  virtual void reset(unsigned type);
-  virtual void generate_smi(Bit8u value);
-  virtual void register_state(void);
-  virtual void after_restore_state(void);
+    bx_acpi_ctrl_c();
+    virtual ~bx_acpi_ctrl_c();
+    virtual void init(void);
+    virtual void reset(unsigned type);
+    virtual void generate_smi(Bit8u value);
+    virtual void register_state(void);
+    virtual void after_restore_state(void);
 
-  virtual void pci_write_handler(Bit8u address, Bit32u value, unsigned io_len);
+    virtual void pci_write_handler(Bit8u address, Bit32u value, unsigned io_len);
 
-  static Bit32u read_handler(void *this_ptr, Bit32u address, unsigned io_len);
-  static void   write_handler(void *this_ptr, Bit32u address, Bit32u value, unsigned io_len);
+    static Bit32u read_handler(void* this_ptr, Bit32u address, unsigned io_len);
+    static void   write_handler(void* this_ptr, Bit32u address, Bit32u value, unsigned io_len);
 #if !BX_USE_ACPI_SMF
-  Bit32u read(Bit32u address, unsigned io_len);
-  void   write(Bit32u address, Bit32u value, unsigned io_len);
+    Bit32u read(Bit32u address, unsigned io_len);
+    void   write(Bit32u address, Bit32u value, unsigned io_len);
 #endif
-  BX_ACPI_SMF void timer(void);
+    BX_ACPI_SMF void timer(void);
 
 private:
-  BX_ACPI_SMF void set_irq_level(bool level);
-  BX_ACPI_SMF Bit32u get_pmtmr(void);
-  BX_ACPI_SMF Bit16u get_pmsts(void);
-  BX_ACPI_SMF void pm_update_sci(void);
-  static void timer_handler(void *);
+    BX_ACPI_SMF void set_irq_level(bool level);
+    BX_ACPI_SMF Bit32u get_pmtmr(void);
+    BX_ACPI_SMF Bit16u get_pmsts(void);
+    BX_ACPI_SMF void pm_update_sci(void);
+    static void timer_handler(void*);
 
-  struct {
-    Bit8u devfunc;
-    Bit32u pm_base;
-    Bit32u sm_base;
-    Bit16u pmsts;
-    Bit16u pmen;
-    Bit16u pmcntrl;
-    Bit64u tmr_overflow_time;
-    Bit8u pmreg[0x38];
-    int timer_index;
-    struct {
-      Bit8u stat;
-      Bit8u ctl;
-      Bit8u cmd;
-      Bit8u addr;
-      Bit8u data0;
-      Bit8u data1;
-      Bit8u index;
-      Bit8u data[32];
-    } smbus;
-  } s;
+    struct
+    {
+        Bit8u devfunc;
+        Bit32u pm_base;
+        Bit32u sm_base;
+        Bit16u pmsts;
+        Bit16u pmen;
+        Bit16u pmcntrl;
+        Bit64u tmr_overflow_time;
+        Bit8u pmreg[0x38];
+        int timer_index;
+        struct
+        {
+            Bit8u stat;
+            Bit8u ctl;
+            Bit8u cmd;
+            Bit8u addr;
+            Bit8u data0;
+            Bit8u data1;
+            Bit8u index;
+            Bit8u data[32];
+        } smbus;
+    } s;
 };
 
 #endif

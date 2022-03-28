@@ -1,0 +1,14 @@
+pci: enabled=1, chipset=i440fx
+cpu: model=corei5_lynnfield_750, count=1, ips=60000000
+megs: 1024
+clock: sync=both
+romimage:    file=xbios.bin
+vgaromimage: file=xvgabios.bin
+ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
+#ata0-master: type=disk, mode=vmware4, path="xdb11.vmdk"
+ata0-master:  type=disk, mode=vmware4, path="xdb8x.vmdk"
+
+boot: c
+#vga: extension=vbe, update_freq=15
+keyboard: serial_delay=250, paste_delay=100000
+mouse: enabled=0

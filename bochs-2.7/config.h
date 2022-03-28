@@ -644,9 +644,9 @@ typedef Bit64u bx_ptr_equiv_t;
 #error "EVEX and AVX-512 support require AVX to be compiled in"
 #endif
 
-#define BX_SUPPORT_REPEAT_SPEEDUPS 1
-#define BX_SUPPORT_HANDLERS_CHAINING_SPEEDUPS 0
-#define BX_ENABLE_TRACE_LINKING 1
+#define BX_SUPPORT_REPEAT_SPEEDUPS 0
+#define BX_SUPPORT_HANDLERS_CHAINING_SPEEDUPS 1
+#define BX_ENABLE_TRACE_LINKING 0
 
 #if (BX_DEBUGGER || BX_GDBSTUB) && BX_SUPPORT_HANDLERS_CHAINING_SPEEDUPS
 #error "Handler-chaining-speedups are not supported together with internal debugger or gdb-stub!"

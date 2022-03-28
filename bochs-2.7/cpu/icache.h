@@ -159,9 +159,19 @@ public:
 
     BX_CPP_INLINE static unsigned hash(bx_phy_address pAddr, unsigned fetchModeMask)
     {
-        //  return ((pAddr + (pAddr << 2) + (pAddr>>6)) & (BxICacheEntries-1)) ^ fetchModeMask;
+        unsigned uret = BxICacheEntries - 1; //#define BxICacheEntries(64 * 1024)  // Must be a power of 2.;
+        bx_phy_address tmp = uret & pAddr;
+
+        tmp = tmp ^ fetchModeMask;
+
         return ((pAddr) & (BxICacheEntries - 1)) ^ fetchModeMask;
     }
+
+    //BX_CPP_INLINE static unsigned hash(bx_phy_address pAddr, unsigned fetchModeMask)
+    //{
+    //    //  return ((pAddr + (pAddr << 2) + (pAddr>>6)) & (BxICacheEntries-1)) ^ fetchModeMask;
+    //    return ((pAddr) & (BxICacheEntries - 1)) ^ fetchModeMask;
+    //}
 
     BX_CPP_INLINE void alloc_trace(bxICacheEntry_c* e)
     {

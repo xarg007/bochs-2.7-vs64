@@ -111,7 +111,10 @@ void BX_CPU_C::cpu_loop(void)
 
             BX_SYNC_TIME_IF_SINGLE_PROCESSOR(0);
 
-            if (BX_CPU_THIS_PTR async_event) break;
+            if (BX_CPU_THIS_PTR async_event)
+            {
+                break;
+            }
 
             i = getICacheEntry()->i;
         }
@@ -225,16 +228,17 @@ bxICacheEntry_c* BX_CPU_C::getICacheEntry(void)
         eipBiased = RIP + BX_CPU_THIS_PTR eipPageBias;
     }
 
-    INC_ICACHE_STAT(iCacheLookups);
+    INC_ICACHE_STAT(iCacheLookups); //#define INC_ICACHE_STAT(stat) ()
 
     bx_phy_address pAddr = BX_CPU_THIS_PTR pAddrFetchPage + eipBiased;
     bxICacheEntry_c* entry = BX_CPU_THIS_PTR iCache.find_entry(pAddr, BX_CPU_THIS_PTR fetchModeMask);
 
     if (entry == NULL)
     {
-        // iCache miss. No validated instruction with matching fetch parameters
-        // is in the iCache.
-        INC_ICACHE_STAT(iCacheMisses);
+        //缓存中没有具有匹配提取参数的已验证指令。
+        // iCache miss. No validated instruction with matching fetch parameters is in the iCache.
+        INC_ICACHE_STAT(iCacheMisses); //#define INC_ICACHE_STAT(stat)  ()
+
         entry = serveICacheMiss((Bit32u)eipBiased, pAddr);
     }
 
@@ -266,7 +270,7 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::linkTrace(bxInstruction_c* i)
         return;
 #endif
 
-#define BX_HANDLERS_CHAINING_MAX_DEPTH 1000
+#define BX_HANDLERS_CHAINING_MAX_DEPTH 128
 
     // do not allow extreme trace link depth / avoid host stack overflow
     // (could happen with badly compiled instruction handlers)

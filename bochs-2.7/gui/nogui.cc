@@ -32,15 +32,16 @@
 #if BX_WITH_NOGUI
 #include "icon_bochs.h"
 
-class bx_nogui_gui_c : public bx_gui_c {
+class bx_nogui_gui_c : public bx_gui_c
+{
 public:
-  bx_nogui_gui_c (void) {}
-  DECLARE_GUI_VIRTUAL_METHODS()
+    bx_nogui_gui_c(void) {}
+    DECLARE_GUI_VIRTUAL_METHODS()
 };
 
 // declare one instance of the gui object and call macro to insert the
 // plugin code
-static bx_nogui_gui_c *theGui = NULL;
+static bx_nogui_gui_c* theGui = NULL;
 IMPLEMENT_GUI_PLUGIN_CODE(nogui)
 
 #define LOG_THIS theGui->
@@ -68,18 +69,19 @@ IMPLEMENT_GUI_PLUGIN_CODE(nogui)
 //     always assumes the width of the current VGA mode width, but
 //     it's height is defined by this parameter.
 
-void bx_nogui_gui_c::specific_init(int argc, char **argv, unsigned headerbar_y)
+void bx_nogui_gui_c::specific_init(int argc, char** argv, unsigned headerbar_y)
 {
-  put("NOGUI");
-  UNUSED(argc);
-  UNUSED(argv);
-  UNUSED(headerbar_y);
+    put("NOGUI");
+    UNUSED(argc);
+    UNUSED(argv);
+    UNUSED(headerbar_y);
 
-  UNUSED(bochs_icon_bits);  // global variable
+    UNUSED(bochs_icon_bits);  // global variable
 
-  if (SIM->get_param_bool(BXPN_PRIVATE_COLORMAP)->get()) {
-    BX_INFO(("private_colormap option ignored."));
-  }
+    if (SIM->get_param_bool(BXPN_PRIVATE_COLORMAP)->get())
+    {
+        BX_INFO(("private_colormap option ignored."));
+    }
 }
 
 
@@ -90,8 +92,7 @@ void bx_nogui_gui_c::specific_init(int argc, char **argv, unsigned headerbar_y)
 // relevant events.
 
 void bx_nogui_gui_c::handle_events(void)
-{
-}
+{}
 
 
 // ::FLUSH()
@@ -100,8 +101,7 @@ void bx_nogui_gui_c::handle_events(void)
 // screen update requests.
 
 void bx_nogui_gui_c::flush(void)
-{
-}
+{}
 
 
 // ::CLEAR_SCREEN()
@@ -110,8 +110,7 @@ void bx_nogui_gui_c::flush(void)
 // clear the area that defines the headerbar.
 
 void bx_nogui_gui_c::clear_screen(void)
-{
-}
+{}
 
 
 
@@ -134,15 +133,15 @@ void bx_nogui_gui_c::clear_screen(void)
 // tm_info:  this structure contains information for additional
 //           features in text mode (cursor shape, line offset,...)
 
-void bx_nogui_gui_c::text_update(Bit8u *old_text, Bit8u *new_text,
-                      unsigned long cursor_x, unsigned long cursor_y,
-                      bx_vga_tminfo_t *tm_info)
+void bx_nogui_gui_c::text_update(Bit8u* old_text, Bit8u* new_text,
+    unsigned long cursor_x, unsigned long cursor_y,
+    bx_vga_tminfo_t* tm_info)
 {
-  UNUSED(old_text);
-  UNUSED(new_text);
-  UNUSED(cursor_x);
-  UNUSED(cursor_y);
-  UNUSED(tm_info);
+    UNUSED(old_text);
+    UNUSED(new_text);
+    UNUSED(cursor_x);
+    UNUSED(cursor_y);
+    UNUSED(tm_info);
 }
 
 
@@ -150,11 +149,11 @@ void bx_nogui_gui_c::text_update(Bit8u *old_text, Bit8u *new_text,
 //
 // Called to get text from the GUI clipboard. Returns 1 if successful.
 
-int bx_nogui_gui_c::get_clipboard_text(Bit8u **bytes, Bit32s *nbytes)
+int bx_nogui_gui_c::get_clipboard_text(Bit8u** bytes, Bit32s* nbytes)
 {
-  UNUSED(bytes);
-  UNUSED(nbytes);
-  return 0;
+    UNUSED(bytes);
+    UNUSED(nbytes);
+    return 0;
 }
 
 
@@ -163,11 +162,11 @@ int bx_nogui_gui_c::get_clipboard_text(Bit8u **bytes, Bit32s *nbytes)
 // Called to copy the text screen contents to the GUI clipboard.
 // Returns 1 if successful.
 
-int bx_nogui_gui_c::set_clipboard_text(char *text_snapshot, Bit32u len)
+int bx_nogui_gui_c::set_clipboard_text(char* text_snapshot, Bit32u len)
 {
-  UNUSED(text_snapshot);
-  UNUSED(len);
-  return 0;
+    UNUSED(text_snapshot);
+    UNUSED(len);
+    return 0;
 }
 
 
@@ -180,11 +179,11 @@ int bx_nogui_gui_c::set_clipboard_text(char *text_snapshot, Bit32u len)
 
 bool bx_nogui_gui_c::palette_change(Bit8u index, Bit8u red, Bit8u green, Bit8u blue)
 {
-  UNUSED(index);
-  UNUSED(red);
-  UNUSED(green);
-  UNUSED(blue);
-  return(0);
+    UNUSED(index);
+    UNUSED(red);
+    UNUSED(green);
+    UNUSED(blue);
+    return(0);
 }
 
 
@@ -203,11 +202,11 @@ bool bx_nogui_gui_c::palette_change(Bit8u index, Bit8u red, Bit8u green, Bit8u b
 // note: origin of tile and of window based on (0,0) being in the upper
 //       left of the window.
 
-void bx_nogui_gui_c::graphics_tile_update(Bit8u *tile, unsigned x0, unsigned y0)
+void bx_nogui_gui_c::graphics_tile_update(Bit8u* tile, unsigned x0, unsigned y0)
 {
-  UNUSED(tile);
-  UNUSED(x0);
-  UNUSED(y0);
+    UNUSED(tile);
+    UNUSED(x0);
+    UNUSED(y0);
 }
 
 
@@ -225,11 +224,11 @@ void bx_nogui_gui_c::graphics_tile_update(Bit8u *tile, unsigned x0, unsigned y0)
 
 void bx_nogui_gui_c::dimension_update(unsigned x, unsigned y, unsigned fheight, unsigned fwidth, unsigned bpp)
 {
-  guest_textmode = (fheight > 0);
-  guest_xres = x;
-  guest_yres = y;
-  guest_bpp = bpp;
-  UNUSED(fwidth);
+    guest_textmode = (fheight > 0);
+    guest_xres = x;
+    guest_yres = y;
+    guest_bpp = bpp;
+    UNUSED(fwidth);
 }
 
 
@@ -244,12 +243,12 @@ void bx_nogui_gui_c::dimension_update(unsigned x, unsigned y, unsigned fheight, 
 // xdim: x dimension of bitmap
 // ydim: y dimension of bitmap
 
-unsigned bx_nogui_gui_c::create_bitmap(const unsigned char *bmap, unsigned xdim, unsigned ydim)
+unsigned bx_nogui_gui_c::create_bitmap(const unsigned char* bmap, unsigned xdim, unsigned ydim)
 {
-  UNUSED(bmap);
-  UNUSED(xdim);
-  UNUSED(ydim);
-  return(0);
+    UNUSED(bmap);
+    UNUSED(xdim);
+    UNUSED(ydim);
+    return(0);
 }
 
 
@@ -269,10 +268,10 @@ unsigned bx_nogui_gui_c::create_bitmap(const unsigned char *bmap, unsigned xdim,
 
 unsigned bx_nogui_gui_c::headerbar_bitmap(unsigned bmap_id, unsigned alignment, void (*f)(void))
 {
-  UNUSED(bmap_id);
-  UNUSED(alignment);
-  UNUSED(f);
-  return(0);
+    UNUSED(bmap_id);
+    UNUSED(alignment);
+    UNUSED(f);
+    return(0);
 }
 
 
@@ -282,8 +281,7 @@ unsigned bx_nogui_gui_c::headerbar_bitmap(unsigned bmap_id, unsigned alignment, 
 // currently installed bitmaps.
 
 void bx_nogui_gui_c::show_headerbar(void)
-{
-}
+{}
 
 
 // ::REPLACE_BITMAP()
@@ -301,8 +299,8 @@ void bx_nogui_gui_c::show_headerbar(void)
 
 void bx_nogui_gui_c::replace_bitmap(unsigned hbar_id, unsigned bmap_id)
 {
-  UNUSED(hbar_id);
-  UNUSED(bmap_id);
+    UNUSED(hbar_id);
+    UNUSED(bmap_id);
 }
 
 
@@ -313,7 +311,7 @@ void bx_nogui_gui_c::replace_bitmap(unsigned hbar_id, unsigned bmap_id)
 
 void bx_nogui_gui_c::exit(void)
 {
-  BX_INFO(("bx_nogui_gui_c::exit() not implemented yet."));
+    BX_INFO(("bx_nogui_gui_c::exit() not implemented yet."));
 }
 
 
@@ -325,7 +323,6 @@ void bx_nogui_gui_c::exit(void)
 // method with keyboard or mouse, or from the configuration interface.
 
 void bx_nogui_gui_c::mouse_enabled_changed_specific(bool val)
-{
-}
+{}
 
 #endif /* if BX_WITH_NOGUI */

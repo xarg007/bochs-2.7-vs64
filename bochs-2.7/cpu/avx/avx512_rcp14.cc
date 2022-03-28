@@ -8237,241 +8237,259 @@ extern float_status_t mxcsr_to_softfloat_status_word(bx_mxcsr_t mxcsr);
 #include "fpu/softfloat-round-pack.h"
 #include "simd_int.h"
 
-static Bit32u rcp14_table_lookup(Bit32u mant, unsigned bias, Bit16s *exp)
+static Bit32u rcp14_table_lookup(Bit32u mant, unsigned bias, Bit16s* exp)
 {
-  /*
-   * Calculate (1/1.yyyyyyyyyyyyyy1), the result is always rounded to the
-   *  14th bit after the decimal point by round-to-nearest, regardless
-   *  of the current rounding mode.
-   *
-   * Using precalculated 64K-entry table.
-   */
+    /*
+     * Calculate (1/1.yyyyyyyyyyyyyy1), the result is always rounded to the
+     *  14th bit after the decimal point by round-to-nearest, regardless
+     *  of the current rounding mode.
+     *
+     * Using precalculated 64K-entry table.
+     */
 
-  Bit16s r_exp = 2*bias - 1 - *exp;
+    Bit16s r_exp = 2 * bias - 1 - *exp;
 
-  if (mant == 0) {
-    /* fraction is zero this means we deal with exact power of 2,
-       adjust the exponent */
-    r_exp++;
-  }
-  else {
-    /* The input to the table is the 16 most significant bits of the 23-bit mantissa */
-    mant = rcp14_table[mant >> 7];
-  }
+    if (mant == 0)
+    {
+        /* fraction is zero this means we deal with exact power of 2,
+           adjust the exponent */
+        r_exp++;
+    }
+    else
+    {
+        /* The input to the table is the 16 most significant bits of the 23-bit mantissa */
+        mant = rcp14_table[mant >> 7];
+    }
 
-  *exp = r_exp;
+    *exp = r_exp;
 
-  return mant;
+    return mant;
 }
 
 // approximate 14-bit reciprocal of scalar single precision FP
-float32 approximate_rcp14(float32 op, const float_status_t &status)
+float32 approximate_rcp14(float32 op, const float_status_t& status)
 {
-  float_class_t op_class = float32_class(op);
+    float_class_t op_class = float32_class(op);
 
-  int sign = float32_sign(op);
-  Bit32u fraction = float32_fraction(op);
-  Bit16s exp = float32_exp(op);
+    int sign = float32_sign(op);
+    Bit32u fraction = float32_fraction(op);
+    Bit16s exp = float32_exp(op);
 
-  switch(op_class) {
+    switch (op_class)
+    {
     case float_zero:
-      return packFloat32(sign, 0xFF, 0);
+        return packFloat32(sign, 0xFF, 0);
 
     case float_negative_inf:
     case float_positive_inf:
-      return packFloat32(sign, 0, 0);
+        return packFloat32(sign, 0, 0);
 
     case float_SNaN:
     case float_QNaN:
-      return convert_to_QNaN(op);
+        return convert_to_QNaN(op);
 
-    // the rcp14 handle denormals properly
+        // the rcp14 handle denormals properly
     case float_denormal:
-      if (get_denormals_are_zeros(status))
-        return packFloat32(sign, 0xFF, 0);
-        
-      normalizeFloat32Subnormal(fraction, &exp, &fraction);
+        if (get_denormals_are_zeros(status))
+            return packFloat32(sign, 0xFF, 0);
 
-      fraction &= 0x7fffff;
-      // fall through
+        normalizeFloat32Subnormal(fraction, &exp, &fraction);
+
+        fraction &= 0x7fffff;
+        // fall through
 
     case float_normalized:
-      break;
-  }
+        break;
+    }
 
-  fraction = rcp14_table_lookup(fraction, FLOAT32_EXP_BIAS, &exp) << 7;
+    fraction = rcp14_table_lookup(fraction, FLOAT32_EXP_BIAS, &exp) << 7;
 
-  if (exp >= 0xFF) {
-    /* overflow - the result is signed infinity */
-    return packFloat32(sign, 0xFF, 0);
-  }
+    if (exp >= 0xFF)
+    {
+        /* overflow - the result is signed infinity */
+        return packFloat32(sign, 0xFF, 0);
+    }
 
-  if (exp <= 0) {
-    /* underflow */
-    if (get_flush_underflow_to_zero(status)) 
-      return packFloat32(sign, 0, 0);
+    if (exp <= 0)
+    {
+        /* underflow */
+        if (get_flush_underflow_to_zero(status))
+            return packFloat32(sign, 0, 0);
 
-    fraction >>= (1 - exp); // make denormal result, note that -1 <= exp <= 0 so no rounding needed
-    exp = 0;
-  }
+        fraction >>= (1 - exp); // make denormal result, note that -1 <= exp <= 0 so no rounding needed
+        exp = 0;
+    }
 
-  return packFloat32(sign, exp, fraction);
+    return packFloat32(sign, exp, fraction);
 }
 
 // approximate 14-bit reciprocal of scalar double precision FP
-float64 approximate_rcp14(float64 op, const float_status_t &status)
+float64 approximate_rcp14(float64 op, const float_status_t& status)
 {
-  float_class_t op_class = float64_class(op);
+    float_class_t op_class = float64_class(op);
 
-  int sign = float64_sign(op);
-  Bit64u fraction = float64_fraction(op);
-  Bit16s exp = float64_exp(op);
+    int sign = float64_sign(op);
+    Bit64u fraction = float64_fraction(op);
+    Bit16s exp = float64_exp(op);
 
-  switch(op_class) {
+    switch (op_class)
+    {
     case float_zero:
-      return packFloat64(sign, 0x7FF, 0);
+        return packFloat64(sign, 0x7FF, 0);
 
     case float_negative_inf:
     case float_positive_inf:
-      return packFloat64(sign, 0, 0);
+        return packFloat64(sign, 0, 0);
 
     case float_SNaN:
     case float_QNaN:
-      return convert_to_QNaN(op);
+        return convert_to_QNaN(op);
 
-    // the rcp14 handle denormals properly
+        // the rcp14 handle denormals properly
     case float_denormal:
-      if (get_denormals_are_zeros(status))
-        return packFloat64(sign, 0x7FF, 0);
-        
-      normalizeFloat64Subnormal(fraction, &exp, &fraction);
+        if (get_denormals_are_zeros(status))
+            return packFloat64(sign, 0x7FF, 0);
 
-      fraction &= BX_CONST64(0xfffffffffffff);
-      // fall through
+        normalizeFloat64Subnormal(fraction, &exp, &fraction);
+
+        fraction &= BX_CONST64(0xfffffffffffff);
+        // fall through
 
     case float_normalized:
-      break;
-  }
+        break;
+    }
 
-  // Compute the single precision 23-bit mantissa from the 52-bit double
-  // precision mantissa by shifting it right, but also leave a "sticky bit"
-  // for the shifted off bits.
-  fraction = (fraction >> 29) | ((fraction & 0x1fffffff) != 0);
+    // Compute the single precision 23-bit mantissa from the 52-bit double
+    // precision mantissa by shifting it right, but also leave a "sticky bit"
+    // for the shifted off bits.
+    fraction = (fraction >> 29) | ((fraction & 0x1fffffff) != 0);
 
-  fraction = (Bit64u) rcp14_table_lookup(fraction, FLOAT64_EXP_BIAS, &exp);
-  fraction <<= 36;
+    fraction = (Bit64u)rcp14_table_lookup(fraction, FLOAT64_EXP_BIAS, &exp);
+    fraction <<= 36;
 
-  if (exp >= 0x7FF) {
-    /* overflow - the result is signed infinity */
-    return packFloat64(sign, 0x7FF, 0);
-  }
+    if (exp >= 0x7FF)
+    {
+        /* overflow - the result is signed infinity */
+        return packFloat64(sign, 0x7FF, 0);
+    }
 
-  if (exp <= 0) {
-    /* underflow */
-    if (get_flush_underflow_to_zero(status)) 
-      return packFloat64(sign, 0, 0);
+    if (exp <= 0)
+    {
+        /* underflow */
+        if (get_flush_underflow_to_zero(status))
+            return packFloat64(sign, 0, 0);
 
-    fraction >>= (1 - exp); // make denormal result, note that -1 <= exp <= 0 so no rounding needed
-    exp = 0;
-  }
+        fraction >>= (1 - exp); // make denormal result, note that -1 <= exp <= 0 so no rounding needed
+        exp = 0;
+    }
 
-  return packFloat64(sign, exp, fraction);
+    return packFloat64(sign, exp, fraction);
 }
 
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::VRCP14PS_MASK_VpsWpsR(bxInstruction_c *i)
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::VRCP14PS_MASK_VpsWpsR(bxInstruction_c* i)
 {
-  BxPackedAvxRegister op = BX_READ_AVX_REG(i->src());
-  Bit32u mask = i->opmask() ? BX_READ_16BIT_OPMASK(i->opmask()) : (Bit32u) -1;
-  unsigned len = i->getVL();
-
-  float_status_t status = mxcsr_to_softfloat_status_word(MXCSR);
-
-  for (unsigned n=0, tmp_mask = mask; n < DWORD_ELEMENTS(len); n++, tmp_mask >>= 1) {
-    if (tmp_mask & 0x1)
-      op.vmm32u(n) = approximate_rcp14(op.vmm32u(n), status);
-    else
-      op.vmm32u(n) = 0;
-  }
-
-  if (! i->isZeroMasking()) {
-    for (unsigned n=0; n < len; n++, mask >>= 4)
-      xmm_blendps(&BX_READ_AVX_REG_LANE(i->dst(), n), &op.vmm128(n), mask);
-    BX_CLEAR_AVX_REGZ(i->dst(), len);
-  }
-  else {
-    BX_WRITE_AVX_REGZ(i->dst(), op, len);
-  }
-
-  BX_NEXT_INSTR(i);
-}
-
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::VRCP14PD_MASK_VpdWpdR(bxInstruction_c *i)
-{
-  BxPackedAvxRegister op = BX_READ_AVX_REG(i->src());
-  Bit32u mask = i->opmask() ? BX_READ_8BIT_OPMASK(i->opmask()) : (Bit32u) -1;
-  unsigned len = i->getVL();
-
-  float_status_t status = mxcsr_to_softfloat_status_word(MXCSR);
-
-  for (unsigned n=0, tmp_mask = mask; n < QWORD_ELEMENTS(len); n++, tmp_mask >>= 1) {
-    if (tmp_mask & 0x1)
-      op.vmm64u(n) = approximate_rcp14(op.vmm64u(n), status);
-    else
-      op.vmm64u(n) = 0;
-  }
-
-  if (! i->isZeroMasking()) {
-    for (unsigned n=0; n < len; n++, mask >>= 2)
-      xmm_blendpd(&BX_READ_AVX_REG_LANE(i->dst(), n), &op.vmm128(n), mask);
-    BX_CLEAR_AVX_REGZ(i->dst(), len);
-  }
-  else {
-    BX_WRITE_AVX_REGZ(i->dst(), op, len);
-  }
-
-  BX_NEXT_INSTR(i);
-}
-
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::VRCP14SS_MASK_VssHpsWssR(bxInstruction_c *i)
-{
-  BxPackedXmmRegister op1 = BX_READ_XMM_REG(i->src1());
-
-  if (! i->opmask() || BX_SCALAR_ELEMENT_MASK(i->opmask())) {
-    float32 op2 = BX_READ_XMM_REG_LO_DWORD(i->src2());
+    BxPackedAvxRegister op = BX_READ_AVX_REG(i->src());
+    Bit32u mask = i->opmask() ? BX_READ_16BIT_OPMASK(i->opmask()) : (Bit32u)-1;
+    unsigned len = i->getVL();
 
     float_status_t status = mxcsr_to_softfloat_status_word(MXCSR);
-    op1.xmm32u(0) = approximate_rcp14(op2, status);
-  }
-  else {
-    if (i->isZeroMasking())
-      op1.xmm32u(0) = 0;
-    else
-      op1.xmm32u(0) = BX_READ_XMM_REG_LO_DWORD(i->dst());
-  }
 
-  BX_WRITE_XMM_REG_CLEAR_HIGH(i->dst(), op1);
-  BX_NEXT_INSTR(i);
+    for (unsigned n = 0, tmp_mask = mask; n < DWORD_ELEMENTS(len); n++, tmp_mask >>= 1)
+    {
+        if (tmp_mask & 0x1)
+            op.vmm32u(n) = approximate_rcp14(op.vmm32u(n), status);
+        else
+            op.vmm32u(n) = 0;
+    }
+
+    if (!i->isZeroMasking())
+    {
+        for (unsigned n = 0; n < len; n++, mask >>= 4)
+            xmm_blendps(&BX_READ_AVX_REG_LANE(i->dst(), n), &op.vmm128(n), mask);
+        BX_CLEAR_AVX_REGZ(i->dst(), len);
+    }
+    else
+    {
+        BX_WRITE_AVX_REGZ(i->dst(), op, len);
+    }
+
+    BX_NEXT_INSTR(i);
 }
 
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::VRCP14SD_MASK_VsdHpdWsdR(bxInstruction_c *i)
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::VRCP14PD_MASK_VpdWpdR(bxInstruction_c* i)
 {
-  BxPackedXmmRegister op1 = BX_READ_XMM_REG(i->src1());
-
-  if (! i->opmask() || BX_SCALAR_ELEMENT_MASK(i->opmask())) {
-    float64 op2 = BX_READ_XMM_REG_LO_QWORD(i->src2());
+    BxPackedAvxRegister op = BX_READ_AVX_REG(i->src());
+    Bit32u mask = i->opmask() ? BX_READ_8BIT_OPMASK(i->opmask()) : (Bit32u)-1;
+    unsigned len = i->getVL();
 
     float_status_t status = mxcsr_to_softfloat_status_word(MXCSR);
-    op1.xmm64u(0) = approximate_rcp14(op2, status);
-  }
-  else {
-    if (i->isZeroMasking())
-      op1.xmm64u(0) = 0;
-    else
-      op1.xmm64u(0) = BX_READ_XMM_REG_LO_QWORD(i->dst());
-  }
 
-  BX_WRITE_XMM_REG_CLEAR_HIGH(i->dst(), op1);
-  BX_NEXT_INSTR(i);
+    for (unsigned n = 0, tmp_mask = mask; n < QWORD_ELEMENTS(len); n++, tmp_mask >>= 1)
+    {
+        if (tmp_mask & 0x1)
+            op.vmm64u(n) = approximate_rcp14(op.vmm64u(n), status);
+        else
+            op.vmm64u(n) = 0;
+    }
+
+    if (!i->isZeroMasking())
+    {
+        for (unsigned n = 0; n < len; n++, mask >>= 2)
+            xmm_blendpd(&BX_READ_AVX_REG_LANE(i->dst(), n), &op.vmm128(n), mask);
+        BX_CLEAR_AVX_REGZ(i->dst(), len);
+    }
+    else
+    {
+        BX_WRITE_AVX_REGZ(i->dst(), op, len);
+    }
+
+    BX_NEXT_INSTR(i);
+}
+
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::VRCP14SS_MASK_VssHpsWssR(bxInstruction_c* i)
+{
+    BxPackedXmmRegister op1 = BX_READ_XMM_REG(i->src1());
+
+    if (!i->opmask() || BX_SCALAR_ELEMENT_MASK(i->opmask()))
+    {
+        float32 op2 = BX_READ_XMM_REG_LO_DWORD(i->src2());
+
+        float_status_t status = mxcsr_to_softfloat_status_word(MXCSR);
+        op1.xmm32u(0) = approximate_rcp14(op2, status);
+    }
+    else
+    {
+        if (i->isZeroMasking())
+            op1.xmm32u(0) = 0;
+        else
+            op1.xmm32u(0) = BX_READ_XMM_REG_LO_DWORD(i->dst());
+    }
+
+    BX_WRITE_XMM_REG_CLEAR_HIGH(i->dst(), op1);
+    BX_NEXT_INSTR(i);
+}
+
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::VRCP14SD_MASK_VsdHpdWsdR(bxInstruction_c* i)
+{
+    BxPackedXmmRegister op1 = BX_READ_XMM_REG(i->src1());
+
+    if (!i->opmask() || BX_SCALAR_ELEMENT_MASK(i->opmask()))
+    {
+        float64 op2 = BX_READ_XMM_REG_LO_QWORD(i->src2());
+
+        float_status_t status = mxcsr_to_softfloat_status_word(MXCSR);
+        op1.xmm64u(0) = approximate_rcp14(op2, status);
+    }
+    else
+    {
+        if (i->isZeroMasking())
+            op1.xmm64u(0) = 0;
+        else
+            op1.xmm64u(0) = BX_READ_XMM_REG_LO_QWORD(i->dst());
+    }
+
+    BX_WRITE_XMM_REG_CLEAR_HIGH(i->dst(), op1);
+    BX_NEXT_INSTR(i);
 }
 
 #endif

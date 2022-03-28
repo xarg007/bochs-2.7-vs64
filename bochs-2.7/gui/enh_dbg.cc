@@ -23,7 +23,7 @@
 #include "pc_system.h"
 #include "cpu/cpu.h"
 
-extern char* disasm(const Bit8u *opcode, bool is_32, bool is_64, char *disbufptr, bxInstruction_c *i, bx_address cs_base, bx_address rip);
+extern char* disasm(const Bit8u* opcode, bool is_32, bool is_64, char* disbufptr, bxInstruction_c* i, bx_address cs_base, bx_address rip);
 
 #include "enh_dbg.h"
 
@@ -35,7 +35,7 @@ extern char* disasm(const Bit8u *opcode, bool is_32, bool is_64, char *disbufptr
 #define NEGATE_CLASS
 #define OPTIMIZE_JUST_STAR
 
-const char* DC0txt[2] = {"P.Address","L.Address"};    // DumpMode definitions in text
+const char* DC0txt[2] = { "P.Address","L.Address" };    // DumpMode definitions in text
 
 const char* BTxt[6] = {
   "Continue [c]",
@@ -43,7 +43,7 @@ const char* BTxt[6] = {
   "Step N [s ###]",
   "Refresh",
   "Break [^C]",
-  "Break All"};
+  "Break All" };
 
 int BtnLkup[6] = {
     CMD_CONT, CMD_STEP1, CMD_STEPN, CMD_RFRSH, CMD_BREAK
@@ -108,7 +108,7 @@ int OneCharWide;    // average width of a char in current font (pixels)
 int Sizing = 0;     // current "resizing/docking mode"
 int Resize_HiX;     // horizontal limits of the current resize operation (pixels)
 int Resize_LoX;
-unsigned ListWidthPix[3] = {5,7,8}; // set initial proportions of Reg, Asm, Dump windows
+unsigned ListWidthPix[3] = { 5,7,8 }; // set initial proportions of Reg, Asm, Dump windows
 int CurCenterList = 0;
 bool DumpHasFocus = FALSE;
 // BarClix holds the x-axis position (in pixels or logical units) of the two resizing bars,
@@ -129,7 +129,7 @@ bool doSimuInit;             // Internal flag #2
 bool ResizeColmns;           // address/value column autosize flag
 bool FWflag = FALSE;         // friendly warning has been shown to user once already
 
-static char *PrevStack;             // buffer for testing changes in stack values
+static char* PrevStack;             // buffer for testing changes in stack values
 Bit64u PStackLA = 0;                // to calculate alignment between prev and current stack
 bool StackEntChg[STACK_ENTRIES];     // flag for "change detected" on each stack line
 
@@ -142,7 +142,7 @@ static const char* RegLCName[EFER_Rnum + 1] = {
     "gdtr","idtr","ldtr","tr","cr0","cr2","cr3","cr4","efer"
 };
 static char* RDispName[EFER_Rnum + 1];
-static bx_param_num_c *RegObject[BX_MAX_SMP_THREADS_SUPPORTED][TOT_REG_NUM + EXTRA_REGS];
+static bx_param_num_c* RegObject[BX_MAX_SMP_THREADS_SUPPORTED][TOT_REG_NUM + EXTRA_REGS];
 Bit64u rV[EFER_Rnum + 1];   // current values of registers
 Bit64u PV[EFER_Rnum + 1];   // previous values of registers
 Bit32s GDT_Len;             // "limits" (= bytesize-1) for GDT and IDT
@@ -158,20 +158,20 @@ Bit64u l_p_offset;
 bool DumpInitted = FALSE;      // has the MemDump window ever been filled with data?
 int DumpAlign = 1;
 int PrevDAD;                   // saves "previous DumpAlign value" (forces column autosize)
-char *DataDump;
+char* DataDump;
 Bit64u DumpStart = 0;          // current emulated address (lin or phys) of DataDump
 bool doDumpRefresh;
 int DViewMode = VIEW_MEMDUMP;
 bool LinearDump = TRUE;        // FALSE = memdump uses physical addressing
 
-char *tmpcb;                   // 512b is allocated in bigbuf
-char *CurStack;                // Stack workspace (400b usually)
+char* tmpcb;                   // 512b is allocated in bigbuf
+char* CurStack;                // Stack workspace (400b usually)
 char AsciiHex[512];            // Unsigned char to printable hex xlat table
 static char UCtable[256];
 
 char bigbuf[outbufSIZE];       // 40K preallocated storage for all char buffers (see DoAllInit)
-char *DbgAppendPtr = bigbuf;
-char *OutWindow;               // buffer for the Output window
+char* DbgAppendPtr = bigbuf;
+char* OutWindow;               // buffer for the Output window
 int OutWinCnt = OutWinSIZE;    // available size of OutWindow buffer
 int PO_Tdelay = 0;             // delay before displaying partial output lines
 
@@ -183,7 +183,7 @@ Bit64u AsmLA[MAX_ASM];         // linear address of each disassembled ASM line
 
 // Command stuff
 int CommandHistoryIdx = 0;
-char *CmdHistory[CmdHistorySize];  // 64 command History storage (fixed 80b each)
+char* CmdHistory[CmdHistorySize];  // 64 command History storage (fixed 80b each)
 int CmdHInsert = 0;                // index of next history entry to store
 
 int SizeList = 0;
@@ -214,7 +214,7 @@ static const char* Fmt16b[2] = { "%04x", "%04X" };
 static const char* xDT64Fmt[2] = { FMT_ADDRX64 " (%4x)", "%016llX (%4X)" };
 static const char* xDT32Fmt[2] = { "%08x (%4x)", "%08X (%4X)" };
 
-static const char *BrkName[5] = {
+static const char* BrkName[5] = {
    "Linear Breakpt",
    "Physical Breakpt",
    "Virtual Breakpt",
@@ -222,8 +222,8 @@ static const char *BrkName[5] = {
    "Read Watchpoint",
 };
 
-bx_address BrkLAddr[BX_DBG_MAX_LIN_BPOINTS+1];
-unsigned BrkIdx[BX_DBG_MAX_LIN_BPOINTS+1];
+bx_address BrkLAddr[BX_DBG_MAX_LIN_BPOINTS + 1];
+unsigned BrkIdx[BX_DBG_MAX_LIN_BPOINTS + 1];
 int BreakCount = 0;
 
 // Breakpoint Dump Window stuff
@@ -237,12 +237,12 @@ unsigned short RWPSnapCount;
 bx_phy_address WWP_Snapshot[16];
 bx_phy_address RWP_Snapshot[16];
 
-char *debug_cmd;
+char* debug_cmd;
 bool debug_cmd_ready;
 bool vgaw_refresh;
 
 static bxevent_handler old_callback = NULL;
-static void *old_callback_arg = NULL;
+static void* old_callback_arg = NULL;
 
 short nDock[36] = {     // lookup table for alternate DockOrders
     0x231, 0x312, 0x231, 0x213, 0x132, 0x132,
@@ -255,29 +255,29 @@ short nDock[36] = {     // lookup table for alternate DockOrders
 
 void MakeXlatTables()
 {
-    char *p, c;
+    char* p, c;
     int i = 256;
     while (--i >= 0)            // make an upper case translation table
-        UCtable[i]= toupper(i);
+        UCtable[i] = toupper(i);
     p = AsciiHex;               //  then also make a "hex" table
-    for ( i = 0; i < 256; i++)
+    for (i = 0; i < 256; i++)
     {
         c = i >> 4;
         if (c > 9)
             c += 'A' - 10;  // do all hex in uppercase
         else
             c += '0';
-        *(p++)= c;
+        *(p++) = c;
         c = i & 0xf;
         if (c > 9)
             c += 'A' - 10;
         else
             c += '0';
-        *(p++)= c;
+        *(p++) = c;
     }
 }
 
-int DoMatch(const char *text, const char *p, bool IsCaseSensitive)
+int DoMatch(const char* text, const char* p, bool IsCaseSensitive)
 {
     // probably the MOST DIFFICULT FUNCTION in TurboIRC
     // Thanks to BitchX for copying this function
@@ -297,33 +297,33 @@ int DoMatch(const char *text, const char *p, bool IsCaseSensitive)
             //                pP++;
             // NO BREAK HERE
 
-            default:
-                if (IsCaseSensitive)
-                {
-                    if (text[pT] != p[pP])
-                        return MATCH_FALSE;
-                    else
-                        continue;
-                }
-                if (UCtable[(int) text[pT]] != UCtable[(int) p[pP]])
+        default:
+            if (IsCaseSensitive)
+            {
+                if (text[pT] != p[pP])
                     return MATCH_FALSE;
-                continue;
+                else
+                    continue;
+            }
+            if (UCtable[(int)text[pT]] != UCtable[(int)p[pP]])
+                return MATCH_FALSE;
+            continue;
 
-            case '?':
-                continue;
+        case '?':
+            continue;
 
-            case '*':
-                if (p[pP] == '*')
-                    pP++;
-                if (p[pP] == '\0')
-                    return MATCH_TRUE;
-                while (text[pT] != FALSE)
-                {
-                    matched = DoMatch(text + pT++, p + pP, FALSE);
-                    if (matched != MATCH_FALSE)
-                        return matched;
-                }
-                return MATCH_ABORT;
+        case '*':
+            if (p[pP] == '*')
+                pP++;
+            if (p[pP] == '\0')
+                return MATCH_TRUE;
+            while (text[pT] != FALSE)
+            {
+                matched = DoMatch(text + pT++, p + pP, FALSE);
+                if (matched != MATCH_FALSE)
+                    return matched;
+            }
+            return MATCH_ABORT;
 
         }
     }
@@ -331,7 +331,7 @@ int DoMatch(const char *text, const char *p, bool IsCaseSensitive)
 }
 
 // This will be called from the other funcs
-int VMatching(const char *text, const char *p, bool IsCaseSensitive)
+int VMatching(const char* text, const char* p, bool IsCaseSensitive)
 {
 #ifdef OPTIMIZE_JUST_STAR
     if (p[0] == '*' && p[1] == '\0')
@@ -340,7 +340,7 @@ int VMatching(const char *text, const char *p, bool IsCaseSensitive)
     return (DoMatch(text, p, IsCaseSensitive) == MATCH_TRUE);
 }
 
-int IsMatching(const char *text, const char *p, bool IsCaseSensitive)
+int IsMatching(const char* text, const char* p, bool IsCaseSensitive)
 {
     return VMatching(text, p, IsCaseSensitive);
 }
@@ -353,14 +353,14 @@ void SetHorzLimits()
     if (Sizing == -2)  // is it the left or right bar?
     {
         Resize_LoX = OneCharWide << 2;      // set horizontal limits
-        i = ListWidthPix[(DockOrder >> 8) -1];  // col1 width
+        i = ListWidthPix[(DockOrder >> 8) - 1];  // col1 width
         // calculate end of col2 - 4 charwidths in parent coordinates
         Resize_HiX = i + ListWidthPix[CurCenterList] - (OneCharWide << 2);
         Sizing = 1;
     }
     else
     {
-        i = ListWidthPix[(DockOrder >> 8) -1];  // col1 width
+        i = ListWidthPix[(DockOrder >> 8) - 1];  // col1 width
         Resize_LoX = i + (OneCharWide << 2);    // set horizontal limits
         // calculate total width - 4 charwidths in parent coordinates
         i = ListWidthPix[REG_WND] + ListWidthPix[ASM_WND] + ListWidthPix[DUMP_WND];
@@ -369,7 +369,7 @@ void SetHorzLimits()
     }
 }
 
-void DockResize (int DestIdx, Bit32u ParentX)
+void DockResize(int DestIdx, Bit32u ParentX)
 {
     if (Sizing >= 10)       // dock operation
     {
@@ -378,13 +378,13 @@ void DockResize (int DestIdx, Bit32u ParentX)
         {
             // Convert Sizing and DestIdx into a table lookup index (j)
             // -- otherwise, the "algorithm" to compute new DockOrder is annoying
-            int j = (Siz*2 + ((Siz | DestIdx) & 1)) *6;
+            int j = (Siz * 2 + ((Siz | DestIdx) & 1)) * 6;
             if (Siz == 1)
-                j = (Siz*4 + (DestIdx & 2)) *3;
+                j = (Siz * 4 + (DestIdx & 2)) * 3;
 
             // convert current DockOrder to a number from 0 to 5, add to j
-            j += ((DockOrder >> 7) - 2) &6;
-            if (((DockOrder >> 4) &3) > (DockOrder & 3))
+            j += ((DockOrder >> 7) - 2) & 6;
+            if (((DockOrder >> 4) & 3) > (DockOrder & 3))
                 j += 1;
             DockOrder = nDock[j];
             MoveLists();
@@ -395,15 +395,15 @@ void DockResize (int DestIdx, Bit32u ParentX)
         int idx, totpix;
         if (Sizing == 1)
         {
-            idx = (DockOrder >> 8) -1;          // sizing the left bar
+            idx = (DockOrder >> 8) - 1;          // sizing the left bar
             totpix = ListWidthPix[idx] + ListWidthPix[CurCenterList];
             ListWidthPix[idx] = ParentX;
             ListWidthPix[CurCenterList] = totpix - ParentX; // reset the widths of the left and center windows
         }
         else
         {
-            ParentX -= ListWidthPix[(DockOrder >> 8) -1];       // caclulate new width of center window
-            idx = (DockOrder & 3) -1;
+            ParentX -= ListWidthPix[(DockOrder >> 8) - 1];       // caclulate new width of center window
+            idx = (DockOrder & 3) - 1;
             totpix = ListWidthPix[idx] + ListWidthPix[CurCenterList];
             ListWidthPix[CurCenterList] = ParentX;
             ListWidthPix[idx] = totpix - ParentX;   // reset the widths of the right and center windows
@@ -416,7 +416,7 @@ void DockResize (int DestIdx, Bit32u ParentX)
 // Convert a string (except for the 0x in a hex number) to uppercase
 void upr(char* d)
 {
-    char *p;
+    char* p;
     p = d;
     while (*p != 0)
     {
@@ -424,16 +424,16 @@ void upr(char* d)
             p += 2;
         else
         {
-            *p = UCtable[(int) *p]; // use the lookup table created by MakeXlatTables
+            *p = UCtable[(int)*p]; // use the lookup table created by MakeXlatTables
             ++p;
         }
     }
 }
 
 // create EFLAGS display for Status line
-void ShowEflags(char *buf)
+void ShowEflags(char* buf)
 {
-    static const char *EflBName[16] = {
+    static const char* EflBName[16] = {
         "cf", "pf", "af", "zf", "sf", "tf", "if", "df", "of", "nt", "rf", "vm", "ac", "vif", "vip", "id"
     };
     static const int EflBNameLen[16] = {
@@ -443,15 +443,15 @@ void ShowEflags(char *buf)
         1, 4, 0x10, 0x40, 0x80, 0x100, 0x200, 0x400, 0x800, 0x4000, 0x10000, 0x20000, 0x40000, 0x80000, 0x100000, 0x200000
     };
 
-    Bit32u Efl = (Bit32u) rV[EFL_Rnum];
+    Bit32u Efl = (Bit32u)rV[EFL_Rnum];
     int i = 16;
-    char *cp = buf + 6;
+    char* cp = buf + 6;
 
-    sprintf(buf,"IOPL=%1u", (Efl & 0x3000) >> 12);
+    sprintf(buf, "IOPL=%1u", (Efl & 0x3000) >> 12);
     while (--i >= 0)
     {
-        *(cp++)= ' ';
-        strcpy (cp, EflBName[i]);       // copy the name of the bitflag
+        *(cp++) = ' ';
+        strcpy(cp, EflBName[i]);       // copy the name of the bitflag
         if ((Efl & EflBitVal[i]) != 0)  // if the bit is set, put the name in uppercase
             upr(cp);
         cp += EflBNameLen[i];
@@ -476,36 +476,39 @@ void UpdateStatus()
         {
             CpuModeChange = FALSE;
             char mode[32];
-            switch (CpuMode) {
-                case BX_MODE_IA32_REAL:
-                    if (In32Mode == FALSE)
-                        strcpy (mode, "CPU: Real Mode 16");
+            switch (CpuMode)
+            {
+            case BX_MODE_IA32_REAL:
+                if (In32Mode == FALSE)
+                    strcpy(mode, "CPU: Real Mode 16");
+                else
+                    strcpy(mode, "CPU: Real Mode 32");
+                break;
+            case BX_MODE_IA32_V8086:
+                strcpy(mode, "CPU: V8086 Mode");
+                break;
+            case BX_MODE_IA32_PROTECTED:
+                if (In32Mode == FALSE)
+                {
+                    if (InPaging != 0)
+                        strcpy(mode, "CPU: Protected Mode 16 (PG)");
                     else
-                        strcpy (mode, "CPU: Real Mode 32");
-                    break;
-                case BX_MODE_IA32_V8086:
-                    strcpy (mode, "CPU: V8086 Mode");
-                    break;
-                case BX_MODE_IA32_PROTECTED:
-                    if (In32Mode == FALSE) {
-                        if (InPaging != 0)
-                            strcpy (mode, "CPU: Protected Mode 16 (PG)");
-                        else
-                            strcpy (mode, "CPU: Protected Mode 16");
-                    }
-                    else {
-                        if (InPaging != 0)
-                            strcpy (mode, "CPU: Protected Mode 32 (PG)");
-                        else
-                            strcpy (mode, "CPU: Protected Mode 32");
-                    }
-                    break;
-                case BX_MODE_LONG_COMPAT:
-                    strcpy (mode, "CPU: Compatibility Mode");
-                    break;
-                case BX_MODE_LONG_64:
-                    strcpy (mode, "CPU: Long Mode");
-                    break;
+                        strcpy(mode, "CPU: Protected Mode 16");
+                }
+                else
+                {
+                    if (InPaging != 0)
+                        strcpy(mode, "CPU: Protected Mode 32 (PG)");
+                    else
+                        strcpy(mode, "CPU: Protected Mode 32");
+                }
+                break;
+            case BX_MODE_LONG_COMPAT:
+                strcpy(mode, "CPU: Compatibility Mode");
+                break;
+            case BX_MODE_LONG_64:
+                strcpy(mode, "CPU: Long Mode");
+                break;
             }
             SetStatusText(1, mode);    // display CPU mode in status col#1
         }
@@ -519,13 +522,13 @@ void UpdateStatus()
 
 // Read a copy of some emulated linear bochs memory
 // Note: laddr + len must not cross a 4K boundary -- otherwise, there are no limits
-bool ReadBxLMem(Bit64u laddr, unsigned len, Bit8u *buf)
+bool ReadBxLMem(Bit64u laddr, unsigned len, Bit8u* buf)
 {
     return bx_dbg_read_linear(CurrentCPU, laddr, len, buf);
 }
 
 // binary conversion (and validity testing) on hex/decimal char string inputs
-Bit64u cvthex(char *p, Bit64u errval)
+Bit64u cvthex(char* p, Bit64u errval)
 {
     Bit64u ret = 0;
     bool end = FALSE;
@@ -543,13 +546,13 @@ Bit64u cvthex(char *p, Bit64u errval)
     return ret;
 }
 
-Bit64u cvt64(char *nstr, bool negok)
+Bit64u cvt64(char* nstr, bool negok)
 {
-    char *p, *s;
+    char* p, * s;
     Bit64u ret = 0;
     bool neg = FALSE;
-    p= nstr;
-    while (*p==' ' || *p == '\t')
+    p = nstr;
+    while (*p == ' ' || *p == '\t')
         ++p;
     if (*p == '-' && negok != FALSE)
     {
@@ -557,19 +560,19 @@ Bit64u cvt64(char *nstr, bool negok)
         neg = TRUE;
     }
     if (*p == '0' && (p[1] | 0x20) == 'x' && neg == FALSE)
-        return cvthex (p+2, 0);
+        return cvthex(p + 2, 0);
     s = p;
     while (*p >= '0' && *p <= '9')
         ret = (ret * 10) + *(p++) - '0';
     if ((*p | 0x20) >= 'a' && (*p | 0x20) <= 'f' && neg == FALSE)
-        return cvthex (s, ret);
+        return cvthex(s, ret);
     if (neg != FALSE)
         return 0 - ret;
     return ret;
 }
 
 // "singlestep" disassembly lines from the internal debugger are sometimes ignored
-bool isSSDisasm(char *s)
+bool isSSDisasm(char* s)
 {
     if (ignSSDisasm == FALSE)   // ignoring those lines?
         return FALSE;
@@ -595,15 +598,15 @@ bool isSSDisasm(char *s)
 
 // dump output from the bochs internal debugger to Output window
 // Note: this routine may be called *DIRECTLY* from bochs!
-void ParseIDText(const char *x)
+void ParseIDText(const char* x)
 {
     int i = 0;
     int overflow = 0;
-    while (*x !=0 && *x != '\r' && *x != '\n' && DbgAppendPtr < tmpcb)
-        *(DbgAppendPtr++)= *(x++);  // append the chars from x into the bigbuf
+    while (*x != 0 && *x != '\r' && *x != '\n' && DbgAppendPtr < tmpcb)
+        *(DbgAppendPtr++) = *(x++);  // append the chars from x into the bigbuf
     if (DbgAppendPtr >= tmpcb)      // overflow error?
     {
-        DispMessage("Debugger output cannot be parsed -- line too long","Buffer overflow");
+        DispMessage("Debugger output cannot be parsed -- line too long", "Buffer overflow");
         DbgAppendPtr = bigbuf;      // throw away the line
         return;
     }
@@ -617,10 +620,10 @@ void ParseIDText(const char *x)
     PO_Tdelay = 0;          // line completed -- cancel any partial output time delay
 
     // restart DbgAppendPtr at the beginning of a new line buffer
-    char *s = DbgAppendPtr = bigbuf;    // s -> raw text line from debugger
+    char* s = DbgAppendPtr = bigbuf;    // s -> raw text line from debugger
     if (ignoreNxtT != FALSE)
     {
-        if (strncmp(s,"Next at t",9) == 0)
+        if (strncmp(s, "Next at t", 9) == 0)
             return;
     }
     if (isSSDisasm(s) != FALSE)
@@ -636,20 +639,20 @@ void ParseIDText(const char *x)
         i = 200;
         overflow = 3;
     }
-    char *p = OutWindow;
-    if ((i+overflow+2+useCR) > OutWinCnt)       // amt needed vs. space available
+    char* p = OutWindow;
+    if ((i + overflow + 2 + useCR) > OutWinCnt)       // amt needed vs. space available
     {
         s = OutWindow;      // need to toss lines off beginning of OutWindow
         int j = OutWinCnt - overflow - 2 - useCR;
         while (j < i)       // throw away one line at a time
         {
-                // stop on any unprintable char < ' '
+            // stop on any unprintable char < ' '
             while ((unsigned char)*s >= ' ' || *s == '\t')
             {
                 ++s;
                 ++j;    // increase available space as chars are tossed
             }
-             // in reality, s must be pointing at an EOL
+            // in reality, s must be pointing at an EOL
             s += 1 + useCR;
             j += 1 + useCR;
         }
@@ -702,10 +705,10 @@ void FillRegs()
         IDT_Len = RegObject[CurrentCPU][IDTR_Lim]->get();
 
     // Check CR0 bit 31 -- Paging bit
-    Bit32u NewPg = (Bit32u) rV[CR0_Rnum] & 0x80000000;
+    Bit32u NewPg = (Bit32u)rV[CR0_Rnum] & 0x80000000;
     if (InPaging != NewPg)
     {
-        GrayMenuItem ((int) NewPg, CMD_PAGEV);
+        GrayMenuItem((int)NewPg, CMD_PAGEV);
         StatusChange = TRUE;
     }
     InPaging = NewPg;
@@ -755,28 +758,28 @@ int FillSSE(int LineCount)
 {
 #if BX_CPU_LEVEL >= 6
     Bit64u val = 0;
-    bx_param_num_c *p;
-    char *cols[3];
+    bx_param_num_c* p;
+    char* cols[3];
     char ssetxt[80];
 
     if ((rV[CR0_Rnum] & 0xc) != 0)  // TS or EM flags in CR0 temporarily disable SSE
     {
         cols[0] = ssetxt;
-        strcpy (ssetxt, "SSE-off");
+        strcpy(ssetxt, "SSE-off");
         InsertListRow(cols, 1, REG_WND, LineCount, 4);
         RitemToRnum[LineCount] = XMM0_Rnum;
         return ++LineCount;
     }
 
-// format: XMM[#] 00000000:00000000 (each 16 hex digits)
+    // format: XMM[#] 00000000:00000000 (each 16 hex digits)
     *ssetxt = 0;
     cols[1] = ssetxt;       // column 1 is being left blank
     cols[0] = ssetxt + 1;
     cols[2] = ssetxt + 10;
-    strcpy (ssetxt+1, "XMM[0]");
+    strcpy(ssetxt + 1, "XMM[0]");
     ssetxt[10] = '0';       // I'm putting a hex value in the decimal column -- more room there!
     ssetxt[11] = 'x';
-    strcpy (ssetxt + 28, " : ");
+    strcpy(ssetxt + 28, " : ");
     for (int i = 0; i < /*BX_XMM_REGISTERS*/ 16; i++)
     {
         if (i >= 10)
@@ -795,13 +798,13 @@ int FillSSE(int LineCount)
             val = p->get64();   // get the value of "xmm(i)_hi" register
         else
             val = 0;
-        sprintf (ssetxt + 12,Fmt64b[UprCase],val);
+        sprintf(ssetxt + 12, Fmt64b[UprCase], val);
         p = RegObject[CurrentCPU][XMM0_Rnum + i];
         if (p != NULL)
             val = p->get64();       // "SSE.xmm[i]_lo"
         else
             val = 0;
-        sprintf (ssetxt + 31,Fmt64b[UprCase], val);
+        sprintf(ssetxt + 31, Fmt64b[UprCase], val);
         InsertListRow(cols, 3, REG_WND, LineCount, 4);  // 3 cols, group 4
         ++LineCount;
     }
@@ -817,25 +820,25 @@ int FillMMX(int LineCount)
     int i;
     Bit16u exp = 0;
     Bit64u mmreg = 0;
-    bx_param_num_c *p;
+    bx_param_num_c* p;
     unsigned short exponent[8];
-    char *cols[3];
+    char* cols[3];
     char fputxt[60];
 
     cols[0] = fputxt;
     if ((rV[CR0_Rnum] & 0xc) != 0)  // TS or EM flags in CR0 temporarily disable MMX/FPU/SSE
     {
-        strcpy (fputxt, "FPU-off");
+        strcpy(fputxt, "FPU-off");
         InsertListRow(cols, 1, REG_WND, LineCount, 3);
         RitemToRnum[LineCount] = ST0_Rnum;
         return ++LineCount;
     }
 
-// format: MM#|ST# 00000000:00000000 then FPU float value in "decimal" column
+    // format: MM#|ST# 00000000:00000000 then FPU float value in "decimal" column
     cols[1] = fputxt + 10;
     cols[2] = fputxt + 32;
-    strcpy (fputxt, "MM0-ST0");
-    strcpy (fputxt + 18, " : ");
+    strcpy(fputxt, "MM0-ST0");
+    strcpy(fputxt + 18, " : ");
     i = 7;
     for (i = 0; i < 8; i++)
     {
@@ -847,12 +850,12 @@ int FillMMX(int LineCount)
             mmreg = p->get64(); // get the value of "mmx(i)" register
         else
             mmreg = 0;
-        sprintf (fputxt + 10,Fmt32b[UprCase],GET32H(mmreg));
-        sprintf (fputxt + 21,Fmt32b[UprCase], GET32L(mmreg));
+        sprintf(fputxt + 10, Fmt32b[UprCase], GET32H(mmreg));
+        sprintf(fputxt + 21, Fmt32b[UprCase], GET32L(mmreg));
 
         p = RegObject[CurrentCPU][ST0_exp + i];
         if (p != NULL)
-            exp = (Bit16u) p->get64();  // get the exponent for this FPU register
+            exp = (Bit16u)p->get64();  // get the exponent for this FPU register
         else
             exp = 0;
         exponent[i] = exp;              // save each one temporarily
@@ -860,21 +863,21 @@ int FillMMX(int LineCount)
         if (exp & 0x8000)
             f = -f;
 #ifdef _MSC_VER
-        f *= (double)(signed __int64)(mmreg>>1) * scale_factor * 2;
+        f *= (double)(signed __int64)(mmreg >> 1) * scale_factor * 2;
 #else
-        f *= mmreg*scale_factor;
+        f *= mmreg * scale_factor;
 #endif
-        sprintf (cols[2],"%.3e",f);
+        sprintf(cols[2], "%.3e", f);
         InsertListRow(cols, 3, REG_WND, LineCount, 3);  // 3 cols, group 3
         ++LineCount;
     }
-    strcpy (fputxt, "ST0.exp");
+    strcpy(fputxt, "ST0.exp");
     for (i = 0; i < 8; i++)
     {
         fputxt[2] = i + '0';
         RitemToRnum[LineCount] = i + ST0_exp;
-        sprintf (fputxt+10,Fmt16b[UprCase], exponent[i]);   // col1
-        sprintf (fputxt+32,"%u", exponent[i]);      // col2
+        sprintf(fputxt + 10, Fmt16b[UprCase], exponent[i]);   // col1
+        sprintf(fputxt + 32, "%u", exponent[i]);      // col2
         InsertListRow(cols, 3, REG_WND, LineCount, 3);  // 3 cols, group 3
         ++LineCount;
     }
@@ -884,13 +887,13 @@ int FillMMX(int LineCount)
 // get values of Debug registers from simulation
 int FillDebugRegs(int itemnum)
 {
-    bx_param_num_c *bxp;
+    bx_param_num_c* bxp;
     Bit32u val;
     unsigned int i;
-    char *cols[2];
+    char* cols[2];
     char drtxt[20];
 
-    strcpy (drtxt,"dr0");
+    strcpy(drtxt, "dr0");
     if (UprCase != FALSE)
     {
         *drtxt = 'D';
@@ -899,14 +902,14 @@ int FillDebugRegs(int itemnum)
     cols[0] = drtxt;
     cols[1] = drtxt + 4;
 
-    for(i = 0; i < 6; i++)
+    for (i = 0; i < 6; i++)
     {
         bxp = RegObject[CurrentCPU][DR0_Rnum + i];
         val = 0;
         if (bxp != NULL)
-             val = bxp->get();
+            val = bxp->get();
         RitemToRnum[itemnum] = i + DR0_Rnum;
-        sprintf(drtxt + 4,Fmt32b[UprCase],val);
+        sprintf(drtxt + 4, Fmt32b[UprCase], val);
 
         InsertListRow(cols, 2, REG_WND, itemnum, 5);    // 3 cols, group 5
         ++drtxt[2];         // change the name, the cheap way
@@ -928,8 +931,8 @@ void FillAsm(Bit64u LAddr, int MaxLines)
     bool BufEmpty;
     bool Go = TRUE;
     char AsmData[BX_GUI_DB_ASM_DATA];  // 5K for binary disassembly data
-    char *s, *p = AsmData;  // just to avoid a compiler warning
-    char *cols[3];
+    char* s, * p = AsmData;  // just to avoid a compiler warning
+    char* cols[3];
     char asmtxt[200];
 
     cols[0] = asmtxt;
@@ -943,32 +946,32 @@ void FillAsm(Bit64u LAddr, int MaxLines)
     while (Go != FALSE)
     {
         // copydown buffer -- buffer size must be 4K + 16
-        s= AsmData;
-        i= BufLen;      // BufLen is guaranteed < 16
+        s = AsmData;
+        i = BufLen;      // BufLen is guaranteed < 16
         while (i-- > 0)
-            *(s++)= *(p++);
+            *(s++) = *(p++);
         // load buffer, up to the next 4k boundary
-        len = 4096 - (((int) ReadAddr) & 0xfff);    // calculate read amount
-        Go = ReadBxLMem(ReadAddr, len, (Bit8u *) s);
+        len = 4096 - (((int)ReadAddr) & 0xfff);    // calculate read amount
+        Go = ReadBxLMem(ReadAddr, len, (Bit8u*)s);
         BufLen += len;
         ReadAddr += len;
         if (Go == FALSE)
             break;
         BufEmpty = FALSE;
-        p= AsmData;         // start at the beginning of the new buffer
+        p = AsmData;         // start at the beginning of the new buffer
         while (AsmLineCount < MaxLines && BufEmpty == FALSE)
         {
             // disassemble 1 line with a direct call, into asmtxt
-            len = bx_dbg_disasm_wrapper(In32Mode, In64Mode, (bx_address) 0,
-                  (bx_address) LAddr, (Bit8u *) p, cols[2]);
+            len = bx_dbg_disasm_wrapper(In32Mode, In64Mode, (bx_address)0,
+                (bx_address)LAddr, (Bit8u*)p, cols[2]);
 
             if (len <= BufLen)      // disassembly was successful?
             {
                 AsmLA[AsmLineCount] = LAddr;        // save, and
                 if (In64Mode == FALSE)      // "display" linear addy of the opcode
-                    sprintf (asmtxt,Fmt32b[UprCase],LAddr);
+                    sprintf(asmtxt, Fmt32b[UprCase], LAddr);
                 else
-                    sprintf (asmtxt,Fmt64b[UprCase],LAddr);
+                    sprintf(asmtxt, Fmt64b[UprCase], LAddr);
 
                 BufLen -= len;  // used up len bytes from buffer
                 LAddr += len;   // calculate next LAddr
@@ -979,7 +982,7 @@ void FillAsm(Bit64u LAddr, int MaxLines)
                 i = len;
                 if (len > 9)
                 {
-                    *(s++)=  '1';   // len < 16, so convert to decimal the easy way
+                    *(s++) = '1';   // len < 16, so convert to decimal the easy way
                     i -= 10;
                 }
                 *(s++) = i + '0';
@@ -987,9 +990,9 @@ void FillAsm(Bit64u LAddr, int MaxLines)
                 *(s++) = ' ';
                 while (len-- > 0)
                 {
-                    i = (unsigned char) *(p++);
-                    *(s++) = AsciiHex[2*i];
-                    *(s++) = AsciiHex[2*i+1];
+                    i = (unsigned char)*(p++);
+                    *(s++) = AsciiHex[2 * i];
+                    *(s++) = AsciiHex[2 * i + 1];
                 }
                 *s = 0;     // zero terminate the "bytes" string
 
@@ -1016,7 +1019,7 @@ void LoadRegList()
 {
     int i, itemnum;     // TODO: This routine needs a big rewrite to make it pretty
     bool showEreg = TRUE;
-    char *cols[3];
+    char* cols[3];
     char regtxt[100];
     StartListUpdate(REG_WND);
     FillRegs();         // get new values for rV local register array
@@ -1032,7 +1035,7 @@ void LoadRegList()
         for (i = RAX_Rnum; i <= R15_Rnum; i++)
         {
             RitemToRnum[itemnum] = i;   // always recreate the register -> itemnum mapping
-            sprintf(regtxt,Fmt64b[UprCase], rV[i]);  // print the hex column
+            sprintf(regtxt, Fmt64b[UprCase], rV[i]);  // print the hex column
             sprintf(cols[2], FMT_LL "d", rV[i]);     // and decimal
             cols[0] = RDispName[i];
             InsertListRow(cols, 3, REG_WND, itemnum, 0);    // 3 cols, group 0
@@ -1062,7 +1065,7 @@ void LoadRegList()
     }
     // always insert eflags next
     RitemToRnum[itemnum] = EFL_Rnum;
-    sprintf(regtxt,Fmt32b[UprCase],(Bit32u)rV[EFL_Rnum]);   // print the hex column
+    sprintf(regtxt, Fmt32b[UprCase], (Bit32u)rV[EFL_Rnum]);   // print the hex column
     cols[0] = RDispName[EFL_Rnum];
     InsertListRow(cols, 2, REG_WND, itemnum, 0);    // 2 cols, group 0
     ++itemnum;
@@ -1073,7 +1076,7 @@ void LoadRegList()
     // display Segment registers (if requested)
     if (SeeReg[1])
     {
-        for(i = CS_Rnum; i <= GS_Rnum; i++)       // segment registers
+        for (i = CS_Rnum; i <= GS_Rnum; i++)       // segment registers
         {
             RitemToRnum[itemnum] = i;
             sprintf(regtxt, Fmt16b[UprCase], rV[i] & 0xffff);
@@ -1088,8 +1091,8 @@ void LoadRegList()
     {
         int j = TRRnum;
         if (In32Mode == FALSE)      // don't show lgdt or tr in Real mode
-            j= IDTRnum;
-        for(i = GDTRnum; i <= j; i++)
+            j = IDTRnum;
+        for (i = GDTRnum; i <= j; i++)
         {
             RitemToRnum[itemnum] = i;
             if (i == GDTRnum || i == IDTRnum)
@@ -1098,13 +1101,13 @@ void LoadRegList()
                 if (i == IDTRnum)
                     limit = IDT_Len;
                 if (In64Mode == FALSE)
-                    sprintf(regtxt,xDT32Fmt[UprCase],(Bit32u)rV[i],limit);
+                    sprintf(regtxt, xDT32Fmt[UprCase], (Bit32u)rV[i], limit);
                 else
-                    sprintf(regtxt,xDT64Fmt[UprCase],rV[i],limit);
+                    sprintf(regtxt, xDT64Fmt[UprCase], rV[i], limit);
 
             }
             else
-                sprintf(regtxt,Fmt16b[UprCase], rV[i] & 0xffff);    // lgdt, tr
+                sprintf(regtxt, Fmt16b[UprCase], rV[i] & 0xffff);    // lgdt, tr
 
             cols[0] = RDispName[i];
             InsertListRow(cols, 2, REG_WND, itemnum, 1);    // 2 cols, group 1
@@ -1114,14 +1117,14 @@ void LoadRegList()
     // display Control Registers (if requested)
     if (SeeReg[3])
     {
-        for(i = CR0_Rnum; i <= EFER_Rnum; i++)
+        for (i = CR0_Rnum; i <= EFER_Rnum; i++)
         {
             RitemToRnum[itemnum] = i;
 
             if (In64Mode && (i == CR2_Rnum || i == CR3_Rnum))
-                sprintf(regtxt,Fmt64b[UprCase],rV[i]);
+                sprintf(regtxt, Fmt64b[UprCase], rV[i]);
             else
-                sprintf(regtxt,Fmt32b[UprCase],(Bit32u)rV[i]);
+                sprintf(regtxt, Fmt32b[UprCase], (Bit32u)rV[i]);
 
             cols[0] = RDispName[i];
             InsertListRow(cols, 2, REG_WND, itemnum, 2);    // 2 cols, group 2
@@ -1138,7 +1141,7 @@ void LoadRegList()
         else
             RegColor[i] &= 0x7f;
     }
-// Load any optional STi, MMX, SSE, DRx, TRx register info into the Register window
+    // Load any optional STi, MMX, SSE, DRx, TRx register info into the Register window
 #if BX_SUPPORT_FPU
     // MMX-FPU registers
     if (SeeReg[4] != FALSE)
@@ -1164,7 +1167,7 @@ void doAsmScroll()
     int CurTopIdx = GetASMTopIdx();
     int nli = -2;
     // Can the current line be displayed at all?
-    if (CurrentAsmLA < *AsmLA || CurrentAsmLA > AsmLA[AsmLineCount-1])
+    if (CurrentAsmLA < *AsmLA || CurrentAsmLA > AsmLA[AsmLineCount - 1])
         return;
     //  convert from LA to a Line Index (nli) with a search
     j = CurTopIdx;      // try to start at CurTopIdx
@@ -1191,16 +1194,16 @@ void doAsmScroll()
         if (ScrollLines < -CurTopIdx)
             ScrollLines = -CurTopIdx - 1;   // just a little extra to make sure
         // convert # of scroll lines to pixels
-        ScrollASM (ScrollLines * ListLineRatio);
+        ScrollASM(ScrollLines * ListLineRatio);
     }
     Invalidate(ASM_WND);        // "current opcode" in ASM window needs redrawing
 }
 
 // try to find a Linear Address to start a "pretty" autodisassembly
-void CanDoLA(Bit64u *h)
+void CanDoLA(Bit64u* h)
 {
     int index;
-    if (TopAsmLA > *h || *h > AsmLA[AsmLineCount-1])    // is it hopeless?
+    if (TopAsmLA > *h || *h > AsmLA[AsmLineCount - 1])    // is it hopeless?
         return;
     if (bottommargin > AsmLineCount)
         index = 0;
@@ -1218,8 +1221,8 @@ void CanDoLA(Bit64u *h)
 
 void InitRegObjects()
 {
-    bx_list_c *cpu_list;
-    extern bx_list_c *root_param;
+    bx_list_c* cpu_list;
+    extern bx_list_c* root_param;
     int cpu = BX_SMP_PROCESSORS;
     // get the param tree interface objects for every single register on all CPUs
     while (--cpu >= 0)
@@ -1228,11 +1231,11 @@ void InitRegObjects()
         // but it doesn't hurt anything to do it again, once
         int i = TOT_REG_NUM + EXTRA_REGS;
         while (--i >= 0)
-            RegObject[cpu][i] = (bx_param_num_c *) NULL;
+            RegObject[cpu][i] = (bx_param_num_c*)NULL;
 
         char pname[16];
-        sprintf (pname,"bochs.cpu%d", cpu);    // set the "cpu number" for cpu_list
-        cpu_list = (bx_list_c *) SIM->get_param(pname, root_param);
+        sprintf(pname, "bochs.cpu%d", cpu);    // set the "cpu number" for cpu_list
+        cpu_list = (bx_list_c*)SIM->get_param(pname, root_param);
 
         // TODO: in the next version, put all the names in an array, and loop
         // -- but that method is not compatible with bochs 2.3.7 or earlier
@@ -1309,7 +1312,8 @@ void InitRegObjects()
 #if BX_CPU_LEVEL >= 6
         CpuSupportSSE = SIM->get_param("SSE", cpu_list) != NULL;
 
-        if (CpuSupportSSE) {
+        if (CpuSupportSSE)
+        {
             RegObject[cpu][XMM0_Rnum] = SIM->get_param_num("SSE.xmm00_0", cpu_list);
             RegObject[cpu][XMM1_Rnum] = SIM->get_param_num("SSE.xmm01_0", cpu_list);
             RegObject[cpu][XMM2_Rnum] = SIM->get_param_num("SSE.xmm02_0", cpu_list);
@@ -1368,7 +1372,7 @@ void doUpdate()
     ParseBkpt();        // get the linear breakpoint list
     if (DViewMode == VIEW_STACK)    // in stack view mode, keep the stack updated
         FillStack();
-    CurrentAsmLA = BX_CPU(CurrentCPU)->get_laddr(BX_SEG_REG_CS, (bx_address) rV[RIP_Rnum]);
+    CurrentAsmLA = BX_CPU(CurrentCPU)->get_laddr(BX_SEG_REG_CS, (bx_address)rV[RIP_Rnum]);
     if (CurrentAsmLA < BottomAsmLA || CurrentAsmLA > TopAsmLA)
     {
         Bit64u h = CurrentAsmLA;
@@ -1396,7 +1400,7 @@ void FillGDT()
     unsigned int i, j, GroupId;
     unsigned int k = (GDT_Len + 1) / 8;
     Bit8u gdtbuf[8];
-    char *cols[18];
+    char* cols[18];
     char gdttxt[90];
     doDumpRefresh = FALSE;
 
@@ -1404,35 +1408,35 @@ void FillGDT()
     StartListUpdate(DUMP_WND);
 
     *gdttxt = 0;
-    cols[0]= gdttxt + 1;
-    cols[1]= gdttxt + 30;
-    cols[2]= gdttxt + 40;
-    cols[3]= gdttxt + 80;
-    cols[4]= gdttxt;    // columns #5 to 17 are blank
-    cols[5]= gdttxt;
-    cols[6]= gdttxt;
-    cols[7]= gdttxt;
-    cols[8]= gdttxt;
-    cols[9]= gdttxt;
-    cols[10]= gdttxt;
-    cols[11]= gdttxt;
-    cols[12]= gdttxt;
-    cols[13]= gdttxt;
-    cols[14]= gdttxt;
-    cols[15]= gdttxt;
-    cols[16]= gdttxt;
+    cols[0] = gdttxt + 1;
+    cols[1] = gdttxt + 30;
+    cols[2] = gdttxt + 40;
+    cols[3] = gdttxt + 80;
+    cols[4] = gdttxt;    // columns #5 to 17 are blank
+    cols[5] = gdttxt;
+    cols[6] = gdttxt;
+    cols[7] = gdttxt;
+    cols[8] = gdttxt;
+    cols[9] = gdttxt;
+    cols[10] = gdttxt;
+    cols[11] = gdttxt;
+    cols[12] = gdttxt;
+    cols[13] = gdttxt;
+    cols[14] = gdttxt;
+    cols[15] = gdttxt;
+    cols[16] = gdttxt;
 
-    for(i = 0; i < k; i++)
+    for (i = 0; i < k; i++)
     {
         // read 2 dwords from bochs linear mem into "buffer"
         sprintf(cols[0], "%02u (Selector 0x%04X)", i, i << 3);
         if (ReadBxLMem(laddr, 8, gdtbuf) == FALSE)      // abort the current GDT dump on a memory error
         {
-            cols[1]= gdttxt;    // ERROR - blank out cols #2 - 4 for this new row
-            cols[2]= gdttxt;
-            cols[3]= gdttxt;
+            cols[1] = gdttxt;    // ERROR - blank out cols #2 - 4 for this new row
+            cols[2] = gdttxt;
+            cols[3] = gdttxt;
             cols[17] = gdttxt + 30;
-            strcpy (cols[17],"illegal address");
+            strcpy(cols[17], "illegal address");
             InsertListRow(cols, 18, DUMP_WND, i, 8);    // 18 cols, "no group"
             RedrawColumns(DUMP_WND);
             EndListUpdate(DUMP_WND);
@@ -1441,13 +1445,13 @@ void FillGDT()
         laddr += 8;
 
         // enforce proper littleendianness on the gdtbuf bytes
-        Bit32u limit = gdtbuf[0] | ((Bit32u) gdtbuf[1] << 8);
+        Bit32u limit = gdtbuf[0] | ((Bit32u)gdtbuf[1] << 8);
         limit |= ((Bit32u)gdtbuf[6] & 0xf) << 16;
         if ((gdtbuf[6] & 0x80) != 0)       // 'Granularity' bit = 4K limit multiplier
             limit = limit * 4096 + 4095;   // and the bottom 12 bits aren't tested
 
         GroupId = 8;        // default to "blank" group
-        cols[17]= (char*)GDTsT[0]; // default info string is blank
+        cols[17] = (char*)GDTsT[0]; // default info string is blank
         j = 8;              // default GDT type (group) is blank
         if ((gdtbuf[5] & 0x10) == 0)    // 'S' bit clear = System segment
         {
@@ -1455,7 +1459,7 @@ void FillGDT()
             if (limit == 0 && (gdtbuf[5] & 0x80) == 0)      // 'P' (present) bit
                 GroupId = 0;
             // point to the approprate info string for the GDT system segment type
-            cols[17] = (char*)GDTsT[(int) (gdtbuf[5] & 0xf)];
+            cols[17] = (char*)GDTsT[(int)(gdtbuf[5] & 0xf)];
         }
         else        // it's an 'executable' code or data segment
         {
@@ -1473,19 +1477,19 @@ void FillGDT()
         }
 
         // enforce proper littleendianness on the gdtbuf bytes
-        Bit32u base = gdtbuf[2] | ((Bit32u) gdtbuf[3] << 8);
-        base |= (Bit32u) gdtbuf[4] << 16;
-        base |= (Bit32u) gdtbuf[7] << 24;
+        Bit32u base = gdtbuf[2] | ((Bit32u)gdtbuf[3] << 8);
+        base |= (Bit32u)gdtbuf[4] << 16;
+        base |= (Bit32u)gdtbuf[7] << 24;
 
         if ((gdtbuf[6] & 0x60) == 0x20)     // test for longmode segment
         {
             base = 0;       // the base is always 0 in longmode, with "no" limit
-            sprintf(cols[2],"0xFFFFFFFFFFFFFFFF");
+            sprintf(cols[2], "0xFFFFFFFFFFFFFFFF");
         }
         else
-            sprintf(cols[2],"0x%X",limit);
-        sprintf(cols[1],"0x%X",base);
-        sprintf(cols[3],"%u", (gdtbuf[5] & 0x60) >> 5);
+            sprintf(cols[2], "0x%X", limit);
+        sprintf(cols[1], "0x%X", base);
+        sprintf(cols[3], "%u", (gdtbuf[5] & 0x60) >> 5);
 
         if (i == 0)
             cols[17] = (char*)GDTt2[7];    // call "Null" selector "unused"
@@ -1505,7 +1509,7 @@ void FillIDT()
     Bit32u ofs;
     unsigned entrysize;
     unsigned int i;
-    char *cols[18];
+    char* cols[18];
     char idttxt[80];
     unsigned int mode = 0;
     if (In32Mode)
@@ -1515,24 +1519,24 @@ void FillIDT()
     doDumpRefresh = FALSE;
 
     *idttxt = 0;
-    cols[0]= idttxt + 1;
-    cols[1]= idttxt;    // columns #2 to 17 are blank
-    cols[2]= idttxt;
-    cols[3]= idttxt;
-    cols[4]= idttxt;
-    cols[5]= idttxt;
-    cols[6]= idttxt;
-    cols[7]= idttxt;
-    cols[8]= idttxt;
-    cols[9]= idttxt;
-    cols[10]= idttxt;
-    cols[11]= idttxt;
-    cols[12]= idttxt;
-    cols[13]= idttxt;
-    cols[14]= idttxt;
-    cols[15]= idttxt;
-    cols[16]= idttxt;
-    cols[17]= idttxt + 10;
+    cols[0] = idttxt + 1;
+    cols[1] = idttxt;    // columns #2 to 17 are blank
+    cols[2] = idttxt;
+    cols[3] = idttxt;
+    cols[4] = idttxt;
+    cols[5] = idttxt;
+    cols[6] = idttxt;
+    cols[7] = idttxt;
+    cols[8] = idttxt;
+    cols[9] = idttxt;
+    cols[10] = idttxt;
+    cols[11] = idttxt;
+    cols[12] = idttxt;
+    cols[13] = idttxt;
+    cols[14] = idttxt;
+    cols[15] = idttxt;
+    cols[16] = idttxt;
+    cols[17] = idttxt + 10;
     entrysize = 4 << mode; // calculate the bytesize of the entries
     unsigned int k = (IDT_Len + 1) / entrysize;
     StartListUpdate(DUMP_WND);
@@ -1542,14 +1546,14 @@ void FillIDT()
 
     if (k > 256)    // if IDT_Len is unreasonably large, set a reasonable maximum
         k = 256;
-    for(i = 0; i < k; i++)
+    for (i = 0; i < k; i++)
     {
-        idttxt[1] = AsciiHex[2*i];
-        idttxt[2] = AsciiHex[2*i+1];
+        idttxt[1] = AsciiHex[2 * i];
+        idttxt[2] = AsciiHex[2 * i + 1];
         idttxt[3] = 0;
         if (ReadBxLMem(laddr, entrysize, idtbuf) == FALSE)      // abort the current IDT dump on a memory error
         {
-            strcpy (cols[17],"illegal address");
+            strcpy(cols[17], "illegal address");
             InsertListRow(cols, 18, DUMP_WND, i, 8);    // 18 cols, "no group"
             RedrawColumns(DUMP_WND);
             EndListUpdate(DUMP_WND);
@@ -1557,28 +1561,28 @@ void FillIDT()
         }
         laddr += entrysize;
         // enforce proper littleendianness on the idtbuf bytes
-        ofs = idtbuf[0] | ((Bit32u) idtbuf[1] << 8);
-        sel = idtbuf[2] | ((Bit16u) idtbuf[3] << 8);
+        ofs = idtbuf[0] | ((Bit32u)idtbuf[1] << 8);
+        sel = idtbuf[2] | ((Bit16u)idtbuf[3] << 8);
 
         switch (mode)
         {
-            case 0:     // Real Mode
-                sprintf(cols[17],"0x%04X:0x%04X", sel, ofs);
-                break;
+        case 0:     // Real Mode
+            sprintf(cols[17], "0x%04X:0x%04X", sel, ofs);
+            break;
 
-            case 1:     // Pmode
-                ofs |= ((Bit32u) idtbuf[6] << 16) | ((Bit32u) idtbuf[7] << 24);
-                sprintf(cols[17],"0x%04X:0x%08X", sel, ofs);
-                // TODO: also print some flags from idtbuf[5], maybe, in another column
-                break;
+        case 1:     // Pmode
+            ofs |= ((Bit32u)idtbuf[6] << 16) | ((Bit32u)idtbuf[7] << 24);
+            sprintf(cols[17], "0x%04X:0x%08X", sel, ofs);
+            // TODO: also print some flags from idtbuf[5], maybe, in another column
+            break;
 
-            case 2:     // Lmode
-                Bit64u off64 = (Bit64u)(ofs | ((Bit32u) idtbuf[6] << 16) | ((Bit32u) idtbuf[7] << 24));
-                off64 |= ((Bit64u) idtbuf[8] << 32) | ((Bit64u) idtbuf[9] << 40);
-                off64 |= ((Bit64u) idtbuf[10] << 48) | ((Bit64u) idtbuf[11] << 56);
-                sprintf(cols[17],"0x%04X:0x" FMT_LLCAPX, sel, off64);
-                // TODO: also print some flags from idtbuf[5], maybe, in another column
-                break;
+        case 2:     // Lmode
+            Bit64u off64 = (Bit64u)(ofs | ((Bit32u)idtbuf[6] << 16) | ((Bit32u)idtbuf[7] << 24));
+            off64 |= ((Bit64u)idtbuf[8] << 32) | ((Bit64u)idtbuf[9] << 40);
+            off64 |= ((Bit64u)idtbuf[10] << 48) | ((Bit64u)idtbuf[11] << 56);
+            sprintf(cols[17], "0x%04X:0x" FMT_LLCAPX, sel, off64);
+            // TODO: also print some flags from idtbuf[5], maybe, in another column
+            break;
         }
 
         InsertListRow(cols, 18, DUMP_WND, i, 8);    // 18 cols, "no group"
@@ -1589,28 +1593,28 @@ void FillIDT()
 
 
 // insert one entry into the Paging data list (a linear and a physical addy)
-void AddPagingLine(int LC, char *pa_lin, char *pa_phy)
+void AddPagingLine(int LC, char* pa_lin, char* pa_phy)
 {
     char zero = 0;
-    char *cols[18];
-    cols[0]= pa_lin;
-    cols[1]= &zero; // columns #2 to 17 are blank
-    cols[2]= &zero;
-    cols[3]= &zero;
-    cols[4]= &zero;
-    cols[5]= &zero;
-    cols[6]= &zero;
-    cols[7]= &zero;
-    cols[8]= &zero;
-    cols[9]= &zero;
-    cols[10]= &zero;
-    cols[11]= &zero;
-    cols[12]= &zero;
-    cols[13]= &zero;
-    cols[14]= &zero;
-    cols[15]= &zero;
-    cols[16]= &zero;
-    cols[17]= pa_phy;
+    char* cols[18];
+    cols[0] = pa_lin;
+    cols[1] = &zero; // columns #2 to 17 are blank
+    cols[2] = &zero;
+    cols[3] = &zero;
+    cols[4] = &zero;
+    cols[5] = &zero;
+    cols[6] = &zero;
+    cols[7] = &zero;
+    cols[8] = &zero;
+    cols[9] = &zero;
+    cols[10] = &zero;
+    cols[11] = &zero;
+    cols[12] = &zero;
+    cols[13] = &zero;
+    cols[14] = &zero;
+    cols[15] = &zero;
+    cols[16] = &zero;
+    cols[17] = pa_phy;
     InsertListRow(cols, 18, DUMP_WND, LC, 8);   // 18 cols, "no group"
 }
 
@@ -1639,10 +1643,10 @@ void FillPAGE()
             {
                 if (start_lin != 1)
                 {
-                    sprintf (pa_lin,"0x%08X - 0x%08X",start_lin, lin - 1);
-                    sprintf (pa_phy,"0x" FMT_LLCAPX " - 0x" FMT_LLCAPX,
-                        start_phy, start_phy + (lin-1-start_lin));
-                    AddPagingLine (LineCount,pa_lin,pa_phy);
+                    sprintf(pa_lin, "0x%08X - 0x%08X", start_lin, lin - 1);
+                    sprintf(pa_phy, "0x" FMT_LLCAPX " - 0x" FMT_LLCAPX,
+                        start_phy, start_phy + (lin - 1 - start_lin));
+                    AddPagingLine(LineCount, pa_lin, pa_phy);
                     ++LineCount;
                 }
                 start_lin = lin;
@@ -1653,10 +1657,10 @@ void FillPAGE()
         {
             if (start_lin != 1)
             {
-                sprintf (pa_lin,"0x%08X - 0x%08X",start_lin, lin - 1);
-                sprintf (pa_phy,"0x" FMT_LLCAPX " - 0x" FMT_LLCAPX,
-                    start_phy, start_phy + (lin-1-start_lin));
-                AddPagingLine (LineCount,pa_lin,pa_phy);
+                sprintf(pa_lin, "0x%08X - 0x%08X", start_lin, lin - 1);
+                sprintf(pa_phy, "0x" FMT_LLCAPX " - 0x" FMT_LLCAPX,
+                    start_phy, start_phy + (lin - 1 - start_lin));
+                AddPagingLine(LineCount, pa_lin, pa_phy);
                 ++LineCount;
             }
             start_lin = 1;
@@ -1667,9 +1671,9 @@ void FillPAGE()
     }
     if (start_lin != 1)     // need to output one last line?
     {
-        sprintf (pa_lin,"0x%08X - 0x%08X", start_lin, -1);
-        sprintf (pa_phy,"0x" FMT_LLCAPX " - 0x" FMT_LLCAPX,start_phy, start_phy + (lin-1-start_lin));
-        AddPagingLine (LineCount,pa_lin,pa_phy);
+        sprintf(pa_lin, "0x%08X - 0x%08X", start_lin, -1);
+        sprintf(pa_phy, "0x" FMT_LLCAPX " - 0x" FMT_LLCAPX, start_phy, start_phy + (lin - 1 - start_lin));
+        AddPagingLine(LineCount, pa_lin, pa_phy);
     }
     RedrawColumns(DUMP_WND);
     EndListUpdate(DUMP_WND);
@@ -1685,31 +1689,31 @@ void FillStack()
     int j;
     bool LglAddy;
     bool UpdateDisp;
-    char *cp, *cpp;
-    char *cols[18];
+    char* cp, * cpp;
+    char* cols[18];
     char stktxt[120];
 
     *stktxt = 0;
-    cols[0]= stktxt + 1;
-    cols[1]= stktxt + 40;
-    cols[2]= stktxt;    // columns #3 to 17 are blank
-    cols[3]= stktxt;
-    cols[4]= stktxt;
-    cols[5]= stktxt;
-    cols[6]= stktxt;
-    cols[7]= stktxt;
-    cols[8]= stktxt;
-    cols[9]= stktxt;
-    cols[10]= stktxt;
-    cols[11]= stktxt;
-    cols[12]= stktxt;
-    cols[13]= stktxt;
-    cols[14]= stktxt;
-    cols[15]= stktxt;
-    cols[16]= stktxt;
-    cols[17]= stktxt + 80;
+    cols[0] = stktxt + 1;
+    cols[1] = stktxt + 40;
+    cols[2] = stktxt;    // columns #3 to 17 are blank
+    cols[3] = stktxt;
+    cols[4] = stktxt;
+    cols[5] = stktxt;
+    cols[6] = stktxt;
+    cols[7] = stktxt;
+    cols[8] = stktxt;
+    cols[9] = stktxt;
+    cols[10] = stktxt;
+    cols[11] = stktxt;
+    cols[12] = stktxt;
+    cols[13] = stktxt;
+    cols[14] = stktxt;
+    cols[15] = stktxt;
+    cols[16] = stktxt;
+    cols[17] = stktxt + 80;
     doDumpRefresh = FALSE;
-    StackLA = (Bit64u) BX_CPU(CurrentCPU)->get_laddr(BX_SEG_REG_SS, (bx_address) rV[RSP_Rnum]);
+    StackLA = (Bit64u)BX_CPU(CurrentCPU)->get_laddr(BX_SEG_REG_SS, (bx_address)rV[RSP_Rnum]);
 
     if (PStackLA == 1)               // illegal value requests a full refresh
         PStackLA = StackLA ^ 0x4000; // force a non-match below (kludge)
@@ -1724,26 +1728,26 @@ void FillStack()
     // TODO: enforce that cp is wordsize aligned
     // also -- enforce that StackLA is wordsize aligned
     cp = CurStack;
-    i = (unsigned) StackLA & 0xfff; // where is stack bottom, in its 4K memory page?
+    i = (unsigned)StackLA & 0xfff; // where is stack bottom, in its 4K memory page?
     if (i > 0x1000 - len)           // does len cross a 4K boundary?
     {
         unsigned int ReadSize = 0x1000 - i;
         // read up to the 4K boundary, then try to read the last chunk
-        if (ReadBxLMem(StackLA, ReadSize, (Bit8u *) cp) == FALSE)
+        if (ReadBxLMem(StackLA, ReadSize, (Bit8u*)cp) == FALSE)
         {
             // no data to show -- just one error message
-            sprintf (cols[17],"illegal address");
+            sprintf(cols[17], "illegal address");
             StartListUpdate(DUMP_WND);
             InsertListRow(cols, 18, DUMP_WND, 0, 8);    // 18 cols, "no group"
             EndListUpdate(DUMP_WND);
             return;
         }
-        LglAddy = ReadBxLMem(StackLA + ReadSize, len + i - 0x1000, (Bit8u *) cp + ReadSize);
+        LglAddy = ReadBxLMem(StackLA + ReadSize, len + i - 0x1000, (Bit8u*)cp + ReadSize);
         if (LglAddy == FALSE)
             len = ReadSize;
     }
     else
-        ReadBxLMem(StackLA, len, (Bit8u *) cp);
+        ReadBxLMem(StackLA, len, (Bit8u*)cp);
 
     UpdateDisp = CpuModeChange;     // calculate which stack entries have changed
     cp = CurStack;
@@ -1756,7 +1760,7 @@ void FillStack()
         EndLA = PStackLA - StackLA;
         if (EndLA < len)
         {
-            i = (unsigned int) (EndLA / wordsize);
+            i = (unsigned int)(EndLA / wordsize);
             cp += i * wordsize;
         }
         else
@@ -1768,7 +1772,7 @@ void FillStack()
         if (EndLA < len)
         {
             i = 0;
-            j = (int) (EndLA / wordsize);
+            j = (int)(EndLA / wordsize);
             cpp += j * wordsize;
             overlap -= j;
         }
@@ -1810,10 +1814,10 @@ void FillStack()
     cpp = PrevStack;
     j = len;
     while (--j >= 0)
-        *(cpp++)= *(cp++);      // copy the stack to the Prev buffer
-    j= STACK_ENTRIES * 8 - len;
+        *(cpp++) = *(cp++);      // copy the stack to the Prev buffer
+    j = STACK_ENTRIES * 8 - len;
     while (--j >= 0)
-        *(cpp++)= 0;            // zero out the unused tail end of the prev buffer
+        *(cpp++) = 0;            // zero out the unused tail end of the prev buffer
     cp = CurStack;                  // the following display loop runs on the cp pointer
 
     EndLA = StackLA + len - 1;
@@ -1823,20 +1827,20 @@ void FillStack()
         if (In64Mode == FALSE)
         {
             int tmp;
-            sprintf (cols[0],Fmt32b[1],StackLA);
+            sprintf(cols[0], Fmt32b[1], StackLA);
             if (In32Mode == FALSE)
-                tmp = *((Bit16s *) cp);
+                tmp = *((Bit16s*)cp);
             else
-                tmp = *((Bit32s *) cp);
-            sprintf (cols[1],Fmt32b[UprCase],tmp);
-            sprintf (cols[17],"%d",tmp);
+                tmp = *((Bit32s*)cp);
+            sprintf(cols[1], Fmt32b[UprCase], tmp);
+            sprintf(cols[17], "%d", tmp);
         }
         else
         {
-            Bit64s tmp = *((Bit64s *) cp);
-            sprintf (cols[0],Fmt64b[UprCase],StackLA);
-            sprintf (cols[1],Fmt64b[1],tmp);
-            sprintf (cols[17], FMT_LL "d",tmp);
+            Bit64s tmp = *((Bit64s*)cp);
+            sprintf(cols[0], Fmt64b[UprCase], StackLA);
+            sprintf(cols[1], Fmt64b[1], tmp);
+            sprintf(cols[17], FMT_LL "d", tmp);
         }
         InsertListRow(cols, 18, DUMP_WND, i, 8);    // 18 cols, "no group"
         StackLA += wordsize;
@@ -1849,27 +1853,28 @@ void FillStack()
 }
 
 // utility function to print breakpoints in a unified way
-void prtbrk (Bit32u seg, Bit64u addy, unsigned int id, bool enabled, char *cols[])
+void prtbrk(Bit32u seg, Bit64u addy, unsigned int id, bool enabled, char* cols[])
 {
     int i = 0;
     if (enabled == FALSE)
         *cols[1] = 'n';
     else
         *cols[1] = 'y';
-    sprintf (cols[17],"%u",id);
-    if (seg <= 0xffff){
-        i= 5;
-        sprintf (cols[0],"%04X:",seg);
+    sprintf(cols[17], "%u", id);
+    if (seg <= 0xffff)
+    {
+        i = 5;
+        sprintf(cols[0], "%04X:", seg);
     }
 
-    sprintf (cols[0] + i,FMT_LLCAPX,addy);
+    sprintf(cols[0] + i, FMT_LLCAPX, addy);
 }
 
 // Displays all Breakpoints and Watchpoints
 void FillBrkp()
 {
     int LineCount, totqty, i;
-    char *cols[18];
+    char* cols[18];
     char brktxt[60];
     unsigned int brktype;
     extern bx_guard_t bx_guard;
@@ -1878,21 +1883,21 @@ void FillBrkp()
 
     *brktxt = 0;
     brktxt[49] = 0;     // 0 terminate the "enabled" string
-    cols[2]= brktxt;    // columns #3 to 17 are blank
-    cols[3]= brktxt;
-    cols[4]= brktxt;
-    cols[5]= brktxt;
-    cols[6]= brktxt;
-    cols[7]= brktxt;
-    cols[8]= brktxt;
-    cols[9]= brktxt;
-    cols[10]= brktxt;
-    cols[11]= brktxt;
-    cols[12]= brktxt;
-    cols[13]= brktxt;
-    cols[14]= brktxt;
-    cols[15]= brktxt;
-    cols[16]= brktxt;
+    cols[2] = brktxt;    // columns #3 to 17 are blank
+    cols[3] = brktxt;
+    cols[4] = brktxt;
+    cols[5] = brktxt;
+    cols[6] = brktxt;
+    cols[7] = brktxt;
+    cols[8] = brktxt;
+    cols[9] = brktxt;
+    cols[10] = brktxt;
+    cols[11] = brktxt;
+    cols[12] = brktxt;
+    cols[13] = brktxt;
+    cols[14] = brktxt;
+    cols[15] = brktxt;
+    cols[16] = brktxt;
     StartListUpdate(DUMP_WND);
     i = 256;
     while (--i >= 0)
@@ -1907,17 +1912,17 @@ void FillBrkp()
     LineCount = 0;
     for (brktype = 0; brktype < 5; brktype++)
     {
-        cols[0]= brktxt;
-        cols[1]= brktxt;
-        cols[17]= brktxt;
+        cols[0] = brktxt;
+        cols[1] = brktxt;
+        cols[17] = brktxt;
         InsertListRow(cols, 18, DUMP_WND, LineCount++, 8);  // make a blank row
-        cols[0]= (char*)BrkName[brktype];
+        cols[0] = (char*)BrkName[brktype];
         InsertListRow(cols, 18, DUMP_WND, LineCount++, 8);  // brkpt "type" as only text on row
-        cols[0]= brktxt + 1;
+        cols[0] = brktxt + 1;
         if (brktype < 3)
         {
-            cols[17]= brktxt + 50;  // only breakpoints have IDs
-            cols[1]= brktxt + 48;   // and can be "enabled"
+            cols[17] = brktxt + 50;  // only breakpoints have IDs
+            cols[1] = brktxt + 48;   // and can be "enabled"
             if (brktype == 0)
             {
 #if (BX_DBG_MAX_LIN_BPOINTS > 0)
@@ -1925,8 +1930,8 @@ void FillBrkp()
                 for (i = 0; i < totqty; i++)
                 {
                     BrkpIDMap[LineCount] = bx_guard.iaddr.lin[i].bpoint_id;
-                    prtbrk (0xf0000, (Bit64u) bx_guard.iaddr.lin[i].addr,
-                        (unsigned) BrkpIDMap[LineCount],
+                    prtbrk(0xf0000, (Bit64u)bx_guard.iaddr.lin[i].addr,
+                        (unsigned)BrkpIDMap[LineCount],
                         bx_guard.iaddr.lin[i].enabled, cols);
                     InsertListRow(cols, 18, DUMP_WND, LineCount++, 8);
                 }
@@ -1940,8 +1945,8 @@ void FillBrkp()
                 for (i = 0; i < totqty; i++)
                 {
                     BrkpIDMap[LineCount] = bx_guard.iaddr.phy[i].bpoint_id;
-                    prtbrk (0xf0000, (Bit64u) bx_guard.iaddr.phy[i].addr,
-                        (unsigned) BrkpIDMap[LineCount],
+                    prtbrk(0xf0000, (Bit64u)bx_guard.iaddr.phy[i].addr,
+                        (unsigned)BrkpIDMap[LineCount],
                         bx_guard.iaddr.phy[i].enabled, cols);
                     InsertListRow(cols, 18, DUMP_WND, LineCount++, 8);
                 }
@@ -1955,9 +1960,9 @@ void FillBrkp()
                 for (i = 0; i < totqty; i++)
                 {
                     BrkpIDMap[LineCount] = bx_guard.iaddr.vir[i].bpoint_id;
-                    prtbrk (bx_guard.iaddr.vir[i].cs,
-                    (Bit64u) bx_guard.iaddr.vir[i].eip,
-                        (unsigned) BrkpIDMap[LineCount],
+                    prtbrk(bx_guard.iaddr.vir[i].cs,
+                        (Bit64u)bx_guard.iaddr.vir[i].eip,
+                        (unsigned)BrkpIDMap[LineCount],
                         bx_guard.iaddr.vir[i].enabled, cols);
                     InsertListRow(cols, 18, DUMP_WND, LineCount++, 8);
                 }
@@ -1972,7 +1977,7 @@ void FillBrkp()
             for (i = 0; i < totqty; i++)
             {
                 WWP_Snapshot[i] = write_watchpoint[i].addr;
-                sprintf (cols[0], FMT_PHY_ADDRX, (bx_phy_address) write_watchpoint[i].addr);
+                sprintf(cols[0], FMT_PHY_ADDRX, (bx_phy_address)write_watchpoint[i].addr);
                 InsertListRow(cols, 18, DUMP_WND, LineCount++, 8);
             }
         }
@@ -1984,7 +1989,7 @@ void FillBrkp()
             for (i = 0; i < totqty; i++)
             {
                 RWP_Snapshot[i] = read_watchpoint[i].addr;
-                sprintf (cols[0], FMT_PHY_ADDRX, (bx_phy_address) read_watchpoint[i].addr);
+                sprintf(cols[0], FMT_PHY_ADDRX, (bx_phy_address)read_watchpoint[i].addr);
                 InsertListRow(cols, 18, DUMP_WND, LineCount++, 8);
             }
         }
@@ -1997,7 +2002,7 @@ void FillBrkp()
 void FillDataX(char* t, char C, bool doHex)
 {
     char tmpbuf[40];
-    char *d = tmpbuf;
+    char* d = tmpbuf;
     if (isLittleEndian == FALSE || doHex == FALSE)
         d = t + strlen(t);  // bigendian can always be appended directly
     *d = C;
@@ -2007,13 +2012,13 @@ void FillDataX(char* t, char C, bool doHex)
 
     if (doHex != FALSE)
     {
-        *d = AsciiHex[2* (unsigned char)C];
-        d[1] = AsciiHex[2* (unsigned char)C + 1];
+        *d = AsciiHex[2 * (unsigned char)C];
+        d[1] = AsciiHex[2 * (unsigned char)C + 1];
         d[2] = 0;
         if (isLittleEndian) // little endian => reverse hex digits
         {
-            strcat(d,t);
-            strcpy(t,d);    // so append the new bytes to the FRONT of t
+            strcat(d, t);
+            strcpy(t, d);    // so append the new bytes to the FRONT of t
         }
     }
 }
@@ -2022,62 +2027,62 @@ void FillDataX(char* t, char C, bool doHex)
 void ShowData()
 {
     unsigned int i;
-    char *x;
-    char *cols[18];
+    char* x;
+    char* cols[18];
     char mdtxt[200];
     char tmphex[40];
 
     *mdtxt = 0;
-    cols[0]= mdtxt + 1;     // the amount of storage needed for each column is complicated
-    cols[1]= mdtxt + 20;
-    cols[2]= mdtxt + 60;
-    cols[3]= mdtxt + 64;
-    cols[4]= mdtxt + 70;
-    cols[5]= mdtxt + 74;
-    cols[6]= mdtxt + 84;
-    cols[7]= mdtxt + 88;
-    cols[8]= mdtxt + 94;
-    cols[9]= mdtxt + 100;
-    cols[10]= mdtxt + 120;
-    cols[11]= mdtxt + 124;
-    cols[12]= mdtxt + 130;
-    cols[13]= mdtxt + 134;
-    cols[14]= mdtxt + 144;
-    cols[15]= mdtxt + 148;
-    cols[16]= mdtxt + 154;
-    cols[17]= mdtxt + 160;
+    cols[0] = mdtxt + 1;     // the amount of storage needed for each column is complicated
+    cols[1] = mdtxt + 20;
+    cols[2] = mdtxt + 60;
+    cols[3] = mdtxt + 64;
+    cols[4] = mdtxt + 70;
+    cols[5] = mdtxt + 74;
+    cols[6] = mdtxt + 84;
+    cols[7] = mdtxt + 88;
+    cols[8] = mdtxt + 94;
+    cols[9] = mdtxt + 100;
+    cols[10] = mdtxt + 120;
+    cols[11] = mdtxt + 124;
+    cols[12] = mdtxt + 130;
+    cols[13] = mdtxt + 134;
+    cols[14] = mdtxt + 144;
+    cols[15] = mdtxt + 148;
+    cols[16] = mdtxt + 154;
+    cols[17] = mdtxt + 160;
     doDumpRefresh = FALSE;
     StartListUpdate(DUMP_WND);
 
     x = DataDump;       // data dumps are ALWAYS 4K
-    for(i = 0; i < 4096; i += 16)
+    for (i = 0; i < 4096; i += 16)
     {
         if (In64Mode == FALSE)
-            sprintf(cols[0],"0x%08X",(Bit32u) (DumpStart + i));
+            sprintf(cols[0], "0x%08X", (Bit32u)(DumpStart + i));
         else
-            sprintf(cols[0],"0x" FMT_LLCAPX,DumpStart + i);
+            sprintf(cols[0], "0x" FMT_LLCAPX, DumpStart + i);
 
         *tmphex = 0;
         *cols[17] = 0;
-        for(unsigned y = 0; y < 16; y++)
+        for (unsigned y = 0; y < 16; y++)
         {
             if ((DumpInAsciiMode & 1) != 0)
                 // verify the char is printable, then append it to the "ascii" column
-                FillDataX(cols[17],x[y],FALSE);
+                FillDataX(cols[17], x[y], FALSE);
 
             if ((DumpInAsciiMode & 2) != 0)
             {
                 // convert char to hex, build "endian" hex value, 2 digits at a time
-                FillDataX(tmphex,x[y],TRUE);
+                FillDataX(tmphex, x[y], TRUE);
                 if (((y + 1) & (DumpAlign - 1)) == 0)
                 {
-                    strcpy (cols[y+2-DumpAlign], tmphex);
+                    strcpy(cols[y + 2 - DumpAlign], tmphex);
                     *tmphex = 0;        // FillDataX APPENDS, so you need to clear the buffer
                 }
             }
         }
-        InsertListRow(cols, 18, DUMP_WND, i>>4, 8); // 18 cols, list2, "no group"
-        x+= 16;         // bump to the next row of data
+        InsertListRow(cols, 18, DUMP_WND, i >> 4, 8); // 18 cols, list2, "no group"
+        x += 16;         // bump to the next row of data
     }
 
     RedrawColumns(DUMP_WND);
@@ -2089,16 +2094,16 @@ void ShowData()
 // (must build the pointer list while building the names)
 void MakeRDnames()
 {
-    char *p = RDispName[0];       // first storage location
-    for (int i=0; i <= EFER_Rnum; i++)
+    char* p = RDispName[0];       // first storage location
+    for (int i = 0; i <= EFER_Rnum; i++)
     {
         RDispName[i] = p;   // create the Name pointer
-        const char *c = RegLCName[i];   // Register name in lower case
+        const char* c = RegLCName[i];   // Register name in lower case
 
         if (UprCase != 0)
         {
             while (*c != 0)
-                *(p++) = UCtable[(int) *(c++)]; // use lookup tbl for uppercase
+                *(p++) = UCtable[(int)*(c++)]; // use lookup tbl for uppercase
         }
         else
         {
@@ -2112,7 +2117,7 @@ void MakeRDnames()
 // generic initialization routine -- called once, only at startup
 void DoAllInit()
 {
-    char *p;
+    char* p;
     int i;
 
     doSimuInit = TRUE;
@@ -2172,30 +2177,30 @@ void RefreshDataWin()
 {
     switch (DViewMode)
     {
-        case VIEW_MEMDUMP:
-            if (DumpInitted != FALSE)
-                ShowData();
-            else
-                EndListUpdate(2);   // list is empty, so end (show) it!
-            break;
-        case VIEW_GDT:
-            FillGDT();
-            break;
-        case VIEW_IDT:
-            FillIDT();
-            break;
-        case VIEW_PAGING:
-            FillPAGE();
-            break;
-        case VIEW_STACK:
-            PStackLA = 1;   // flag to force a full stack refresh
-            FillStack();
-            break;
-        case VIEW_BREAK:
-            FillBrkp();
-            break;
-        case VIEW_PTREE:
-            FillPTree();
+    case VIEW_MEMDUMP:
+        if (DumpInitted != FALSE)
+            ShowData();
+        else
+            EndListUpdate(2);   // list is empty, so end (show) it!
+        break;
+    case VIEW_GDT:
+        FillGDT();
+        break;
+    case VIEW_IDT:
+        FillIDT();
+        break;
+    case VIEW_PAGING:
+        FillPAGE();
+        break;
+    case VIEW_STACK:
+        PStackLA = 1;   // flag to force a full stack refresh
+        FillStack();
+        break;
+    case VIEW_BREAK:
+        FillBrkp();
+        break;
+    case VIEW_PTREE:
+        FillPTree();
     }
 }
 
@@ -2208,8 +2213,8 @@ void OnBreak()
 
     // display the new ptime on the status bar
     char time_buf[20];
-    sprintf (time_buf,"t= " FMT_LL "d", bx_pc_system.time_ticks());
-    SetStatusText (2, time_buf);
+    sprintf(time_buf, "t= " FMT_LL "d", bx_pc_system.time_ticks());
+    SetStatusText(2, time_buf);
 
     // remember register values from before the last run
     while (--i >= 0)
@@ -2242,7 +2247,7 @@ void OnBreak()
     }
     if (CpuModeChange)
     {
-        GrayMenuItem ((int) In64Mode, CMD_EREG);
+        GrayMenuItem((int)In64Mode, CMD_EREG);
         BottomAsmLA = ~0;       // force an ASM autoload
         StatusChange = TRUE;
     }
@@ -2255,12 +2260,12 @@ static int HexFromAsk(const char* ask, char* b)       // this routine converts a
 {                   // it ignores any bigendian issues -- binary is converted front to end as chars
     int y = 0;
     int i = 0;
-    for(;;)
+    for (;;)
     {
         unsigned int C = 0;
         if (strlen(ask + i) < 2)
             break;
-        if (!sscanf(ask + i,"%02X",&C))
+        if (!sscanf(ask + i, "%02X", &C))
             break;
         b[y++] = C;
         i += 2;
@@ -2268,13 +2273,13 @@ static int HexFromAsk(const char* ask, char* b)       // this routine converts a
     return y;
 }
 
-static bool FindHex(const unsigned char* b1,int bs,const unsigned char* b2,int by)
+static bool FindHex(const unsigned char* b1, int bs, const unsigned char* b2, int by)
 {
     // search bs bytes of b1
-    for(int i = 0; i < bs; i++)       // TODO: this loop could be a little more efficient.
+    for (int i = 0; i < bs; i++)       // TODO: this loop could be a little more efficient.
     {                       // -- it just scans an input byte string against DataDump memory
         bool Match = TRUE;
-        for(int y = 0; y < by; y++)
+        for (int y = 0; y < by; y++)
         {
             if (b1[i + y] != b2[y])
             {
@@ -2288,11 +2293,11 @@ static bool FindHex(const unsigned char* b1,int bs,const unsigned char* b2,int b
     return FALSE;
 }
 
-bool AskText(const char *title, const char *prompt, char *DefaultText)
+bool AskText(const char* title, const char* prompt, char* DefaultText)
 {
-    ask_str.title= title;
-    ask_str.prompt= prompt;
-    ask_str.reply= DefaultText;
+    ask_str.title = title;
+    ask_str.prompt = prompt;
+    ask_str.reply = DefaultText;
     return ShowAskDialog();
 }
 
@@ -2304,16 +2309,16 @@ bool InitDataDump(bool isLinear, Bit64u newDS)
     bool MsgOnErr = FALSE;
     if (AtBreak == FALSE)
         return FALSE;
-    if (((int) newDS & 0xf) != 0)       // legal addys must be on 16byte boundary
+    if (((int)newDS & 0xf) != 0)       // legal addys must be on 16byte boundary
     {
         if (In64Mode == FALSE)
-            sprintf(tmpcb,"0x%X",(Bit32u) DumpStart);
+            sprintf(tmpcb, "0x%X", (Bit32u)DumpStart);
         else
-            sprintf(tmpcb,"0x" FMT_LL "X",DumpStart);
-        if (AskText("4K Memory Dump","4K Memory Dump -- Enter Address (use 0x for hex):",tmpcb) == FALSE)
+            sprintf(tmpcb, "0x" FMT_LL "X", DumpStart);
+        if (AskText("4K Memory Dump", "4K Memory Dump -- Enter Address (use 0x for hex):", tmpcb) == FALSE)
             return FALSE;
 
-        newDS = cvt64(tmpcb,FALSE);     // input either hex or decimal
+        newDS = cvt64(tmpcb, FALSE);     // input either hex or decimal
         newDS &= ~15;                   // force Mem Dump to be 16b aligned
         MsgOnErr = TRUE;
     }
@@ -2323,22 +2328,23 @@ bool InitDataDump(bool isLinear, Bit64u newDS)
     {
         // cannot read linear mem across a 4K boundary -- so break the read in two
         // -- calculate location of 4K boundary (h):
-        unsigned len = (int) newDS & 0xfff;
+        unsigned len = (int)newDS & 0xfff;
         unsigned i = 4096 - len;
         Bit64u h = newDS + i;
-        retval = ReadBxLMem(newDS,i,(Bit8u *)DataDump);
+        retval = ReadBxLMem(newDS, i, (Bit8u*)DataDump);
         if (retval != FALSE && len != 0)
-            retval = ReadBxLMem(h,len,(Bit8u *)DataDump + i);
+            retval = ReadBxLMem(h, len, (Bit8u*)DataDump + i);
     }
-    else {
-        retval = (bool) bx_mem.dbg_fetch_mem(BX_CPU(CurrentCPU),
-            (bx_phy_address)newDS, 4096, (Bit8u *)DataDump);
+    else
+    {
+        retval = (bool)bx_mem.dbg_fetch_mem(BX_CPU(CurrentCPU),
+            (bx_phy_address)newDS, 4096, (Bit8u*)DataDump);
     }
     if (retval == FALSE)
     {
         // assume that the DataDump array is still valid -- fetch_mem should error without damage
         if (MsgOnErr != FALSE)
-            DispMessage ("Address range was not legal memory","Memory Error");
+            DispMessage("Address range was not legal memory", "Memory Error");
         return retval;
     }
 
@@ -2361,7 +2367,7 @@ void ToggleSeeReg(int cmd)
         ResizeColmns = TRUE;    // may need to resize the register value column
 
     SeeReg[i] ^= TRUE;
-    SetMenuCheckmark ((int) SeeReg[i], i + CHK_CMD_EREG);
+    SetMenuCheckmark((int)SeeReg[i], i + CHK_CMD_EREG);
     if (AtBreak != FALSE)
         LoadRegList();  // do a register window update
 }
@@ -2378,7 +2384,7 @@ void doNewWSize(int i)
     {
         ToggleWSchecks(i, j);
         DumpWSIndex = i;
-        DumpAlign = 1<<i;
+        DumpAlign = 1 << i;
         if (DViewMode == VIEW_MEMDUMP && DumpInitted != FALSE)
         {
             if (AtBreak == FALSE)
@@ -2393,12 +2399,12 @@ void ToggleGDT()
 {
     if (AtBreak == FALSE)
         return;
-    GrayMenuItem (0, CMD_WPTWR);
-    GrayMenuItem (0, CMD_WPTRD);
-    if (DViewMode == VIEW_GDT || /*(GDT_Len & 7) != 7 ||*/ (unsigned) GDT_Len >= 0x10000)
+    GrayMenuItem(0, CMD_WPTWR);
+    GrayMenuItem(0, CMD_WPTRD);
+    if (DViewMode == VIEW_GDT || /*(GDT_Len & 7) != 7 ||*/ (unsigned)GDT_Len >= 0x10000)
     {
         if (DViewMode != VIEW_GDT)
-            DispMessage("GDT limit is illegal","Simulation error");
+            DispMessage("GDT limit is illegal", "Simulation error");
         ShowMemData(FALSE);
     }
     else
@@ -2413,12 +2419,12 @@ void ToggleIDT()
 {
     if (AtBreak == FALSE)
         return;
-    GrayMenuItem (0, CMD_WPTWR);
-    GrayMenuItem (0, CMD_WPTRD);
-    if (DViewMode == VIEW_IDT || /*(IDT_Len & 3) != 3 ||*/ (unsigned) IDT_Len >= 0x10000)
+    GrayMenuItem(0, CMD_WPTWR);
+    GrayMenuItem(0, CMD_WPTRD);
+    if (DViewMode == VIEW_IDT || /*(IDT_Len & 3) != 3 ||*/ (unsigned)IDT_Len >= 0x10000)
     {
         if (DViewMode != VIEW_IDT)
-            DispMessage("IDT limit is illegal","Simulation error");
+            DispMessage("IDT limit is illegal", "Simulation error");
         ShowMemData(FALSE);
     }
     else
@@ -2433,8 +2439,8 @@ void TogglePAGE()
 {
     if (AtBreak == FALSE)
         return;
-    GrayMenuItem (0, CMD_WPTWR);
-    GrayMenuItem (0, CMD_WPTRD);
+    GrayMenuItem(0, CMD_WPTWR);
+    GrayMenuItem(0, CMD_WPTRD);
     if (DViewMode == VIEW_PAGING || InPaging == FALSE)
         ShowMemData(FALSE);
     else
@@ -2449,8 +2455,8 @@ void ToggleStack()
 {
     if (AtBreak == FALSE)
         return;
-    GrayMenuItem (0, CMD_WPTWR);
-    GrayMenuItem (0, CMD_WPTRD);
+    GrayMenuItem(0, CMD_WPTWR);
+    GrayMenuItem(0, CMD_WPTRD);
     if (DViewMode == VIEW_STACK)
         ShowMemData(FALSE);
     else
@@ -2466,8 +2472,8 @@ void ToggleBrkpt()
 {
     if (AtBreak == FALSE)
         return;
-    GrayMenuItem (0, CMD_WPTWR);
-    GrayMenuItem (0, CMD_WPTRD);
+    GrayMenuItem(0, CMD_WPTWR);
+    GrayMenuItem(0, CMD_WPTRD);
     if (DViewMode == VIEW_BREAK)
         ShowMemData(FALSE);
     else
@@ -2482,8 +2488,8 @@ void TogglePTree()
 {
     if (AtBreak == FALSE)
         return;
-    GrayMenuItem (0, CMD_WPTWR);
-    GrayMenuItem (0, CMD_WPTRD);
+    GrayMenuItem(0, CMD_WPTWR);
+    GrayMenuItem(0, CMD_WPTRD);
     if (DViewMode == VIEW_PTREE)
         ShowMemData(FALSE);
     else
@@ -2502,19 +2508,19 @@ void doFind()
     if (AtBreak == FALSE)
         return;
     *tmpcb = 0;
-        // read ASM text or MemDump data, find matches, select all matching lines
+    // read ASM text or MemDump data, find matches, select all matching lines
     if (DumpHasFocus == FALSE)
     {
-        if (AskText("Find text in mnemonic lines","ASM Search text:",tmpcb) == FALSE)
+        if (AskText("Find text in mnemonic lines", "ASM Search text:", tmpcb) == FALSE)
             return;
-        if (strchr(tmpcb,'*') == 0 && strchr(tmpcb,'?') == 0)
-            sprintf(srchstr,"*%s*",tmpcb);
+        if (strchr(tmpcb, '*') == 0 && strchr(tmpcb, '?') == 0)
+            sprintf(srchstr, "*%s*", tmpcb);
         else
-            strcpy(srchstr,tmpcb);
+            strcpy(srchstr, tmpcb);
 
         if (UprCase != FALSE)   // convert search string to uppercase if ASM is that way
             upr(srchstr);
-        for(i = 0; i < (unsigned) AsmLineCount; i++)
+        for (i = 0; i < (unsigned)AsmLineCount; i++)
         {
             GetLIText(ASM_WND, i, 2, tmpcb);       // retrieve the ASM column 2 text for row i
             Select = FALSE;
@@ -2526,16 +2532,16 @@ void doFind()
     else
     {
         if (AskText("Memory Dump Search",
-            "Sequential hex bytes (e.g 00FEFA - no spaces), or ascii string (max. 16b):",tmpcb) == FALSE)
+            "Sequential hex bytes (e.g 00FEFA - no spaces), or ascii string (max. 16b):", tmpcb) == FALSE)
             return;
 
-        int by = HexFromAsk(tmpcb,srchstr);     // by = len of binary search string
+        int by = HexFromAsk(tmpcb, srchstr);     // by = len of binary search string
 
         // Find in all rows of 16 bytes -- must do rows, so they can be selected
-        for(i = 0, L = 0; i < 4096; i += 16, L++)
+        for (i = 0, L = 0; i < 4096; i += 16, L++)
         {
             Select = FALSE;
-            if (by != 0 && FindHex((unsigned char *)DataDump + i,16,(unsigned char *)srchstr,by))
+            if (by != 0 && FindHex((unsigned char*)DataDump + i, 16, (unsigned char*)srchstr, by))
                 Select = TRUE;
             SetLIState(DUMP_WND, L, Select);
         }
@@ -2543,9 +2549,9 @@ void doFind()
         // Try ascii for additional matches and selected lines
         Select = TRUE;          // this loop, only add selected lines to the display
         by = strlen(tmpcb);
-        for(i = 0, L = 0; i < 4096; i += 16, L++)
+        for (i = 0, L = 0; i < 4096; i += 16, L++)
         {
-            if (by != 0 && FindHex((unsigned char *)DataDump + i,16,(unsigned char *)tmpcb,by))
+            if (by != 0 && FindHex((unsigned char*)DataDump + i, 16, (unsigned char*)tmpcb, by))
                 SetLIState(DUMP_WND, L, Select);
         }
     }
@@ -2556,10 +2562,10 @@ void doStepN()
     // can't run sim until everything is ready
     if (AtBreak == FALSE || debug_cmd_ready != FALSE)
         return;
-    sprintf (tmpcb,"%d",PrevStepNSize);
-    if (AskText("Singlestep N times","Number of steps (use 0x for hex):",tmpcb) == FALSE)
+    sprintf(tmpcb, "%d", PrevStepNSize);
+    if (AskText("Singlestep N times", "Number of steps (use 0x for hex):", tmpcb) == FALSE)
         return;
-    Bit32u i = (Bit32u) cvt64(tmpcb,FALSE);        // input either hex or decimal
+    Bit32u i = (Bit32u)cvt64(tmpcb, FALSE);        // input either hex or decimal
     if (i == 0)
         return;
     PrevStepNSize = i;
@@ -2575,15 +2581,15 @@ void doDisAsm()
     int NumLines = DefaultAsmLines;
     if (AtBreak == FALSE)
         return;
-    sprintf (tmpcb,"0x" FMT_LL "X",CurrentAsmLA);
+    sprintf(tmpcb, "0x" FMT_LL "X", CurrentAsmLA);
     if (AskText("Disassemble",
-        "Disassemble -- Enter Linear Start Address (use 0x for hex):",tmpcb) == FALSE)
+        "Disassemble -- Enter Linear Start Address (use 0x for hex):", tmpcb) == FALSE)
         return;
-    Bit64u h = cvt64(tmpcb,FALSE);             // input either hex or decimal
-    sprintf (tmpcb,"%d",NumLines);
-    if (AskText("Disassemble","Number of lines: (Max. 2048)",tmpcb) == FALSE)
+    Bit64u h = cvt64(tmpcb, FALSE);             // input either hex or decimal
+    sprintf(tmpcb, "%d", NumLines);
+    if (AskText("Disassemble", "Number of lines: (Max. 2048)", tmpcb) == FALSE)
         return;
-    sscanf (tmpcb,"%d",&NumLines);
+    sscanf(tmpcb, "%d", &NumLines);
     if (NumLines <= 0 || NumLines > 2048)
         return;
     if (NumLines > 1000 && FWflag == FALSE)
@@ -2611,7 +2617,7 @@ void SetBreak(int OneEntry)
     while (L >= 0)
     {
         int iExist = -1;
-        int i=0;
+        int i = 0;
         while (i < BreakCount && iExist < 0)
         {
             if (BrkLAddr[i] == AsmLA[L])
@@ -2625,14 +2631,14 @@ void SetBreak(int OneEntry)
             i = iExist;     // also compress it out of the local list
             while (++i < BreakCount)
             {
-                BrkLAddr[i-1] = BrkLAddr[i];
-                BrkIdx[i-1] = BrkIdx[i];
+                BrkLAddr[i - 1] = BrkLAddr[i];
+                BrkIdx[i - 1] = BrkIdx[i];
             }
             --BreakCount;
         }
         else
         {
-            bx_address nbrk = (bx_address) AsmLA[L];
+            bx_address nbrk = (bx_address)AsmLA[L];
             // Set a "regular" bochs linear breakpoint to that address
             int BpId = bx_dbg_lbreakpoint_command(bkRegular, nbrk, NULL);
             if (BpId >= 0)
@@ -2641,12 +2647,12 @@ void SetBreak(int OneEntry)
                 i = BreakCount - 1;
                 while (i >= 0 && BrkLAddr[i] > nbrk)
                 {
-                    BrkLAddr[i+1] = BrkLAddr[i];
-                    BrkIdx[i+1] = BrkIdx[i];
+                    BrkLAddr[i + 1] = BrkLAddr[i];
+                    BrkIdx[i + 1] = BrkIdx[i];
                     --i;
                 }
-                BrkLAddr[i+1] = nbrk;
-                BrkIdx[i+1] = BpId;
+                BrkLAddr[i + 1] = nbrk;
+                BrkIdx[i + 1] = BpId;
                 ++BreakCount;
             }
         }
@@ -2659,17 +2665,17 @@ void SetBreak(int OneEntry)
     Invalidate(ASM_WND);    // redraw the ASM window -- colors may have changed
 }
 
-void DelWatchpoint(bx_watchpoint *wp_array, unsigned *TotEntries, int i)
+void DelWatchpoint(bx_watchpoint* wp_array, unsigned* TotEntries, int i)
 {
-    while (++i < (int) *TotEntries)
-        wp_array[i-1] = wp_array[i];
-    -- *TotEntries;
+    while (++i < (int)*TotEntries)
+        wp_array[i - 1] = wp_array[i];
+    --* TotEntries;
 }
 
-void SetWatchpoint(unsigned *num_watchpoints, bx_watchpoint *watchpoint)
+void SetWatchpoint(unsigned* num_watchpoints, bx_watchpoint* watchpoint)
 {
     int iExist1 = -1;
-    int i = (int) *num_watchpoints;
+    int i = (int)*num_watchpoints;
     if (AtBreak == FALSE || SA_valid == FALSE)
         return;
     // the list is unsorted -- test all of them
@@ -2689,12 +2695,14 @@ void SetWatchpoint(unsigned *num_watchpoints, bx_watchpoint *watchpoint)
     else
     {
         // Set a watchpoint to last clicked address -- the list is not sorted
-        if (*num_watchpoints >= BX_DBG_MAX_WATCHPONTS) {
+        if (*num_watchpoints >= BX_DBG_MAX_WATCHPONTS)
+        {
             DispMessage("Too many of that type of watchpoint. Max: 16", "Table Overflow");
         }
-        else {
-            watchpoint[*num_watchpoints].len  = 1;
-            watchpoint[*num_watchpoints].addr = (bx_phy_address) SelectedDataAddress;
+        else
+        {
+            watchpoint[*num_watchpoints].len = 1;
+            watchpoint[*num_watchpoints].addr = (bx_phy_address)SelectedDataAddress;
             ++(*num_watchpoints);
         }
     }
@@ -2711,13 +2719,13 @@ void ChangeReg()
     int i = RitemToRnum[L];
     if (i > EFER_Rnum)      // TODO: extend this to more reg -- need display names for all
         return;
-//  if (i > EFER_Rnum)
-//      *tmpcb = 0;
-//  else
-        sprintf (tmpcb,"0x" FMT_LL "X", rV[i]);
-    if (AskText("Change Register Value",RDispName[i],tmpcb))
+    //  if (i > EFER_Rnum)
+    //      *tmpcb = 0;
+    //  else
+    sprintf(tmpcb, "0x" FMT_LL "X", rV[i]);
+    if (AskText("Change Register Value", RDispName[i], tmpcb))
     {
-        Bit64u val = cvt64(tmpcb,TRUE);     // input either hex or decimal
+        Bit64u val = cvt64(tmpcb, TRUE);     // input either hex or decimal
 #if BX_SUPPORT_X86_64
         if (i >= EAX_Rnum && i <= EIP_Rnum) // must use RAX-RIP when setting 32b registers
             i -= EAX_Rnum - RAX_Rnum;
@@ -2727,7 +2735,7 @@ void ChangeReg()
 //      if (worked == FALSE)
 //          DispMessage ("Bochs does not allow you to set that register","Selection Error");
 //      else
-            LoadRegList();      // update the register window
+        LoadRegList();      // update the register window
     }
 }
 
@@ -2736,30 +2744,30 @@ void SetMemLine(int L)
 {
     // get base address of "line" of data -- each line (L) is 16 bytes
     char addrstr[64];
-    Bit64u h = DumpStart + (L<<4);
+    Bit64u h = DumpStart + (L << 4);
     if (AtBreak == FALSE || L >= 256)
         return;
 
     if (LinearDump == FALSE)
-        sprintf(addrstr,"Physical Address: 0x" FMT_LL "X",h);
+        sprintf(addrstr, "Physical Address: 0x" FMT_LL "X", h);
     else
-        sprintf(addrstr,"Linear Address: 0x" FMT_LL "X",h);
+        sprintf(addrstr, "Linear Address: 0x" FMT_LL "X", h);
 
-    unsigned char *u = (unsigned char *)(DataDump + (L<<4));    // important that it be unsigned!
-    sprintf(tmpcb,"%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X",
-        *u,u[1],u[2],u[3],u[4],u[5],u[6],u[7],u[8],u[9],u[10],u[11],u[12],u[13],u[14],u[15]);
+    unsigned char* u = (unsigned char*)(DataDump + (L << 4));    // important that it be unsigned!
+    sprintf(tmpcb, "%02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X",
+        *u, u[1], u[2], u[3], u[4], u[5], u[6], u[7], u[8], u[9], u[10], u[11], u[12], u[13], u[14], u[15]);
 
-    if (AskText("Change Memory Values",addrstr,tmpcb))
+    if (AskText("Change Memory Values", addrstr, tmpcb))
     {
         Bit8u newval;
-        int err=0;
-        char *x = tmpcb;
+        int err = 0;
+        char* x = tmpcb;
         upr(x);         // force input string to uppercase
 
         if (LinearDump)    // is h is a LINEAR address? Convert to physical!
         {
             // use the ReadBx function to calculate the lin->phys offset
-            if (ReadBxLMem(h,0,(Bit8u *)addrstr) == FALSE) // "read" 0 bytes
+            if (ReadBxLMem(h, 0, (Bit8u*)addrstr) == FALSE) // "read" 0 bytes
                 err = 2;
             else
                 h -= l_p_offset;    // convert h to a physmem address
@@ -2767,7 +2775,7 @@ void SetMemLine(int L)
 
         while (*x != 0 && err == 0)
         {
-            char *s = x;
+            char* s = x;
             // verify that the next 2 chars are hex digits
             if ((*x < '0' || *x > '9') && (*x < 'A' || *x > 'F'))
                 err = 1;
@@ -2786,8 +2794,8 @@ void SetMemLine(int L)
             if (err == 0)
             {
                 // convert the hex to a byte, and try to store the byte in bochs physmem
-                sscanf (s,"%2X", (unsigned int*)&newval);
-                if (bx_mem.dbg_set_mem(BX_CPU(CurrentCPU), (bx_phy_address) h, 1, &newval) == FALSE)
+                sscanf(s, "%2X", (unsigned int*)&newval);
+                if (bx_mem.dbg_set_mem(BX_CPU(CurrentCPU), (bx_phy_address)h, 1, &newval) == FALSE)
                     err = 2;
                 else
                     *u++ = newval;      // update DataDump array so it will refresh on the screen
@@ -2800,9 +2808,9 @@ void SetMemLine(int L)
         if (err != 0)
         {
             if (err == 1)
-                DispMessage ("Improper char hex format","Input Format Error");
+                DispMessage("Improper char hex format", "Input Format Error");
             else
-                DispMessage ("Illegal memory address error?","Memory Error");
+                DispMessage("Illegal memory address error?", "Memory Error");
         }
         ShowData();     // refresh the data dump, even if there were errors
     }
@@ -2810,9 +2818,10 @@ void SetMemLine(int L)
 
 // Alt, Shift, Control keys are "down" if negative
 // Normal return value is 0, return != 0 has OS-specific meaning.
-int HotKey (int ww, int Alt, int Shift, int Control)
+int HotKey(int ww, int Alt, int Shift, int Control)
 {
-    if (Alt < 0){
+    if (Alt < 0)
+    {
         if (ww == '1')
             doNewWSize(0);
         else if (ww == '2')
@@ -2831,7 +2840,7 @@ int HotKey (int ww, int Alt, int Shift, int Control)
         else if (ww == VK_F6)       // AltF6 = Read Watchpt
         {
             if (DumpHasFocus != FALSE)
-                SetWatchpoint(&num_read_watchpoints,read_watchpoint);
+                SetWatchpoint(&num_read_watchpoints, read_watchpoint);
         }
         else if (ww == VK_F7)           // Alt+F7 memdump hex toggle
         {
@@ -2841,8 +2850,8 @@ int HotKey (int ww, int Alt, int Shift, int Control)
             {
                 DumpInAsciiMode = i;
                 i &= 2;
-                SetMenuCheckmark (i, CHK_CMD_MHEX);
-                GrayMenuItem (i, CMD_MASCII);
+                SetMenuCheckmark(i, CHK_CMD_MHEX);
+                GrayMenuItem(i, CMD_MASCII);
                 PrevDAD = 0;        // force columns to resize
                 if (DViewMode == VIEW_MEMDUMP && DumpInitted != FALSE)
                 {
@@ -2857,245 +2866,95 @@ int HotKey (int ww, int Alt, int Shift, int Control)
     }
     switch (ww)
     {
-        case VK_ESCAPE:
-            CommandHistoryIdx = 0;
-            ClearInputWindow();
-            ShowMemData(FALSE);         // force a "normal" MemDump window
-            break;
+    case VK_ESCAPE:
+        CommandHistoryIdx = 0;
+        ClearInputWindow();
+        ShowMemData(FALSE);         // force a "normal" MemDump window
+        break;
 
-        case VK_UP:
-            // History from nextmost previous command
-            SelectHistory(-1);
-            break;
+    case VK_UP:
+        // History from nextmost previous command
+        SelectHistory(-1);
+        break;
 
-        case VK_DOWN:
-            // Next History command
-            SelectHistory(+1);
-            break;
+    case VK_DOWN:
+        // Next History command
+        SelectHistory(+1);
+        break;
 
-        case VK_PRIOR:
-            // Page up on the MemDump window by 2K
-            if (DumpInitted != FALSE)
-                InitDataDump(LinearDump, DumpStart - 2048);
-            break;
+    case VK_PRIOR:
+        // Page up on the MemDump window by 2K
+        if (DumpInitted != FALSE)
+            InitDataDump(LinearDump, DumpStart - 2048);
+        break;
 
-        case VK_NEXT:
-            // Page down on the MemDump window by 2K
-            if (DumpInitted != FALSE)
-                InitDataDump(LinearDump, DumpStart + 2048);
-            break;
+    case VK_NEXT:
+        // Page down on the MemDump window by 2K
+        if (DumpInitted != FALSE)
+            InitDataDump(LinearDump, DumpStart + 2048);
+        break;
 
-        case VK_F2:
-            if (Control < 0)
-                ToggleGDT();
-            else if (Shift < 0)
-                ToggleIDT();
-            else
-                ToggleStack();
-            break;
+    case VK_F2:
+        if (Control < 0)
+            ToggleGDT();
+        else if (Shift < 0)
+            ToggleIDT();
+        else
+            ToggleStack();
+        break;
 
-        case VK_F3:     // ^F3 = param tree, F3 = toggle syntax
-            if (Control < 0)
-                TogglePTree();
-            else
+    case VK_F3:     // ^F3 = param tree, F3 = toggle syntax
+        if (Control < 0)
+            TogglePTree();
+        else
+        {
+            bx_dbg_disassemble_switch_mode();
+            if (AtBreak != FALSE)
             {
-                bx_dbg_disassemble_switch_mode();
-                if (AtBreak != FALSE)
-                {
-                    // do the standard ASM window fill sequence
-                    Bit64u h = CurrentAsmLA;
-                    CanDoLA(&h);
-                    FillAsm(h, DefaultAsmLines);
-                }
-                else
-                    BottomAsmLA = ~0;   // force an ASM autoload
-            }
-            break;
-
-        case VK_F4:
-            if (Shift < 0)          // Debug register toggle
-                ToggleSeeReg(CMD_DREG);
-            else if (Control >= 0)      // Refresh
-            {
-                BottomAsmLA = ~0;       // force an ASM autoload
-                ResizeColmns = TRUE;    // force everything to repaint
-                doDumpRefresh = TRUE;   // force a data window reload on a break
-                if (AtBreak != FALSE)   // can't refresh the windows until a break!
-                {
-                    doUpdate();         // refresh the ASM and Register windows
-                    RefreshDataWin();   // and whichever data window is up
-                }
-            }
-            else {
-                if (CpuSupportSSE)
-                    ToggleSeeReg(CMD_XMMR);    // SSE toggle
-            }
-            break;
-
-        case VK_F5:
-            if (Shift < 0)          // ShiftF5 = Modechange brk toggle
-            {
-                // toggle mode_break on cpu0, use that value to reset all CPUs
-                bool nmb = BX_CPU(0)->mode_break ^ TRUE;
-                int j = TotCPUs;
-                while (--j >= 0)
-                    BX_CPU(j)->mode_break = nmb;
-                SetMenuCheckmark ((int) nmb, CHK_CMD_MODEB);
+                // do the standard ASM window fill sequence
+                Bit64u h = CurrentAsmLA;
+                CanDoLA(&h);
+                FillAsm(h, DefaultAsmLines);
             }
             else
+                BottomAsmLA = ~0;   // force an ASM autoload
+        }
+        break;
+
+    case VK_F4:
+        if (Shift < 0)          // Debug register toggle
+            ToggleSeeReg(CMD_DREG);
+        else if (Control >= 0)      // Refresh
+        {
+            BottomAsmLA = ~0;       // force an ASM autoload
+            ResizeColmns = TRUE;    // force everything to repaint
+            doDumpRefresh = TRUE;   // force a data window reload on a break
+            if (AtBreak != FALSE)   // can't refresh the windows until a break!
             {
-                // can't continue until everything is ready
-                if (AtBreak != FALSE && debug_cmd_ready == FALSE)
-                {
-                    // The VGAW *MUST* be refreshed periodically -- it's best to use the timer.
-                    // Which means that the sim cannot be directly run from this msglp thread.
-                    *debug_cmd = 'c';   // send a fake "continue" command to the internal debugger
-                    debug_cmd[1] = 0;
-                    debug_cmd_ready = TRUE;
-                    AtBreak = FALSE;
-                    StatusChange = TRUE;
-                }
+                doUpdate();         // refresh the ASM and Register windows
+                RefreshDataWin();   // and whichever data window is up
             }
-            break;
+        }
+        else
+        {
+            if (CpuSupportSSE)
+                ToggleSeeReg(CMD_XMMR);    // SSE toggle
+        }
+        break;
 
-        case VK_F7:
-            if (Control < 0)
-                InitDataDump(0,(Bit64u) 1);    // ^F7 = PhysDump
-            else if (Shift < 0)                // ShiftF7 = ascii toggle
-            {
-                int i = DumpInAsciiMode;
-                i ^= 1;
-                if (i != 0)
-                {
-                    DumpInAsciiMode = i;
-                    i &= 1;
-                    SetMenuCheckmark (i, CHK_CMD_MASCII);
-                    GrayMenuItem (i, CMD_MHEX);
-                    PrevDAD = 0;        // force columns to resize
-                    if (DViewMode == VIEW_MEMDUMP && DumpInitted != FALSE)
-                    {
-                        if (AtBreak == FALSE)
-                            doDumpRefresh = TRUE;
-                        else
-                            ShowData();
-                    }
-                }
-            }
-            else
-                InitDataDump(1,(Bit64u) 1);     // F7 = LinDump
-            break;
-
-        case VK_F6:
-            if (Control < 0)        // ^F6 = Breakpoint window
-                ToggleBrkpt();
-            else if (Shift < 0)     // ShiftF6 = Write Watchpt
-            {
-                if (DumpHasFocus == FALSE)
-                    SetBreak(-1); // set or delete breakpoint(s) at the selected address(es)
-                else
-                    SetWatchpoint(&num_write_watchpoints,write_watchpoint);
-            }
-            else
-            {
-                if (DumpHasFocus == FALSE)      // F6 = Brkpt
-                    SetBreak(-1); // set or delete breakpoint(s) at the selected address(es)
-                else
-                    SetWatchpoint(&num_write_watchpoints,write_watchpoint);
-            }
-            break;
-
-        case VK_F8:
-                // can't continue until everything is ready
-            if (AtBreak != FALSE && debug_cmd_ready == FALSE)
-            {
-                *debug_cmd = 'p';   // send a fake "proceed" command to the internal debugger
-                debug_cmd[1] = 0;
-                debug_cmd_ready = TRUE;
-                AtBreak = FALSE;
-                StatusChange = TRUE;
-            }
-            break;
-
-        case VK_F11:
-            if (AtBreak != FALSE && debug_cmd_ready == FALSE)
-            {
-                bx_dbg_stepN_command(CurrentCPU, 1);        // singlestep
-                StatusChange = TRUE;
-                OnBreak();
-            }
-            break;
-
-        case VK_F9:
-            doStepN();      // ask user for a step #
-            break;
-
-        case 'C':           // ^c = break
-            if (Control < 0)
-            {
-                SIM->debug_break();
-            }
-            break;
-
-        case 'D':
-            if (Control < 0)
-                doDisAsm();
-            break;
-
-        case 'F':
-            if (Control < 0)
-                doFind();
-            break;
-
-        case VK_RIGHT:  // Win32: send a few virtual movement keys back into the Input window
-        case VK_LEFT:
-        case VK_END:
-        case VK_HOME:
-        case VK_DELETE:
-            return -1;
-
-        case VK_RETURN:
-            // can't run a command until everything is ready
-            if (AtBreak != FALSE && debug_cmd_ready == FALSE)
-            {
-                *tmpcb = 0;
-                GetInputEntry(tmpcb);
-                StatusChange = TRUE;
-                if (*tmpcb == 0)            // Hitting <CR> on a blank line means SINGLESTEP
-                {
-                    bx_dbg_stepN_command(CurrentCPU, 1);        // singlestep
-                    OnBreak();
-                }
-                else
-                {
-                    // deal with the command history:
-                    if (strlen(tmpcb) > 79)
-                        DispMessage ("Running command, but history has an 80 char Max.",
-                            "Command history overflow");
-                    else
-                    {
-                        strcpy (CmdHistory[CmdHInsert], tmpcb);
-                        CmdHInsert = (CmdHInsert + 1) & 63;     // circular buffer, 0 to 63
-                    }
-                    strcpy (debug_cmd,tmpcb);   // send the command into the bochs internal debugger
-                    debug_cmd_ready = TRUE;
-                    AtBreak = FALSE;
-                    ClearInputWindow();         // prepare for the next command
-                    CommandHistoryIdx = 0;      // and reset the history queue to the new end
-                }
-            }
-    }       // end the switch
-//  if (Control >= 0 && ww >= ' ' && ww < 0x7f) -- might be interesting to catch printable chars
-//      return 1;
-    return 0;
-}
-
-void ActivateMenuItem (int cmd)
-{
-    int i;
-
-    switch(cmd)
-    {
-        case CMD_CONT: // run/go/continue
+    case VK_F5:
+        if (Shift < 0)          // ShiftF5 = Modechange brk toggle
+        {
+            // toggle mode_break on cpu0, use that value to reset all CPUs
+            bool nmb = BX_CPU(0)->mode_break ^ TRUE;
+            int j = TotCPUs;
+            while (--j >= 0)
+                BX_CPU(j)->mode_break = nmb;
+            SetMenuCheckmark((int)nmb, CHK_CMD_MODEB);
+        }
+        else
+        {
+            // can't continue until everything is ready
             if (AtBreak != FALSE && debug_cmd_ready == FALSE)
             {
                 // The VGAW *MUST* be refreshed periodically -- it's best to use the timer.
@@ -3106,204 +2965,22 @@ void ActivateMenuItem (int cmd)
                 AtBreak = FALSE;
                 StatusChange = TRUE;
             }
-            break;
-
-        case CMD_STEP1: // step 1
-            if (AtBreak != FALSE && debug_cmd_ready == FALSE)
-            {
-                bx_dbg_stepN_command(CurrentCPU, 1);        // singlestep
-                StatusChange = TRUE;
-                OnBreak();
-            }
-            break;
-
-        case CMD_STEPN: // step N
-            doStepN();
-            break;
-
-        case CMD_BREAK: // break/stop the sim
-            // SIM->debug_break() only "break"s the internal debugger
-            SIM->debug_break();
-            break;
-
-        case CMD_BRKPT: // set or delete breakpoint(s) at the selected address(es)
-            SetBreak(-1);
-            break;
-
-        case CMD_WPTWR: // set or delete a data write watchpoint
-            SetWatchpoint(&num_write_watchpoints,write_watchpoint);
-            break;
-
-        case CMD_WPTRD: // set or delete a data read watchpoint
-            SetWatchpoint(&num_read_watchpoints,read_watchpoint);
-            break;
-
-        case CMD_FIND: // find -- Control-F
-            doFind();
-            break;
-
-        case CMD_RFRSH: // force an update/refresh
-            BottomAsmLA = ~0;       // force an ASM autoload
-            ResizeColmns = TRUE;    // force everything to repaint
-            doDumpRefresh = TRUE;   // force a data window reload on a break
-            if (AtBreak != FALSE)   // can't refresh the windows until a break!
-            {
-                doUpdate();         // refresh the ASM and Register windows
-                RefreshDataWin();   // and whichever data window is up
-            }
-            break;
-
-        case CMD_PHYDMP:        // "physical mem" data dump
-            InitDataDump(0,(Bit64u) 1);
-            break;
-
-        case CMD_LINDMP:        // "linear memory" data dump
-            InitDataDump(1,(Bit64u) 1);
-            break;
-
-        case CMD_STACK:     // toggle display of Stack
-            ToggleStack();
-            break;
-
-        case CMD_GDTV:      // toggle display of GDT
-            ToggleGDT();
-            break;
-
-        case CMD_IDTV:      // toggle display of IDT
-            ToggleIDT();
-            break;
-
-        case CMD_PAGEV:     // display paging info
-            TogglePAGE();
-            break;
-
-        case CMD_VBRK:      // display breakpoint/watchpoint info
-            ToggleBrkpt();
-            break;
-
-        case CMD_CMEM:  // view current MemDump -- acts like "cancel"
-            CommandHistoryIdx = 0;
-            ClearInputWindow();
-            ShowMemData(FALSE);         // force a "normal" MemDump window
-            break;
-
-        case CMD_PTREE:
-            TogglePTree();
-            break;
-
-        case CMD_DISASM:    // disassemble starting at a particular address
-            doDisAsm();
-            break;
-
-        case CMD_MODEB: // toggle the simulation's Mode-Change-Break flag
-        {
-            // toggle mode_break on cpu0, use that value to reset all CPUs
-            bool nmb = BX_CPU(0)->mode_break ^ TRUE;
-            i = TotCPUs;
-            while (--i >= 0)
-                BX_CPU(i)->mode_break = nmb;
-            SetMenuCheckmark ((int) nmb, CHK_CMD_MODEB);
-            break;
         }
+        break;
 
-        case CMD_ONECPU:    // toggle whether to show SMP CPUs
-            if (AtBreak == FALSE)
-                break;
-            SingleCPU ^= TRUE;
-            TotCPUs = 1;
-            if (SingleCPU == FALSE)
-                TotCPUs = BX_SMP_PROCESSORS;
-            SetMenuCheckmark ((int) SingleCPU, CHK_CMD_ONECPU);
-            VSizeChange();
-            break;
-
-        case CMD_DADEF: // set default # of disassembly lines in a list
-            if (AtBreak == FALSE)
-                break;
-            sprintf (tmpcb,"%d",DefaultAsmLines);
-            if (AskText("Disassembly default linecount","Max. 2048:",tmpcb) == FALSE)
-                return;
-            sscanf (tmpcb,"%u",&i);
-            if (i > 0 && i <= 2048)
-                DefaultAsmLines = i;
-            if (i > 1000 && FWflag == FALSE)    // friendly warning
-                ShowFW();
-            break;
-
-        case CMD_ATTI:      // Toggle ASM Syntax
-            bx_dbg_disassemble_switch_mode();
-            if (AtBreak != FALSE)
-            {
-                // do the standard ASM window fill sequence
-                Bit64u h = CurrentAsmLA;
-                CanDoLA(&h);
-                FillAsm(h, DefaultAsmLines);
-            }
-            else
-                BottomAsmLA = ~0;       // force an ASM autoload
-            break;
-
-        case CMD_IOWIN:  // toggle display of internal debugger Input and Output windows
-            if (AtBreak == FALSE)
-                break;
-            ShowIOWindows ^= TRUE;
-            SetMenuCheckmark ((int) ShowIOWindows, CHK_CMD_IOWIN);
-            VSizeChange();
-            break;
-
-        case CMD_SBTN:      // Toggle showing top pushbutton-row
-            if (AtBreak == FALSE)
-                break;
-            ShowButtons ^= TRUE;
-            SetMenuCheckmark ((int) ShowButtons, CHK_CMD_SBTN);
-            VSizeChange();
-            break;
-
-        case CMD_UCASE:     // Toggle showing everything in uppercase
-            UprCase ^= 1;
-            SetMenuCheckmark ((int) UprCase, CHK_CMD_UCASE);
-            MakeRDnames();
-            if (AtBreak != FALSE)
-            {
-                LoadRegList();
-                // do the standard ASM window fill sequence
-                Bit64u h = CurrentAsmLA;
-                CanDoLA(&h);
-                FillAsm(h, DefaultAsmLines);
-            }
-            else
-                BottomAsmLA = ~0;       // force an ASM autoload
-            break;
-
-        case CMD_MHEX:      // Toggle showing hex in Dump window
-            i = DumpInAsciiMode;
-            i ^= 2;
-            if (i != 0)
-            {
-                DumpInAsciiMode = i;
-                i &= 2;
-                SetMenuCheckmark (i, CHK_CMD_MHEX);
-                GrayMenuItem (i, CMD_MASCII);
-                PrevDAD = 0;        // force columns to resize
-                if (DViewMode == VIEW_MEMDUMP && DumpInitted != FALSE)
-                {
-                    if (AtBreak == FALSE)
-                        doDumpRefresh = TRUE;
-                    else
-                        ShowData();
-                }
-            }
-            break;
-
-        case CMD_MASCII:    // Toggle showing ASCII in Dump window
-            i = DumpInAsciiMode;
+    case VK_F7:
+        if (Control < 0)
+            InitDataDump(0, (Bit64u)1);    // ^F7 = PhysDump
+        else if (Shift < 0)                // ShiftF7 = ascii toggle
+        {
+            int i = DumpInAsciiMode;
             i ^= 1;
             if (i != 0)
             {
                 DumpInAsciiMode = i;
                 i &= 1;
-                SetMenuCheckmark (i, CHK_CMD_MASCII);
-                GrayMenuItem (i, CMD_MHEX);
+                SetMenuCheckmark(i, CHK_CMD_MASCII);
+                GrayMenuItem(i, CMD_MHEX);
                 PrevDAD = 0;        // force columns to resize
                 if (DViewMode == VIEW_MEMDUMP && DumpInitted != FALSE)
                 {
@@ -3313,11 +2990,311 @@ void ActivateMenuItem (int cmd)
                         ShowData();
                 }
             }
-            break;
+        }
+        else
+            InitDataDump(1, (Bit64u)1);     // F7 = LinDump
+        break;
 
-        case CMD_LEND:      // Toggle Endianness for the MemDumps
-            isLittleEndian ^= TRUE;
-            SetMenuCheckmark ((int) isLittleEndian, CHK_CMD_LEND);
+    case VK_F6:
+        if (Control < 0)        // ^F6 = Breakpoint window
+            ToggleBrkpt();
+        else if (Shift < 0)     // ShiftF6 = Write Watchpt
+        {
+            if (DumpHasFocus == FALSE)
+                SetBreak(-1); // set or delete breakpoint(s) at the selected address(es)
+            else
+                SetWatchpoint(&num_write_watchpoints, write_watchpoint);
+        }
+        else
+        {
+            if (DumpHasFocus == FALSE)      // F6 = Brkpt
+                SetBreak(-1); // set or delete breakpoint(s) at the selected address(es)
+            else
+                SetWatchpoint(&num_write_watchpoints, write_watchpoint);
+        }
+        break;
+
+    case VK_F8:
+        // can't continue until everything is ready
+        if (AtBreak != FALSE && debug_cmd_ready == FALSE)
+        {
+            *debug_cmd = 'p';   // send a fake "proceed" command to the internal debugger
+            debug_cmd[1] = 0;
+            debug_cmd_ready = TRUE;
+            AtBreak = FALSE;
+            StatusChange = TRUE;
+        }
+        break;
+
+    case VK_F11:
+        if (AtBreak != FALSE && debug_cmd_ready == FALSE)
+        {
+            bx_dbg_stepN_command(CurrentCPU, 1);        // singlestep
+            StatusChange = TRUE;
+            OnBreak();
+        }
+        break;
+
+    case VK_F9:
+        doStepN();      // ask user for a step #
+        break;
+
+    case 'C':           // ^c = break
+        if (Control < 0)
+        {
+            SIM->debug_break();
+        }
+        break;
+
+    case 'D':
+        if (Control < 0)
+            doDisAsm();
+        break;
+
+    case 'F':
+        if (Control < 0)
+            doFind();
+        break;
+
+    case VK_RIGHT:  // Win32: send a few virtual movement keys back into the Input window
+    case VK_LEFT:
+    case VK_END:
+    case VK_HOME:
+    case VK_DELETE:
+        return -1;
+
+    case VK_RETURN:
+        // can't run a command until everything is ready
+        if (AtBreak != FALSE && debug_cmd_ready == FALSE)
+        {
+            *tmpcb = 0;
+            GetInputEntry(tmpcb);
+            StatusChange = TRUE;
+            if (*tmpcb == 0)            // Hitting <CR> on a blank line means SINGLESTEP
+            {
+                bx_dbg_stepN_command(CurrentCPU, 1);        // singlestep
+                OnBreak();
+            }
+            else
+            {
+                // deal with the command history:
+                if (strlen(tmpcb) > 79)
+                    DispMessage("Running command, but history has an 80 char Max.",
+                        "Command history overflow");
+                else
+                {
+                    strcpy(CmdHistory[CmdHInsert], tmpcb);
+                    CmdHInsert = (CmdHInsert + 1) & 63;     // circular buffer, 0 to 63
+                }
+                strcpy(debug_cmd, tmpcb);   // send the command into the bochs internal debugger
+                debug_cmd_ready = TRUE;
+                AtBreak = FALSE;
+                ClearInputWindow();         // prepare for the next command
+                CommandHistoryIdx = 0;      // and reset the history queue to the new end
+            }
+        }
+    }       // end the switch
+//  if (Control >= 0 && ww >= ' ' && ww < 0x7f) -- might be interesting to catch printable chars
+//      return 1;
+    return 0;
+}
+
+void ActivateMenuItem(int cmd)
+{
+    int i;
+
+    switch (cmd)
+    {
+    case CMD_CONT: // run/go/continue
+        if (AtBreak != FALSE && debug_cmd_ready == FALSE)
+        {
+            // The VGAW *MUST* be refreshed periodically -- it's best to use the timer.
+            // Which means that the sim cannot be directly run from this msglp thread.
+            *debug_cmd = 'c';   // send a fake "continue" command to the internal debugger
+            debug_cmd[1] = 0;
+            debug_cmd_ready = TRUE;
+            AtBreak = FALSE;
+            StatusChange = TRUE;
+        }
+        break;
+
+    case CMD_STEP1: // step 1
+        if (AtBreak != FALSE && debug_cmd_ready == FALSE)
+        {
+            bx_dbg_stepN_command(CurrentCPU, 1);        // singlestep
+            StatusChange = TRUE;
+            OnBreak();
+        }
+        break;
+
+    case CMD_STEPN: // step N
+        doStepN();
+        break;
+
+    case CMD_BREAK: // break/stop the sim
+        // SIM->debug_break() only "break"s the internal debugger
+        SIM->debug_break();
+        break;
+
+    case CMD_BRKPT: // set or delete breakpoint(s) at the selected address(es)
+        SetBreak(-1);
+        break;
+
+    case CMD_WPTWR: // set or delete a data write watchpoint
+        SetWatchpoint(&num_write_watchpoints, write_watchpoint);
+        break;
+
+    case CMD_WPTRD: // set or delete a data read watchpoint
+        SetWatchpoint(&num_read_watchpoints, read_watchpoint);
+        break;
+
+    case CMD_FIND: // find -- Control-F
+        doFind();
+        break;
+
+    case CMD_RFRSH: // force an update/refresh
+        BottomAsmLA = ~0;       // force an ASM autoload
+        ResizeColmns = TRUE;    // force everything to repaint
+        doDumpRefresh = TRUE;   // force a data window reload on a break
+        if (AtBreak != FALSE)   // can't refresh the windows until a break!
+        {
+            doUpdate();         // refresh the ASM and Register windows
+            RefreshDataWin();   // and whichever data window is up
+        }
+        break;
+
+    case CMD_PHYDMP:        // "physical mem" data dump
+        InitDataDump(0, (Bit64u)1);
+        break;
+
+    case CMD_LINDMP:        // "linear memory" data dump
+        InitDataDump(1, (Bit64u)1);
+        break;
+
+    case CMD_STACK:     // toggle display of Stack
+        ToggleStack();
+        break;
+
+    case CMD_GDTV:      // toggle display of GDT
+        ToggleGDT();
+        break;
+
+    case CMD_IDTV:      // toggle display of IDT
+        ToggleIDT();
+        break;
+
+    case CMD_PAGEV:     // display paging info
+        TogglePAGE();
+        break;
+
+    case CMD_VBRK:      // display breakpoint/watchpoint info
+        ToggleBrkpt();
+        break;
+
+    case CMD_CMEM:  // view current MemDump -- acts like "cancel"
+        CommandHistoryIdx = 0;
+        ClearInputWindow();
+        ShowMemData(FALSE);         // force a "normal" MemDump window
+        break;
+
+    case CMD_PTREE:
+        TogglePTree();
+        break;
+
+    case CMD_DISASM:    // disassemble starting at a particular address
+        doDisAsm();
+        break;
+
+    case CMD_MODEB: // toggle the simulation's Mode-Change-Break flag
+    {
+        // toggle mode_break on cpu0, use that value to reset all CPUs
+        bool nmb = BX_CPU(0)->mode_break ^ TRUE;
+        i = TotCPUs;
+        while (--i >= 0)
+            BX_CPU(i)->mode_break = nmb;
+        SetMenuCheckmark((int)nmb, CHK_CMD_MODEB);
+        break;
+    }
+
+    case CMD_ONECPU:    // toggle whether to show SMP CPUs
+        if (AtBreak == FALSE)
+            break;
+        SingleCPU ^= TRUE;
+        TotCPUs = 1;
+        if (SingleCPU == FALSE)
+            TotCPUs = BX_SMP_PROCESSORS;
+        SetMenuCheckmark((int)SingleCPU, CHK_CMD_ONECPU);
+        VSizeChange();
+        break;
+
+    case CMD_DADEF: // set default # of disassembly lines in a list
+        if (AtBreak == FALSE)
+            break;
+        sprintf(tmpcb, "%d", DefaultAsmLines);
+        if (AskText("Disassembly default linecount", "Max. 2048:", tmpcb) == FALSE)
+            return;
+        sscanf(tmpcb, "%u", &i);
+        if (i > 0 && i <= 2048)
+            DefaultAsmLines = i;
+        if (i > 1000 && FWflag == FALSE)    // friendly warning
+            ShowFW();
+        break;
+
+    case CMD_ATTI:      // Toggle ASM Syntax
+        bx_dbg_disassemble_switch_mode();
+        if (AtBreak != FALSE)
+        {
+            // do the standard ASM window fill sequence
+            Bit64u h = CurrentAsmLA;
+            CanDoLA(&h);
+            FillAsm(h, DefaultAsmLines);
+        }
+        else
+            BottomAsmLA = ~0;       // force an ASM autoload
+        break;
+
+    case CMD_IOWIN:  // toggle display of internal debugger Input and Output windows
+        if (AtBreak == FALSE)
+            break;
+        ShowIOWindows ^= TRUE;
+        SetMenuCheckmark((int)ShowIOWindows, CHK_CMD_IOWIN);
+        VSizeChange();
+        break;
+
+    case CMD_SBTN:      // Toggle showing top pushbutton-row
+        if (AtBreak == FALSE)
+            break;
+        ShowButtons ^= TRUE;
+        SetMenuCheckmark((int)ShowButtons, CHK_CMD_SBTN);
+        VSizeChange();
+        break;
+
+    case CMD_UCASE:     // Toggle showing everything in uppercase
+        UprCase ^= 1;
+        SetMenuCheckmark((int)UprCase, CHK_CMD_UCASE);
+        MakeRDnames();
+        if (AtBreak != FALSE)
+        {
+            LoadRegList();
+            // do the standard ASM window fill sequence
+            Bit64u h = CurrentAsmLA;
+            CanDoLA(&h);
+            FillAsm(h, DefaultAsmLines);
+        }
+        else
+            BottomAsmLA = ~0;       // force an ASM autoload
+        break;
+
+    case CMD_MHEX:      // Toggle showing hex in Dump window
+        i = DumpInAsciiMode;
+        i ^= 2;
+        if (i != 0)
+        {
+            DumpInAsciiMode = i;
+            i &= 2;
+            SetMenuCheckmark(i, CHK_CMD_MHEX);
+            GrayMenuItem(i, CMD_MASCII);
+            PrevDAD = 0;        // force columns to resize
             if (DViewMode == VIEW_MEMDUMP && DumpInitted != FALSE)
             {
                 if (AtBreak == FALSE)
@@ -3325,274 +3302,355 @@ void ActivateMenuItem (int cmd)
                 else
                     ShowData();
             }
-            break;
+        }
+        break;
 
-        case CMD_WS_1:      // set memory dump "wordsize"
-            // "Align" = "wordsize" -- from 1 to 16
-            doNewWSize(0);
-            break;
+    case CMD_MASCII:    // Toggle showing ASCII in Dump window
+        i = DumpInAsciiMode;
+        i ^= 1;
+        if (i != 0)
+        {
+            DumpInAsciiMode = i;
+            i &= 1;
+            SetMenuCheckmark(i, CHK_CMD_MASCII);
+            GrayMenuItem(i, CMD_MHEX);
+            PrevDAD = 0;        // force columns to resize
+            if (DViewMode == VIEW_MEMDUMP && DumpInitted != FALSE)
+            {
+                if (AtBreak == FALSE)
+                    doDumpRefresh = TRUE;
+                else
+                    ShowData();
+            }
+        }
+        break;
 
-        case CMD_WS_2:
-            doNewWSize(1);
-            break;
+    case CMD_LEND:      // Toggle Endianness for the MemDumps
+        isLittleEndian ^= TRUE;
+        SetMenuCheckmark((int)isLittleEndian, CHK_CMD_LEND);
+        if (DViewMode == VIEW_MEMDUMP && DumpInitted != FALSE)
+        {
+            if (AtBreak == FALSE)
+                doDumpRefresh = TRUE;
+            else
+                ShowData();
+        }
+        break;
 
-        case CMD_WS_4:
-            doNewWSize(2);
-            break;
+    case CMD_WS_1:      // set memory dump "wordsize"
+        // "Align" = "wordsize" -- from 1 to 16
+        doNewWSize(0);
+        break;
 
-        case CMD_WS_8:
-            doNewWSize(3);
-            break;
+    case CMD_WS_2:
+        doNewWSize(1);
+        break;
 
-        case CMD_WS16:
-            doNewWSize(4);
-            break;
+    case CMD_WS_4:
+        doNewWSize(2);
+        break;
 
-        case CMD_IGNSA:     // Toggle ID disassembly output ignoring
-            ignSSDisasm ^= TRUE;
-            SetMenuCheckmark ((int) ignSSDisasm, CHK_CMD_IGNSA);
-            break;
+    case CMD_WS_8:
+        doNewWSize(3);
+        break;
 
-        case CMD_IGNNT:     // Toggle NextT ignoring
-            ignoreNxtT ^= TRUE;
-            SetMenuCheckmark ((int) ignoreNxtT, CHK_CMD_IGNNT);
-            break;
+    case CMD_WS16:
+        doNewWSize(4);
+        break;
 
-        case CMD_RCLR:      // Toggle Register Coloring
-            SeeRegColors ^= TRUE;
-            SetMenuCheckmark ((int) SeeRegColors, CHK_CMD_RCLR);
-            if (AtBreak != FALSE)
-                LoadRegList();
-            break;
+    case CMD_IGNSA:     // Toggle ID disassembly output ignoring
+        ignSSDisasm ^= TRUE;
+        SetMenuCheckmark((int)ignSSDisasm, CHK_CMD_IGNSA);
+        break;
+
+    case CMD_IGNNT:     // Toggle NextT ignoring
+        ignoreNxtT ^= TRUE;
+        SetMenuCheckmark((int)ignoreNxtT, CHK_CMD_IGNNT);
+        break;
+
+    case CMD_RCLR:      // Toggle Register Coloring
+        SeeRegColors ^= TRUE;
+        SetMenuCheckmark((int)SeeRegColors, CHK_CMD_RCLR);
+        if (AtBreak != FALSE)
+            LoadRegList();
+        break;
 
 
-        case CMD_EREG: // Show Registers of various types
-        case CMD_SREG:
-        case CMD_SYSR:
-        case CMD_CREG:
-        case CMD_FPUR:
-        case CMD_XMMR:
-        case CMD_DREG:
-        case CMD_TREG:
-            ToggleSeeReg(cmd);
-            break;
+    case CMD_EREG: // Show Registers of various types
+    case CMD_SREG:
+    case CMD_SYSR:
+    case CMD_CREG:
+    case CMD_FPUR:
+    case CMD_XMMR:
+    case CMD_DREG:
+    case CMD_TREG:
+        ToggleSeeReg(cmd);
+        break;
 
-        case CMD_ABOUT:     // "About" box
-            DispMessage ("Bochs Enhanced Debugger, Version 1.2\r\nCopyright (C) Chourdakis Michael.\r\nModified by Bruce Ewing",
-                "About");
-            break;
+    case CMD_ABOUT:     // "About" box
+        DispMessage("Bochs Enhanced Debugger, Version 1.2\r\nCopyright (C) Chourdakis Michael.\r\nModified by Bruce Ewing",
+            "About");
+        break;
 
-        case CMD_FONT: // font
-            ResizeColmns = TRUE;        // column widths are font dependent
-            if (NewFont() != FALSE)
-                VSizeChange();
-            break;
+    case CMD_FONT: // font
+        ResizeColmns = TRUE;        // column widths are font dependent
+        if (NewFont() != FALSE)
+            VSizeChange();
+        break;
 
-        case CMD_LOGVIEW: // Toggle sending log to output window
-            LogView ^= 1;
-            SIM->set_log_viewer(LogView);
-            SetMenuCheckmark((int)LogView, CHK_CMD_LOGVIEW);
-            break;
+    case CMD_LOGVIEW: // Toggle sending log to output window
+        LogView ^= 1;
+        SIM->set_log_viewer(LogView);
+        SetMenuCheckmark((int)LogView, CHK_CMD_LOGVIEW);
+        break;
     }
 }
 
-BxEvent *enh_dbg_notify_callback(void *unused, BxEvent *event)
+BxEvent* enh_dbg_notify_callback(void* unused, BxEvent* event)
 {
-  switch (event->type)
-  {
+    switch (event->type)
+    {
     case BX_SYNC_EVT_GET_DBG_COMMAND:
-      {
+    {
         debug_cmd = new char[512];
         debug_cmd_ready = 0;
         HitBreak();
         while (debug_cmd_ready == 0 && bx_user_quit == 0)
         {
-          if (vgaw_refresh != 0)  // is the GUI frontend requesting a VGAW refresh?
-            SIM->refresh_vga();
-          vgaw_refresh = 0;
+            if (vgaw_refresh != 0)  // is the GUI frontend requesting a VGAW refresh?
+                SIM->refresh_vga();
+            vgaw_refresh = 0;
 #ifdef WIN32
-          Sleep(10);
+            Sleep(10);
 #elif BX_HAVE_USLEEP
-          usleep(10000);
+            usleep(10000);
 #else
-          sleep(1);
+            sleep(1);
 #endif
         }
-        if (bx_user_quit != 0) {
-          bx_dbg_exit(0);
+        if (bx_user_quit != 0)
+        {
+            bx_dbg_exit(0);
         }
         event->u.debugcmd.command = debug_cmd;
         event->retcode = 1;
         return event;
-      }
+    }
     case BX_ASYNC_EVT_DBG_MSG:
-      {
+    {
         ParseIDText(event->u.logmsg.msg);
         return event;
-      }
+    }
     case BX_ASYNC_EVT_LOG_MSG:
-      if (LogView) {
-        ParseIDText(event->u.logmsg.msg);
-        delete [] event->u.logmsg.msg;
-        return event;
-      }
+        if (LogView)
+        {
+            ParseIDText(event->u.logmsg.msg);
+            delete[] event->u.logmsg.msg;
+            return event;
+        }
     default:
-      return (*old_callback)(old_callback_arg, event);
-  }
+        return (*old_callback)(old_callback_arg, event);
+    }
 }
 
-static size_t strip_whitespace(char *s)
+static size_t strip_whitespace(char* s)
 {
-  size_t ptr = 0;
-  char *tmp = new char[strlen(s)+1];
-  strcpy(tmp, s);
-  while (s[ptr] == ' ') ptr++;
-  if (ptr > 0) strcpy(s, tmp+ptr);
-  delete [] tmp;
-  ptr = strlen(s);
-  while ((ptr > 0) && (s[ptr-1] == ' ')) {
-    s[--ptr] = 0;
-  }
-  return ptr;
+    size_t ptr = 0;
+    char* tmp = new char[strlen(s) + 1];
+    strcpy(tmp, s);
+    while (s[ptr] == ' ') ptr++;
+    if (ptr > 0) strcpy(s, tmp + ptr);
+    delete[] tmp;
+    ptr = strlen(s);
+    while ((ptr > 0) && (s[ptr - 1] == ' '))
+    {
+        s[--ptr] = 0;
+    }
+    return ptr;
 }
 
 void ReadSettings()
 {
-  FILE *fd = NULL;
-  char line[512];
-  char *ret, *param, *val;
-  bool format_checked = 0;
-  size_t len1 = 0, len2;
-  int i;
+    FILE* fd = NULL;
+    char line[512];
+    char* ret, * param, * val;
+    bool format_checked = 0;
+    size_t len1 = 0, len2;
+    int i;
 
-  fd = fopen("bx_enh_dbg.ini", "r");
-  if (fd == NULL) return;
-  do {
-    ret = fgets(line, sizeof(line)-1, fd);
-    line[sizeof(line) - 1] = '\0';
-    size_t len = strlen(line);
-    if ((len>0) && (line[len-1] < ' '))
-      line[len-1] = '\0';
-    if ((ret != NULL) && (strlen(line) > 0)) {
-      if (!format_checked) {
-        if (!strncmp(line, "# bx_enh_dbg_ini", 16)) {
-          format_checked = 1;
-        } else {
-          fprintf(stderr, "bx_enh_dbg.ini: wrong file format\n");
-          fclose(fd);
-          return;
+    fd = fopen("bx_enh_dbg.ini", "r");
+    if (fd == NULL) return;
+    do
+    {
+        ret = fgets(line, sizeof(line) - 1, fd);
+        line[sizeof(line) - 1] = '\0';
+        size_t len = strlen(line);
+        if ((len > 0) && (line[len - 1] < ' '))
+            line[len - 1] = '\0';
+        if ((ret != NULL) && (strlen(line) > 0))
+        {
+            if (!format_checked)
+            {
+                if (!strncmp(line, "# bx_enh_dbg_ini", 16))
+                {
+                    format_checked = 1;
+                }
+                else
+                {
+                    fprintf(stderr, "bx_enh_dbg.ini: wrong file format\n");
+                    fclose(fd);
+                    return;
+                }
+            }
+            else
+            {
+                if (line[0] == '#') continue;
+                param = strtok(line, "=");
+                if (param != NULL)
+                {
+                    len1 = strip_whitespace(param);
+                    val = strtok(NULL, "");
+                    if (val == NULL)
+                    {
+                        fprintf(stderr, "bx_enh_dbg.ini: missing value for parameter '%s'\n", param);
+                        continue;
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+                len2 = strip_whitespace(val);
+                if ((len1 == 0) || (len2 == 0)) continue;
+                if ((len1 == 9) && !strncmp(param, "SeeReg[", 7) && (param[8] == ']'))
+                {
+                    if ((param[7] < '0') || (param[7] > '7'))
+                    {
+                        fprintf(stderr, "bx_enh_dbg.ini: invalid index for option SeeReg[x]\n");
+                        continue;
+                    }
+                    i = atoi(&param[7]);
+                    SeeReg[i] = !strcmp(val, "TRUE");
+                }
+                else if (!strcmp(param, "SingleCPU"))
+                {
+                    SingleCPU = !strcmp(val, "TRUE");
+                }
+                else if (!strcmp(param, "ShowIOWindows"))
+                {
+                    ShowIOWindows = !strcmp(val, "TRUE");
+                }
+                else if (!strcmp(param, "ShowButtons"))
+                {
+                    ShowButtons = !strcmp(val, "TRUE");
+                }
+                else if (!strcmp(param, "SeeRegColors"))
+                {
+                    SeeRegColors = !strcmp(val, "TRUE");
+                }
+                else if (!strcmp(param, "ignoreNxtT"))
+                {
+                    ignoreNxtT = !strcmp(val, "TRUE");
+                }
+                else if (!strcmp(param, "ignSSDisasm"))
+                {
+                    ignSSDisasm = !strcmp(val, "TRUE");
+                }
+                else if (!strcmp(param, "UprCase"))
+                {
+                    UprCase = atoi(val);
+                }
+                else if (!strcmp(param, "DumpInAsciiMode"))
+                {
+                    DumpInAsciiMode = atoi(val);
+                }
+                else if (!strcmp(param, "isLittleEndian"))
+                {
+                    isLittleEndian = !strcmp(val, "TRUE");
+                }
+                else if (!strcmp(param, "DefaultAsmLines"))
+                {
+                    DefaultAsmLines = atoi(val);
+                }
+                else if (!strcmp(param, "DumpWSIndex"))
+                {
+                    DumpWSIndex = atoi(val);
+                    DumpAlign = (1 << DumpWSIndex);
+                    PrevDAD = 0;
+                }
+                else if (!strcmp(param, "DockOrder"))
+                {
+                    DockOrder = strtoul(val, NULL, 16);
+                }
+                else if ((len1 == 15) && !strncmp(param, "ListWidthPix[", 13) && (param[14] == ']'))
+                {
+                    if ((param[13] < '0') || (param[13] > '2'))
+                    {
+                        fprintf(stderr, "bx_enh_dbg.ini: invalid index for option SeeReg[x]\n");
+                        continue;
+                    }
+                    i = atoi(&param[13]);
+                    ListWidthPix[i] = atoi(val);
+                }
+                else if (!ParseOSSettings(param, val))
+                {
+                    fprintf(stderr, "bx_enh_dbg.ini: unknown option '%s'\n", line);
+                }
+            }
         }
-      } else {
-        if (line[0] == '#') continue;
-        param = strtok(line, "=");
-        if (param != NULL) {
-          len1 = strip_whitespace(param);
-          val = strtok(NULL, "");
-          if (val == NULL) {
-            fprintf(stderr, "bx_enh_dbg.ini: missing value for parameter '%s'\n", param);
-            continue;
-          }
-        } else {
-          continue;
-        }
-        len2 = strip_whitespace(val);
-        if ((len1 == 0) || (len2 == 0)) continue;
-        if ((len1 == 9) && !strncmp(param, "SeeReg[", 7) && (param[8] == ']')) {
-          if ((param[7] < '0') || (param[7] > '7')) {
-            fprintf(stderr, "bx_enh_dbg.ini: invalid index for option SeeReg[x]\n");
-            continue;
-          }
-          i = atoi(&param[7]);
-          SeeReg[i] = !strcmp(val, "TRUE");
-        } else if (!strcmp(param, "SingleCPU")) {
-          SingleCPU = !strcmp(val, "TRUE");
-        } else if (!strcmp(param, "ShowIOWindows")) {
-          ShowIOWindows = !strcmp(val, "TRUE");
-        } else if (!strcmp(param, "ShowButtons")) {
-          ShowButtons = !strcmp(val, "TRUE");
-        } else if (!strcmp(param, "SeeRegColors")) {
-          SeeRegColors = !strcmp(val, "TRUE");
-        } else if (!strcmp(param, "ignoreNxtT")) {
-          ignoreNxtT = !strcmp(val, "TRUE");
-        } else if (!strcmp(param, "ignSSDisasm")) {
-          ignSSDisasm = !strcmp(val, "TRUE");
-        } else if (!strcmp(param, "UprCase")) {
-          UprCase = atoi(val);
-        } else if (!strcmp(param, "DumpInAsciiMode")) {
-          DumpInAsciiMode = atoi(val);
-        } else if (!strcmp(param, "isLittleEndian")) {
-          isLittleEndian = !strcmp(val, "TRUE");
-        } else if (!strcmp(param, "DefaultAsmLines")) {
-          DefaultAsmLines = atoi(val);
-        } else if (!strcmp(param, "DumpWSIndex")) {
-          DumpWSIndex = atoi(val);
-          DumpAlign = (1 << DumpWSIndex);
-          PrevDAD = 0;
-        } else if (!strcmp(param, "DockOrder")) {
-          DockOrder = strtoul(val, NULL, 16);
-        } else if ((len1 == 15) && !strncmp(param, "ListWidthPix[", 13) && (param[14] == ']')) {
-          if ((param[13] < '0') || (param[13] > '2')) {
-            fprintf(stderr, "bx_enh_dbg.ini: invalid index for option SeeReg[x]\n");
-            continue;
-          }
-          i = atoi(&param[13]);
-          ListWidthPix[i] = atoi(val);
-        } else if (!ParseOSSettings(param, val)) {
-          fprintf(stderr, "bx_enh_dbg.ini: unknown option '%s'\n", line);
-        }
-      }
-    }
-  } while (!feof(fd));
-  fclose(fd);
+    } while (!feof(fd));
+    fclose(fd);
 }
 
 void WriteSettings()
 {
-  FILE *fd = NULL;
-  int i;
+    FILE* fd = NULL;
+    int i;
 
-  fd = fopen("bx_enh_dbg.ini", "w");
-  if (fd == NULL) return;
-  fprintf(fd, "# bx_enh_dbg_ini\n");
-  for (i = 0; i < 8; i++) {
-    fprintf(fd, "SeeReg[%d] = %s\n", i, SeeReg[i] ? "TRUE" : "FALSE");
-  }
-  fprintf(fd, "SingleCPU = %s\n", SingleCPU ? "TRUE" : "FALSE");
-  fprintf(fd, "ShowIOWindows = %s\n", ShowIOWindows ? "TRUE" : "FALSE");
-  fprintf(fd, "ShowButtons = %s\n", ShowButtons ? "TRUE" : "FALSE");
-  fprintf(fd, "SeeRegColors = %s\n", SeeRegColors ? "TRUE" : "FALSE");
-  fprintf(fd, "ignoreNxtT = %s\n", ignoreNxtT ? "TRUE" : "FALSE");
-  fprintf(fd, "ignSSDisasm = %s\n", ignSSDisasm ? "TRUE" : "FALSE");
-  fprintf(fd, "UprCase = %d\n", UprCase);
-  fprintf(fd, "DumpInAsciiMode = %d\n", DumpInAsciiMode);
-  fprintf(fd, "isLittleEndian = %s\n", isLittleEndian ? "TRUE" : "FALSE");
-  fprintf(fd, "DefaultAsmLines = %d\n", DefaultAsmLines);
-  fprintf(fd, "DumpWSIndex = %d\n", DumpWSIndex);
-  fprintf(fd, "DockOrder = 0x%03x\n", DockOrder);
-  for (i = 0; i < 3; i++) {
-    fprintf(fd, "ListWidthPix[%d] = %d\n", i, ListWidthPix[i]);
-  }
-  WriteOSSettings(fd);
-  fclose(fd);
+    fd = fopen("bx_enh_dbg.ini", "w");
+    if (fd == NULL) return;
+    fprintf(fd, "# bx_enh_dbg_ini\n");
+    for (i = 0; i < 8; i++)
+    {
+        fprintf(fd, "SeeReg[%d] = %s\n", i, SeeReg[i] ? "TRUE" : "FALSE");
+    }
+    fprintf(fd, "SingleCPU = %s\n", SingleCPU ? "TRUE" : "FALSE");
+    fprintf(fd, "ShowIOWindows = %s\n", ShowIOWindows ? "TRUE" : "FALSE");
+    fprintf(fd, "ShowButtons = %s\n", ShowButtons ? "TRUE" : "FALSE");
+    fprintf(fd, "SeeRegColors = %s\n", SeeRegColors ? "TRUE" : "FALSE");
+    fprintf(fd, "ignoreNxtT = %s\n", ignoreNxtT ? "TRUE" : "FALSE");
+    fprintf(fd, "ignSSDisasm = %s\n", ignSSDisasm ? "TRUE" : "FALSE");
+    fprintf(fd, "UprCase = %d\n", UprCase);
+    fprintf(fd, "DumpInAsciiMode = %d\n", DumpInAsciiMode);
+    fprintf(fd, "isLittleEndian = %s\n", isLittleEndian ? "TRUE" : "FALSE");
+    fprintf(fd, "DefaultAsmLines = %d\n", DefaultAsmLines);
+    fprintf(fd, "DumpWSIndex = %d\n", DumpWSIndex);
+    fprintf(fd, "DockOrder = 0x%03x\n", DockOrder);
+    for (i = 0; i < 3; i++)
+    {
+        fprintf(fd, "ListWidthPix[%d] = %d\n", i, ListWidthPix[i]);
+    }
+    WriteOSSettings(fd);
+    fclose(fd);
 }
 
 void InitDebugDialog()
 {
-  // redirect notify callback to the debugger specific code
-  SIM->get_notify_callback(&old_callback, &old_callback_arg);
-  assert (old_callback != NULL);
-  SIM->set_notify_callback(enh_dbg_notify_callback, NULL);
-  ReadSettings();
-  DoAllInit();    // non-os-specific init stuff
-  OSInit();
+    // redirect notify callback to the debugger specific code
+    SIM->get_notify_callback(&old_callback, &old_callback_arg);
+    assert(old_callback != NULL);
+    SIM->set_notify_callback(enh_dbg_notify_callback, NULL);
+    ReadSettings();
+    DoAllInit();    // non-os-specific init stuff
+    OSInit();
 }
 
 void CloseDebugDialog()
 {
-  WriteSettings();
-  SIM->set_log_viewer(0);
-  SIM->set_notify_callback(old_callback, old_callback_arg);
-  CloseDialog();
+    WriteSettings();
+    SIM->set_log_viewer(0);
+    SIM->set_notify_callback(old_callback, old_callback_arg);
+    CloseDialog();
 }
 
 #endif

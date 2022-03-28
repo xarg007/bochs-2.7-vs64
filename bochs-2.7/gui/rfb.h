@@ -48,7 +48,8 @@ typedef Bit8s          S8;
 // Please refer to the specification document
 // http://www.realvnc.com/docs/rfbproto.pdf
 
-typedef struct {
+typedef struct
+{
     U16 xPosition;
     U16 yPosition;
     U16 width;
@@ -59,7 +60,8 @@ typedef struct {
 #define rfbRectangleSize (sizeof(rfbRectangle))
 
 
-typedef struct {
+typedef struct
+{
     U8  bitsPerPixel;
     U8  depth;
     U8  bigEndianFlag;
@@ -93,14 +95,16 @@ typedef char rfbProtocolVersionMessage[rfbProtocolVersionMessageSize + 1]; // Ad
 #define rfbSecurityVncAuthTooMany 2 // No longer used (3.7)
 
 
-typedef struct {
+typedef struct
+{
     U8 sharedFlag;
 } rfbClientInitMessage;
 
 #define rfbClientInitMessageSize (sizeof(rfbClientInitMessage))
 
 
-typedef struct {
+typedef struct
+{
     U16            framebufferWidth;
     U16            framebufferHeight;
     rfbPixelFormat serverPixelFormat;
@@ -122,16 +126,18 @@ typedef struct {
 
 // Client to Server messages
 
-typedef struct {
-	U8             messageType;
-	U8             padding[3];
-	rfbPixelFormat pixelFormat;
+typedef struct
+{
+    U8             messageType;
+    U8             padding[3];
+    rfbPixelFormat pixelFormat;
 } rfbSetPixelFormatMessage;
 
 #define rfbSetPixelFormatMessageSize (sizeof(rfbSetPixelFormatMessage))
 
 
-typedef struct {
+typedef struct
+{
     U8  messageType;
     U8  padding;
     U16 firstColour;
@@ -141,42 +147,46 @@ typedef struct {
 #define rfbFixColourMapEntriesMessageSize (sizeof(rfbFixColourMapEntriesMessage))
 
 
-typedef struct {
-	U8  messageType;
-	U8  padding;
-	U16 numberOfEncodings;
+typedef struct
+{
+    U8  messageType;
+    U8  padding;
+    U16 numberOfEncodings;
 } rfbSetEncodingsMessage;
 
 #define rfbSetEncodingsMessageSize (sizeof(rfbSetEncodingsMessage))
 
 
-typedef struct {
-	U8  messageType;
-	U8  incremental;
-	U16 xPosition;
-	U16 yPosition;
-	U16 width;
-	U16 height;
+typedef struct
+{
+    U8  messageType;
+    U8  incremental;
+    U16 xPosition;
+    U16 yPosition;
+    U16 width;
+    U16 height;
 } rfbFramebufferUpdateRequestMessage;
 
 #define rfbFramebufferUpdateRequestMessageSize (sizeof(rfbFramebufferUpdateRequestMessage))
 
 
-typedef struct {
-	U8  messageType;
-	U8  downFlag;
-	U8  padding[2];
-	U32 key;
+typedef struct
+{
+    U8  messageType;
+    U8  downFlag;
+    U8  padding[2];
+    U32 key;
 } rfbKeyEventMessage;
 
 #define rfbKeyEventMessageSize (sizeof(rfbKeyEventMessage))
 
 
-typedef struct {
-	U8  messageType;
-	U8  buttonMask;
-	U16 xPosition;
-	U16 yPosition;
+typedef struct
+{
+    U8  messageType;
+    U8  buttonMask;
+    U16 xPosition;
+    U16 yPosition;
 } rfbPointerEventMessage;
 
 #define rfbPointerEventMessageSize (sizeof(rfbPointerEventMessage))
@@ -186,24 +196,26 @@ typedef struct {
 #define rfbButton3Mask 4
 
 
-typedef struct {
-	U8  messageType;
-	U8  padding[3];
-	U32 length;
-	// U8[]  text;
+typedef struct
+{
+    U8  messageType;
+    U8  padding[3];
+    U32 length;
+    // U8[]  text;
 } rfbClientCutTextMessage;
 
 #define rfbClientCutTextMessageSize (sizeof(rfbClientCutTextMessage))
 
 // Fill in correct names
-typedef union {
-	rfbSetPixelFormatMessage           spf;
-	rfbFixColourMapEntriesMessage      fcme;
-	rfbSetEncodingsMessage             se;
-	rfbFramebufferUpdateRequestMessage fur;
-	rfbKeyEventMessage                 ke;
-	rfbPointerEventMessage             pe;
-	rfbClientCutTextMessage            cct;
+typedef union
+{
+    rfbSetPixelFormatMessage           spf;
+    rfbFixColourMapEntriesMessage      fcme;
+    rfbSetEncodingsMessage             se;
+    rfbFramebufferUpdateRequestMessage fur;
+    rfbKeyEventMessage                 ke;
+    rfbPointerEventMessage             pe;
+    rfbClientCutTextMessage            cct;
 } rfbClientToServerMessage;
 
 
@@ -258,9 +270,10 @@ typedef union {
 #define rfbEncodingTightOption1f 0xffffff1f
 #define rfbEncodingTightOption20 0xffffff20
 
-typedef struct {
-        U32 id;
-        const char *name;
+typedef struct
+{
+    U32 id;
+    const char* name;
 } rfbEncodingType;
 
 rfbEncodingType rfbEncodings[] = {
@@ -313,23 +326,26 @@ rfbEncodingType rfbEncodings[] = {
 
 // Server To Client Messages
 
-typedef struct {
-	U8  messageType;
-	U8  padding;
-	U16 numberOfRectangles;
+typedef struct
+{
+    U8  messageType;
+    U8  padding;
+    U16 numberOfRectangles;
 } rfbFramebufferUpdateMessage;
 
 #define rfbFramebufferUpdateMessageSize (sizeof(rfbFramebufferUpdateMessage))
 
-typedef struct {
-	rfbRectangle r;
+typedef struct
+{
+    rfbRectangle r;
 } rfbFramebufferUpdateRectHeader;
 
 #define rfbFramebufferUpdateRectHeaderSize (sizeof(rfbFramebufferUpdateRectHeader))
 
-typedef struct {
-	U16 srcXPosition;
-	U16 srcYPosition;
+typedef struct
+{
+    U16 srcXPosition;
+    U16 srcYPosition;
 } rfbCopyRect;
 
 #define rfbCopyRectSize (sizeof(rfbCopyRect))
@@ -365,39 +381,43 @@ typedef struct {
 #define rfbHextileExtractH(byte) (((byte) & 0xf) + 1)
 
 
-typedef struct {
-	U8  messageType;
-	U8  padding;
-	U16 firstColour;
-	U16 numberOfColours;
+typedef struct
+{
+    U8  messageType;
+    U8  padding;
+    U16 firstColour;
+    U16 numberOfColours;
 } rfbSetColourMapEntriesMessage;
 
 #define rfbSetColourMapEntriesMessageSize (sizeof(rfbSetColourMapEntriesMessage))
 
 
 
-typedef struct {
-	U8 messageType;
+typedef struct
+{
+    U8 messageType;
 } rfbBellMessage;
 
 #define rfbBellMessageSize (sizeof(rfbBellMessage))
 
 
 
-typedef struct {
-	U8  messageType;
-	U8  padding[3];
-	U32 length;
-	// U8[]  text;
+typedef struct
+{
+    U8  messageType;
+    U8  padding[3];
+    U32 length;
+    // U8[]  text;
 } rfbServerCutTextMessage;
 
 #define rfbServerCutTextMessageSize (sizeof(rfbServerCutTextMessage))
 
 // Fill in correct names
-typedef union {
-	rfbFramebufferUpdateMessage fu;
-	rfbBellMessage              b;
-	rfbServerCutTextMessage     sct;
+typedef union
+{
+    rfbFramebufferUpdateMessage fu;
+    rfbBellMessage              b;
+    rfbServerCutTextMessage     sct;
 } rfbServerToClientMessage;
 
 #endif // HAVE_LIBVNCSERVER

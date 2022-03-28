@@ -30,10 +30,10 @@
 #endif
 
 void MoveLists();
-void SetStatusText(int column, const char *buf); // should it be here ?
+void SetStatusText(int column, const char* buf); // should it be here ?
 void MakeListsGray();
-void DispMessage(const char *msg, const char *title);
-void InsertListRow(char *ColumnText[], int ColumnCount, int listnum, int LineCount, int grouping);
+void DispMessage(const char* msg, const char* title);
+void InsertListRow(char* ColumnText[], int ColumnCount, int listnum, int LineCount, int grouping);
 void StartListUpdate(int listnum);
 void EndListUpdate(int listnum);
 void RedrawColumns(int listnum);
@@ -43,16 +43,16 @@ bool ShowAskDialog();
 bool NewFont();
 void GrayMenuItem(int flag, int CmdIndex);
 void ShowMemData(bool initting);
-void SetMenuCheckmark (int flag, int CmdIndex);
+void SetMenuCheckmark(int flag, int CmdIndex);
 void ClearInputWindow();
 void VSizeChange();
 void ToggleWSchecks(int newWS, int oldWS);
 void SetOutWinTxt();
 void ShowFW();
-void GetInputEntry(char *buf);
+void GetInputEntry(char* buf);
 void SelectHistory(int UpDown);
-void DelWatchpoint(bx_watchpoint *wp_array, unsigned *TotEntries, int i);
-void SetWatchpoint(unsigned *num_watchpoints, bx_watchpoint *watchpoint);
+void DelWatchpoint(bx_watchpoint* wp_array, unsigned* TotEntries, int i);
+void SetWatchpoint(unsigned* num_watchpoints, bx_watchpoint* watchpoint);
 
 void HideTree();
 void FillPTree();
@@ -60,18 +60,18 @@ void FillPTree();
 int GetASMTopIdx();
 void ScrollASM(int pixels);
 
-void GetLIText(int listnum, int itemnum, int column, char *buf);
+void GetLIText(int listnum, int itemnum, int column, char* buf);
 void SetLIState(int listnum, int itemnum, bool Select);
 int GetNextSelectedLI(int listnum, int StartPt);
 
 bool OSInit();
 void SpecialInit();
 void CloseDialog();
-bool ParseOSSettings(const char *param, const char *value);
-void WriteOSSettings(FILE *fd);
+bool ParseOSSettings(const char* param, const char* value);
+void WriteOSSettings(FILE* fd);
 
 void HitBreak();
-void ParseIDText(const char *x);
+void ParseIDText(const char* x);
 
 extern bool vgaw_refresh;
 
@@ -210,7 +210,8 @@ extern unsigned CpuSupportSSE; // cpu supports SSE
 extern unsigned CurrentCPU;    // cpu that is being displayed
 
 // AskTest stuff -- for the generic dialog box
-struct ASKTEXT {
+struct ASKTEXT
+{
     const char* title;
     const char* prompt;
     char* reply;
@@ -264,12 +265,12 @@ extern bool doDumpRefresh;
 extern int DViewMode;
 extern bool LinearDump;        // FALSE = memdump uses physical addressing
 
-extern char *tmpcb;            // 512b is allocated in bigbuf
+extern char* tmpcb;            // 512b is allocated in bigbuf
 extern char AsciiHex[512];     // Unsigned char to printable hex xlat table
 
 #define outbufSIZE      40960
 extern char bigbuf[outbufSIZE];    // 40K preallocated storage for all char buffers (see DoAllInit)
-extern char *OutWindow;            // buffer for the Output window
+extern char* OutWindow;            // buffer for the Output window
 #define OutWinSIZE  10240
 extern int PO_Tdelay;              // delay before displaying partial output lines
 
@@ -282,7 +283,7 @@ extern Bit64u AsmLA[MAX_ASM];      // linear address of each disassembled ASM li
 // Command stuff
 extern int CommandHistoryIdx;
 #define CmdHistorySize 64
-extern char *CmdHistory[CmdHistorySize];   // 64 command History storage (fixed 80b each)
+extern char* CmdHistory[CmdHistorySize];   // 64 command History storage (fixed 80b each)
 extern int CmdHInsert;                     // index of next history entry to store
 
 // register storage -- names and values
@@ -394,7 +395,7 @@ extern Bit8u RegColor[TOT_REG_NUM];    // specifies foreground and background co
 extern int RitemToRnum[TOT_REG_NUM];   // mapping from Reg List Item# to register number
 
 // do the linear breakpoint list as 2 arrays, rather than a structure -- much easier to search!
-extern bx_address BrkLAddr[BX_DBG_MAX_LIN_BPOINTS+1];
+extern bx_address BrkLAddr[BX_DBG_MAX_LIN_BPOINTS + 1];
 extern int BreakCount;
 
 // Breakpoint Dump Window stuff

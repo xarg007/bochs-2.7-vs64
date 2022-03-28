@@ -104,12 +104,12 @@ EVEX_FMA_PACKED_SINGLE(VFNMSUBPS_MASK_VpsHpsWpsR, xmm_fnmsubps_mask)
     BX_NEXT_INSTR(i);                                                           \
   }
 
-EVEX_FMA_PACKED_DOUBLE(VFMADDPD_MASK_VpdHpdWpdR, xmm_fmaddpd_mask)
-EVEX_FMA_PACKED_DOUBLE(VFMADDSUBPD_MASK_VpdHpdWpdR, xmm_fmaddsubpd_mask)
-EVEX_FMA_PACKED_DOUBLE(VFMSUBADDPD_MASK_VpdHpdWpdR, xmm_fmsubaddpd_mask)
-EVEX_FMA_PACKED_DOUBLE(VFMSUBPD_MASK_VpdHpdWpdR, xmm_fmsubpd_mask)
-EVEX_FMA_PACKED_DOUBLE(VFNMADDPD_MASK_VpdHpdWpdR, xmm_fnmaddpd_mask)
-EVEX_FMA_PACKED_DOUBLE(VFNMSUBPD_MASK_VpdHpdWpdR, xmm_fnmsubpd_mask)
+    EVEX_FMA_PACKED_DOUBLE(VFMADDPD_MASK_VpdHpdWpdR, xmm_fmaddpd_mask)
+    EVEX_FMA_PACKED_DOUBLE(VFMADDSUBPD_MASK_VpdHpdWpdR, xmm_fmaddsubpd_mask)
+    EVEX_FMA_PACKED_DOUBLE(VFMSUBADDPD_MASK_VpdHpdWpdR, xmm_fmsubaddpd_mask)
+    EVEX_FMA_PACKED_DOUBLE(VFMSUBPD_MASK_VpdHpdWpdR, xmm_fmsubpd_mask)
+    EVEX_FMA_PACKED_DOUBLE(VFNMADDPD_MASK_VpdHpdWpdR, xmm_fnmaddpd_mask)
+    EVEX_FMA_PACKED_DOUBLE(VFNMSUBPD_MASK_VpdHpdWpdR, xmm_fnmsubpd_mask)
 
 #define EVEX_FMA_SCALAR_SINGLE(HANDLER, func)                                 \
   void BX_CPP_AttrRegparmN(1) BX_CPU_C:: HANDLER (bxInstruction_c *i)         \
@@ -135,10 +135,10 @@ EVEX_FMA_PACKED_DOUBLE(VFNMSUBPD_MASK_VpdHpdWpdR, xmm_fnmsubpd_mask)
     BX_NEXT_INSTR(i);                                                         \
   }
 
-EVEX_FMA_SCALAR_SINGLE(VFMADDSS_MASK_VpsHssWssR, float32_fmadd)
-EVEX_FMA_SCALAR_SINGLE(VFMSUBSS_MASK_VpsHssWssR, float32_fmsub)
-EVEX_FMA_SCALAR_SINGLE(VFNMADDSS_MASK_VpsHssWssR, float32_fnmadd)
-EVEX_FMA_SCALAR_SINGLE(VFNMSUBSS_MASK_VpsHssWssR, float32_fnmsub)
+    EVEX_FMA_SCALAR_SINGLE(VFMADDSS_MASK_VpsHssWssR, float32_fmadd)
+    EVEX_FMA_SCALAR_SINGLE(VFMSUBSS_MASK_VpsHssWssR, float32_fmsub)
+    EVEX_FMA_SCALAR_SINGLE(VFNMADDSS_MASK_VpsHssWssR, float32_fnmadd)
+    EVEX_FMA_SCALAR_SINGLE(VFNMSUBSS_MASK_VpsHssWssR, float32_fnmsub)
 
 #define EVEX_FMA_SCALAR_DOUBLE(HANDLER, func)                                 \
   void BX_CPP_AttrRegparmN(1) BX_CPU_C:: HANDLER (bxInstruction_c *i)         \
@@ -164,9 +164,9 @@ EVEX_FMA_SCALAR_SINGLE(VFNMSUBSS_MASK_VpsHssWssR, float32_fnmsub)
     BX_NEXT_INSTR(i);                                                         \
   }
 
-EVEX_FMA_SCALAR_DOUBLE(VFMADDSD_MASK_VpdHsdWsdR, float64_fmadd)
-EVEX_FMA_SCALAR_DOUBLE(VFMSUBSD_MASK_VpdHsdWsdR, float64_fmsub)
-EVEX_FMA_SCALAR_DOUBLE(VFNMADDSD_MASK_VpdHsdWsdR, float64_fnmadd)
-EVEX_FMA_SCALAR_DOUBLE(VFNMSUBSD_MASK_VpdHsdWsdR, float64_fnmsub)
+    EVEX_FMA_SCALAR_DOUBLE(VFMADDSD_MASK_VpdHsdWsdR, float64_fmadd)
+    EVEX_FMA_SCALAR_DOUBLE(VFMSUBSD_MASK_VpdHsdWsdR, float64_fmsub)
+    EVEX_FMA_SCALAR_DOUBLE(VFNMADDSD_MASK_VpdHsdWsdR, float64_fnmadd)
+    EVEX_FMA_SCALAR_DOUBLE(VFNMSUBSD_MASK_VpdHsdWsdR, float64_fnmsub)
 
 #endif

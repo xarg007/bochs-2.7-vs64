@@ -8241,200 +8241,212 @@ static const Bit16u rsqrt14_table1[32768] = {
 // approximate 14-bit sqrt reciprocal of scalar single precision FP
 float32 approximate_rsqrt14(float32 op, bool daz)
 {
-  float_class_t op_class = float32_class(op);
+    float_class_t op_class = float32_class(op);
 
-  int sign = float32_sign(op);
-  Bit32u fraction = float32_fraction(op);
-  Bit16s exp = float32_exp(op);
+    int sign = float32_sign(op);
+    Bit32u fraction = float32_fraction(op);
+    Bit16s exp = float32_exp(op);
 
-  switch(op_class) {
+    switch (op_class)
+    {
     case float_zero:
-      return packFloat32(sign, 0xFF, 0);
+        return packFloat32(sign, 0xFF, 0);
 
     case float_positive_inf:
-      return 0;
+        return 0;
 
     case float_negative_inf:
-      return float32_default_nan;
+        return float32_default_nan;
 
     case float_SNaN:
     case float_QNaN:
-      return convert_to_QNaN(op);
+        return convert_to_QNaN(op);
 
     case float_denormal:
-      if (daz) return packFloat32(sign, 0xFF, 0);
-        
-      normalizeFloat32Subnormal(fraction, &exp, &fraction);
+        if (daz) return packFloat32(sign, 0xFF, 0);
 
-      fraction &= 0x7fffff;
-      // fall through
+        normalizeFloat32Subnormal(fraction, &exp, &fraction);
+
+        fraction &= 0x7fffff;
+        // fall through
 
     case float_normalized:
-      break;
-  };
+        break;
+    };
 
-  if (sign == 1) 
-    return float32_default_nan;
+    if (sign == 1)
+        return float32_default_nan;
 
-  /*
-   * Calculate (1/1.yyyyyyyyyyyyy1), the result is always rounded to the
-   * 14th bit after the decimal point by round-to-nearest, regardless
-   * of the current rounding mode.
-   *
-   * Using two precalculated 32K-entry tables.
-   */
+    /*
+     * Calculate (1/1.yyyyyyyyyyyyy1), the result is always rounded to the
+     * 14th bit after the decimal point by round-to-nearest, regardless
+     * of the current rounding mode.
+     *
+     * Using two precalculated 32K-entry tables.
+     */
 
-  const Bit16u *rsqrt_table = (exp & 1) ? rsqrt14_table1 : rsqrt14_table0;
+    const Bit16u* rsqrt_table = (exp & 1) ? rsqrt14_table1 : rsqrt14_table0;
 
-  exp = 0x7E - ((exp - 0x7F) >> 1);
-  if (fraction)
-    fraction = rsqrt_table[fraction >> 8];
-  else
-    exp++;
+    exp = 0x7E - ((exp - 0x7F) >> 1);
+    if (fraction)
+        fraction = rsqrt_table[fraction >> 8];
+    else
+        exp++;
 
-  return packFloat32(0, exp, fraction << 7);
+    return packFloat32(0, exp, fraction << 7);
 }
 
 // approximate 14-bit sqrt reciprocal of scalar double precision FP
 float64 approximate_rsqrt14(float64 op, bool daz)
 {
-  float_class_t op_class = float64_class(op);
+    float_class_t op_class = float64_class(op);
 
-  int sign = float64_sign(op);
-  Bit64u fraction = float64_fraction(op);
-  Bit16s exp = float64_exp(op);
+    int sign = float64_sign(op);
+    Bit64u fraction = float64_fraction(op);
+    Bit16s exp = float64_exp(op);
 
-  switch(op_class) {
+    switch (op_class)
+    {
     case float_zero:
-      return packFloat64(sign, 0x7FF, 0);
+        return packFloat64(sign, 0x7FF, 0);
 
     case float_positive_inf:
-      return 0;
+        return 0;
 
     case float_negative_inf:
-      return float64_default_nan;
+        return float64_default_nan;
 
     case float_SNaN:
     case float_QNaN:
-      return convert_to_QNaN(op);
+        return convert_to_QNaN(op);
 
     case float_denormal:
-      if (daz) return packFloat64(sign, 0x7FF, 0);
-        
-      normalizeFloat64Subnormal(fraction, &exp, &fraction);
+        if (daz) return packFloat64(sign, 0x7FF, 0);
 
-      fraction &= BX_CONST64(0xfffffffffffff);
-      // fall through
+        normalizeFloat64Subnormal(fraction, &exp, &fraction);
+
+        fraction &= BX_CONST64(0xfffffffffffff);
+        // fall through
 
     case float_normalized:
-      break;
-  };
+        break;
+    };
 
-  if (sign == 1) 
-    return float64_default_nan;
+    if (sign == 1)
+        return float64_default_nan;
 
-  // Compute the single precision 23-bit mantissa from the 52-bit double
-  // precision mantissa by shifting it right, but also leave a "sticky bit"
-  // for the shifted off bits.
-  fraction = (fraction >> 29) | ((fraction & 0x1fffffff) != 0);
+    // Compute the single precision 23-bit mantissa from the 52-bit double
+    // precision mantissa by shifting it right, but also leave a "sticky bit"
+    // for the shifted off bits.
+    fraction = (fraction >> 29) | ((fraction & 0x1fffffff) != 0);
 
-  const Bit16u *rsqrt_table = (exp & 1) ? rsqrt14_table1 : rsqrt14_table0;
+    const Bit16u* rsqrt_table = (exp & 1) ? rsqrt14_table1 : rsqrt14_table0;
 
-  exp = 0x3FE - ((exp - 0x3FF) >> 1);
-  if (fraction)
-    fraction = rsqrt_table[(Bit32u)fraction >> 8];
-  else
-    exp++;
+    exp = 0x3FE - ((exp - 0x3FF) >> 1);
+    if (fraction)
+        fraction = rsqrt_table[(Bit32u)fraction >> 8];
+    else
+        exp++;
 
-  return packFloat64(0, exp, fraction << 36);
+    return packFloat64(0, exp, fraction << 36);
 }
 
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::VRSQRT14PS_MASK_VpsWpsR(bxInstruction_c *i)
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::VRSQRT14PS_MASK_VpsWpsR(bxInstruction_c* i)
 {
-  BxPackedAvxRegister op = BX_READ_AVX_REG(i->src());
-  Bit32u mask = i->opmask() ? BX_READ_16BIT_OPMASK(i->opmask()) : (Bit32u) -1;
-  unsigned len = i->getVL();
+    BxPackedAvxRegister op = BX_READ_AVX_REG(i->src());
+    Bit32u mask = i->opmask() ? BX_READ_16BIT_OPMASK(i->opmask()) : (Bit32u)-1;
+    unsigned len = i->getVL();
 
-  for (unsigned n=0, tmp_mask = mask; n < DWORD_ELEMENTS(len); n++, tmp_mask >>= 1) {
-    if (tmp_mask & 0x1)
-      op.vmm32u(n) = approximate_rsqrt14(op.vmm32u(n), MXCSR.get_DAZ());
+    for (unsigned n = 0, tmp_mask = mask; n < DWORD_ELEMENTS(len); n++, tmp_mask >>= 1)
+    {
+        if (tmp_mask & 0x1)
+            op.vmm32u(n) = approximate_rsqrt14(op.vmm32u(n), MXCSR.get_DAZ());
+        else
+            op.vmm32u(n) = 0;
+    }
+
+    if (!i->isZeroMasking())
+    {
+        for (unsigned n = 0; n < len; n++, mask >>= 4)
+            xmm_blendps(&BX_READ_AVX_REG_LANE(i->dst(), n), &op.vmm128(n), mask);
+        BX_CLEAR_AVX_REGZ(i->dst(), len);
+    }
     else
-      op.vmm32u(n) = 0;
-  }
+    {
+        BX_WRITE_AVX_REGZ(i->dst(), op, len);
+    }
 
-  if (! i->isZeroMasking()) {
-    for (unsigned n=0; n < len; n++, mask >>= 4)
-      xmm_blendps(&BX_READ_AVX_REG_LANE(i->dst(), n), &op.vmm128(n), mask);
-    BX_CLEAR_AVX_REGZ(i->dst(), len);
-  }
-  else {
-    BX_WRITE_AVX_REGZ(i->dst(), op, len);
-  }
-
-  BX_NEXT_INSTR(i);
+    BX_NEXT_INSTR(i);
 }
 
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::VRSQRT14PD_MASK_VpdWpdR(bxInstruction_c *i)
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::VRSQRT14PD_MASK_VpdWpdR(bxInstruction_c* i)
 {
-  BxPackedAvxRegister op = BX_READ_AVX_REG(i->src());
-  Bit32u mask = i->opmask() ? BX_READ_8BIT_OPMASK(i->opmask()) : (Bit32u) -1;
-  unsigned len = i->getVL();
+    BxPackedAvxRegister op = BX_READ_AVX_REG(i->src());
+    Bit32u mask = i->opmask() ? BX_READ_8BIT_OPMASK(i->opmask()) : (Bit32u)-1;
+    unsigned len = i->getVL();
 
-  for (unsigned n=0, tmp_mask = mask; n < QWORD_ELEMENTS(len); n++, tmp_mask >>= 1) {
-    if (tmp_mask & 0x1)
-      op.vmm64u(n) = approximate_rsqrt14(op.vmm64u(n), MXCSR.get_DAZ());
+    for (unsigned n = 0, tmp_mask = mask; n < QWORD_ELEMENTS(len); n++, tmp_mask >>= 1)
+    {
+        if (tmp_mask & 0x1)
+            op.vmm64u(n) = approximate_rsqrt14(op.vmm64u(n), MXCSR.get_DAZ());
+        else
+            op.vmm64u(n) = 0;
+    }
+
+    if (!i->isZeroMasking())
+    {
+        for (unsigned n = 0; n < len; n++, mask >>= 2)
+            xmm_blendpd(&BX_READ_AVX_REG_LANE(i->dst(), n), &op.vmm128(n), mask);
+        BX_CLEAR_AVX_REGZ(i->dst(), len);
+    }
     else
-      op.vmm64u(n) = 0;
-  }
+    {
+        BX_WRITE_AVX_REGZ(i->dst(), op, len);
+    }
 
-  if (! i->isZeroMasking()) {
-    for (unsigned n=0; n < len; n++, mask >>= 2)
-      xmm_blendpd(&BX_READ_AVX_REG_LANE(i->dst(), n), &op.vmm128(n), mask);
-    BX_CLEAR_AVX_REGZ(i->dst(), len);
-  }
-  else {
-    BX_WRITE_AVX_REGZ(i->dst(), op, len);
-  }
-
-  BX_NEXT_INSTR(i);
+    BX_NEXT_INSTR(i);
 }
 
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::VRSQRT14SS_MASK_VssHpsWssR(bxInstruction_c *i)
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::VRSQRT14SS_MASK_VssHpsWssR(bxInstruction_c* i)
 {
-  BxPackedXmmRegister op1 = BX_READ_XMM_REG(i->src1());
+    BxPackedXmmRegister op1 = BX_READ_XMM_REG(i->src1());
 
-  if (! i->opmask() || BX_SCALAR_ELEMENT_MASK(i->opmask())) {
-    float32 op2 = BX_READ_XMM_REG_LO_DWORD(i->src2());
-    op1.xmm32u(0) = approximate_rsqrt14(op2, MXCSR.get_DAZ());
-  }
-  else {
-    if (i->isZeroMasking())
-      op1.xmm32u(0) = 0;
+    if (!i->opmask() || BX_SCALAR_ELEMENT_MASK(i->opmask()))
+    {
+        float32 op2 = BX_READ_XMM_REG_LO_DWORD(i->src2());
+        op1.xmm32u(0) = approximate_rsqrt14(op2, MXCSR.get_DAZ());
+    }
     else
-      op1.xmm32u(0) = BX_READ_XMM_REG_LO_DWORD(i->dst());
-  }
+    {
+        if (i->isZeroMasking())
+            op1.xmm32u(0) = 0;
+        else
+            op1.xmm32u(0) = BX_READ_XMM_REG_LO_DWORD(i->dst());
+    }
 
-  BX_WRITE_XMM_REG_CLEAR_HIGH(i->dst(), op1);
-  BX_NEXT_INSTR(i);
+    BX_WRITE_XMM_REG_CLEAR_HIGH(i->dst(), op1);
+    BX_NEXT_INSTR(i);
 }
 
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::VRSQRT14SD_MASK_VsdHpdWsdR(bxInstruction_c *i)
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::VRSQRT14SD_MASK_VsdHpdWsdR(bxInstruction_c* i)
 {
-  BxPackedXmmRegister op1 = BX_READ_XMM_REG(i->src1());
+    BxPackedXmmRegister op1 = BX_READ_XMM_REG(i->src1());
 
-  if (! i->opmask() || BX_SCALAR_ELEMENT_MASK(i->opmask())) {
-    float64 op2 = BX_READ_XMM_REG_LO_QWORD(i->src2());
-    op1.xmm64u(0) = approximate_rsqrt14(op2, MXCSR.get_DAZ());
-  }
-  else {
-    if (i->isZeroMasking())
-      op1.xmm64u(0) = 0;
+    if (!i->opmask() || BX_SCALAR_ELEMENT_MASK(i->opmask()))
+    {
+        float64 op2 = BX_READ_XMM_REG_LO_QWORD(i->src2());
+        op1.xmm64u(0) = approximate_rsqrt14(op2, MXCSR.get_DAZ());
+    }
     else
-      op1.xmm64u(0) = BX_READ_XMM_REG_LO_QWORD(i->dst());
-  }
+    {
+        if (i->isZeroMasking())
+            op1.xmm64u(0) = 0;
+        else
+            op1.xmm64u(0) = BX_READ_XMM_REG_LO_QWORD(i->dst());
+    }
 
-  BX_WRITE_XMM_REG_CLEAR_HIGH(i->dst(), op1);
-  BX_NEXT_INSTR(i);
+    BX_WRITE_XMM_REG_CLEAR_HIGH(i->dst(), op1);
+    BX_NEXT_INSTR(i);
 }
 
 #endif

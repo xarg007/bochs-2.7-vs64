@@ -548,6 +548,15 @@ int WINAPI WinMain(
 }
 #endif
 
+// admin fix @20220328
+//https://www.virtualbox.org/
+//https://www.debian.org/
+//http://cdimage.debian.org/cdimage/archive/
+//install debian-8.11.1-amd64-os@(virtual-box)
+//设置虚拟硬盘文件类型 VMDK
+//在分区格式化时将文件系统设为ext2
+// admin fix @20220328 end;
+
 #if !defined(__WXMSW__)
 // normal main function, presently in for all cases except for
 // wxWidgets under win32.

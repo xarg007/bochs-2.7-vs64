@@ -349,7 +349,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="xbochsvm.bxrc" />
+    <None Include="xbochs.bxrc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

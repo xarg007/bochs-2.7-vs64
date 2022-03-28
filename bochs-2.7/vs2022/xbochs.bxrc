@@ -6,7 +6,8 @@ romimage:    file=xbios.bin
 vgaromimage: file=xvgabios.bin
 ata0: enabled=1, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
 #ata0-master: type=disk, mode=vmware4, path="xdb11.vmdk"
-ata0-master:  type=disk, mode=vmware4, path="xdb8x.vmdk"
+#ata0-master:  type=disk, mode=vmware4, path="xdb8x.vmdk"
+ata0-master:  type=disk, mode=vmware4, path="xdb8.11.x.vmdk"
 
 boot: c
 #vga: extension=vbe, update_freq=15

@@ -35,9 +35,9 @@ extern "C" {
 #endif
 
 #ifdef WIN32
-// In a win32 compile (including cygwin), windows.h is required for several
-// files in gui and iodev.  It is important to include it here in a header
-// file so that WIN32-specific data types can be used in fields of classes.
+    // In a win32 compile (including cygwin), windows.h is required for several
+    // files in gui and iodev.  It is important to include it here in a header
+    // file so that WIN32-specific data types can be used in fields of classes.
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #endif
@@ -111,40 +111,40 @@ extern "C" {
 #endif
 
 // prototypes
-int  bx_begin_simulation(int argc, char *argv[]);
+int  bx_begin_simulation(int argc, char* argv[]);
 void bx_stop_simulation();
-char *bx_find_bochsrc(void);
-const char *get_builtin_variable(const char *varname);
-int  bx_parse_cmdline(int arg, int argc, char *argv[]);
-int  bx_read_configuration(const char *rcfile);
-int  bx_write_configuration(const char *rcfile, int overwrite);
+char* bx_find_bochsrc(void);
+const char* get_builtin_variable(const char* varname);
+int  bx_parse_cmdline(int arg, int argc, char* argv[]);
+int  bx_read_configuration(const char* rcfile);
+int  bx_write_configuration(const char* rcfile, int overwrite);
 void bx_reset_options(void);
 void bx_set_log_actions_by_device(bool panic_flag);
 // special config parameter and options functions for plugins
 #if BX_NETWORKING
-void bx_init_std_nic_options(const char *name, bx_list_c *menu);
+void bx_init_std_nic_options(const char* name, bx_list_c* menu);
 #endif
 #if BX_SUPPORT_PCIUSB
-void bx_init_usb_options(const char *usb_name, const char *pname, int maxports);
+void bx_init_usb_options(const char* usb_name, const char* pname, int maxports);
 #endif
-int  bx_parse_param_from_list(const char *context, const char *input, bx_list_c *list);
-int  bx_parse_nic_params(const char *context, const char *param, bx_list_c *base);
-int  bx_parse_usb_port_params(const char *context, const char *param,
-                              int maxports, bx_list_c *base);
-int  bx_split_option_list(const char *msg, const char *rawopt, char **argv, int max_argv);
-int  bx_write_param_list(FILE *fp, bx_list_c *base, const char *optname, bool multiline);
+int  bx_parse_param_from_list(const char* context, const char* input, bx_list_c* list);
+int  bx_parse_nic_params(const char* context, const char* param, bx_list_c* base);
+int  bx_parse_usb_port_params(const char* context, const char* param,
+    int maxports, bx_list_c* base);
+int  bx_split_option_list(const char* msg, const char* rawopt, char** argv, int max_argv);
+int  bx_write_param_list(FILE* fp, bx_list_c* base, const char* optname, bool multiline);
 #if BX_SUPPORT_PCIUSB
-int  bx_write_usb_options(FILE *fp, int maxports, bx_list_c *base);
+int  bx_write_usb_options(FILE* fp, int maxports, bx_list_c* base);
 #endif
 
-Bit32u crc32(const Bit8u *buf, int len);
+Bit32u crc32(const Bit8u* buf, int len);
 
 // used to print param tree from debugger
-void print_tree(bx_param_c *node, int level = 0, bool xml = false);
+void print_tree(bx_param_c* node, int level = 0, bool xml = false);
 
 #if BX_ENABLE_STATISTICS
 // print statistics
-void print_statistics_tree(bx_param_c *node, int level = 0);
+void print_statistics_tree(bx_param_c* node, int level = 0);
 #define INC_STAT(stat) (++(stat))
 #else
 #define INC_STAT(stat)
@@ -260,9 +260,9 @@ void print_statistics_tree(bx_param_c *node, int level = 0);
 #endif
 
 #if BX_PHY_ADDRESS_LONG
-  #define FMT_PHY_ADDRX FMT_PHY_ADDRX64
+#define FMT_PHY_ADDRX FMT_PHY_ADDRX64
 #else
-  #define FMT_PHY_ADDRX FMT_ADDRX32
+#define FMT_PHY_ADDRX FMT_ADDRX32
 #endif
 
 #define FMT_LIN_ADDRX FMT_ADDRX
@@ -282,21 +282,22 @@ int bx_gdbstub_check(unsigned int eip);
 #endif
 #endif
 
-typedef struct {
-  bool interrupts;
-  bool exceptions;
-  bool print_timestamps;
+typedef struct
+{
+    bool interrupts;
+    bool exceptions;
+    bool print_timestamps;
 #if BX_DEBUGGER
-  bool magic_break_enabled;
+    bool magic_break_enabled;
 #endif
 #if BX_GDBSTUB
-  bool gdbstub_enabled;
+    bool gdbstub_enabled;
 #endif
 #if BX_SUPPORT_APIC
-  bool apic;
+    bool apic;
 #endif
 #if BX_DEBUG_LINUX
-  bool linux_syscall;
+    bool linux_syscall;
 #endif
 } bx_debug_t;
 
@@ -308,9 +309,9 @@ BOCHSAPI_MSVCONLY int bx_atexit(void);
 BOCHSAPI extern bx_debug_t bx_dbg;
 
 #if BX_SUPPORT_SMP
-  #define BX_SMP_PROCESSORS (bx_cpu_count)
+#define BX_SMP_PROCESSORS (bx_cpu_count)
 #else
-  #define BX_SMP_PROCESSORS 1
+#define BX_SMP_PROCESSORS 1
 #endif
 
 BOCHSAPI extern Bit8u bx_cpu_count;
@@ -320,16 +321,17 @@ BOCHSAPI extern Bit32u apic_id_mask;
 #endif
 
 // memory access type (read/write/execute/rw)
-enum {
-  BX_READ    = 0,
-  BX_WRITE   = 1,
-  BX_EXECUTE = 2,
-  BX_RW      = 3,
+enum
+{
+    BX_READ = 0,
+    BX_WRITE = 1,
+    BX_EXECUTE = 2,
+    BX_RW = 3,
 #if BX_SUPPORT_CET
-  BX_SHADOW_STACK_READ    = 4,
-  BX_SHADOW_STACK_WRITE   = 5,
-  BX_SHADOW_STACK_INVALID = 6,  // can't execute shadow stack
-  BX_SHADOW_STACK_RW      = 7,
+    BX_SHADOW_STACK_READ = 4,
+    BX_SHADOW_STACK_WRITE = 5,
+    BX_SHADOW_STACK_INVALID = 6,  // can't execute shadow stack
+    BX_SHADOW_STACK_RW = 7,
 #endif
 };
 
@@ -359,7 +361,7 @@ extern bool bx_gui_sighandler;
 #define BX_N_PARALLEL_PORTS 2
 #define BX_N_PCI_SLOTS 5
 
-void bx_center_print(FILE *file, const char *line, unsigned maxwidth);
+void bx_center_print(FILE* file, const char* line, unsigned maxwidth);
 
 #include "instrument.h"
 #include "misc/bswap.h"

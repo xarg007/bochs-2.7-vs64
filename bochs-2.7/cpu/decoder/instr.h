@@ -49,6 +49,7 @@ typedef void (BX_CPU_C::* BxExecutePtr_tR)(bxInstruction_c*) BX_CPP_AttrRegparmN
 class bxInstruction_c
 {
 public:
+    void* ptrThis = this;
 
 #ifndef BX_STANDALONE_DECODER
     // Function pointers; a function to resolve the modRM address

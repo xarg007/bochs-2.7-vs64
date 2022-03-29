@@ -112,6 +112,11 @@ extern bxPageWriteStampTable pageWriteStampTable;
 
 struct bxICacheEntry_c
 {
+    bxICacheEntry_c()
+    {
+        ptrThis = this;
+    }
+    void* ptrThis;
     bx_phy_address pAddr; // Physical address of the instruction
     Bit32u traceMask;
 

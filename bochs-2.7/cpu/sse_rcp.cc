@@ -292,44 +292,45 @@ static Bit16u rcp_table[2048] = {
 // approximate reciprocal of scalar single precision FP
 float32 approximate_rcp(float32 op)
 {
-  float_class_t op_class = float32_class(op);
-  int sign = float32_sign(op);
+    float_class_t op_class = float32_class(op);
+    int sign = float32_sign(op);
 
-  switch(op_class) {
+    switch (op_class)
+    {
     case float_zero:
     case float_denormal:
-      return packFloat32(sign, 0xFF, 0);
+        return packFloat32(sign, 0xFF, 0);
 
     case float_negative_inf:
     case float_positive_inf:
-      return packFloat32(sign, 0, 0);
+        return packFloat32(sign, 0, 0);
 
     case float_SNaN:
     case float_QNaN:
-      return convert_to_QNaN(op);
+        return convert_to_QNaN(op);
 
     case float_normalized:
-      break;
-  }
+        break;
+    }
 
-  Bit32u fraction = float32_fraction(op);
-  Bit16s exp = float32_exp(op);
+    Bit32u fraction = float32_fraction(op);
+    Bit16s exp = float32_exp(op);
 
-  /*
-   * Calculate (1/1.yyyyyyyyyyy1), the result is always rounded to the
-   *  12th bit after the decimal point by round-to-nearest, regardless
-   *  of the current rounding mode.
-   *
-   * Using precalculated 2048-entry table.
-   */
+    /*
+     * Calculate (1/1.yyyyyyyyyyy1), the result is always rounded to the
+     *  12th bit after the decimal point by round-to-nearest, regardless
+     *  of the current rounding mode.
+     *
+     * Using precalculated 2048-entry table.
+     */
 
-  exp = 2 * FLOAT32_EXP_BIAS - 1 - exp;
+    exp = 2 * FLOAT32_EXP_BIAS - 1 - exp;
 
-  /* check for underflow */
-  if (exp <= 0)
-      return packFloat32(sign, 0, 0);
+    /* check for underflow */
+    if (exp <= 0)
+        return packFloat32(sign, 0, 0);
 
-  return packFloat32(sign, exp, (Bit32u)(rcp_table[fraction >> 12]) << 8);
+    return packFloat32(sign, exp, (Bit32u)(rcp_table[fraction >> 12]) << 8);
 }
 
 #endif
@@ -339,20 +340,20 @@ float32 approximate_rcp(float32 op)
  * Approximate reciprocals of packed single precision FP values from XMM2/MEM.
  * Possible floating point exceptions: -
  */
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::RCPPS_VpsWpsR(bxInstruction_c *i)
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::RCPPS_VpsWpsR(bxInstruction_c* i)
 {
 #if BX_CPU_LEVEL >= 6
-  BxPackedXmmRegister op = BX_READ_XMM_REG(i->src());
+    BxPackedXmmRegister op = BX_READ_XMM_REG(i->src());
 
-  op.xmm32u(0) = approximate_rcp(op.xmm32u(0));
-  op.xmm32u(1) = approximate_rcp(op.xmm32u(1));
-  op.xmm32u(2) = approximate_rcp(op.xmm32u(2));
-  op.xmm32u(3) = approximate_rcp(op.xmm32u(3));
+    op.xmm32u(0) = approximate_rcp(op.xmm32u(0));
+    op.xmm32u(1) = approximate_rcp(op.xmm32u(1));
+    op.xmm32u(2) = approximate_rcp(op.xmm32u(2));
+    op.xmm32u(3) = approximate_rcp(op.xmm32u(3));
 
-  BX_WRITE_XMM_REG(i->dst(), op);
+    BX_WRITE_XMM_REG(i->dst(), op);
 #endif
 
-  BX_NEXT_INSTR(i);
+    BX_NEXT_INSTR(i);
 }
 
 /*
@@ -360,15 +361,15 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::RCPPS_VpsWpsR(bxInstruction_c *i)
  * Approximate reciprocal of scalar single precision FP value from XMM2/MEM32.
  * Possible floating point exceptions: -
  */
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::RCPSS_VssWssR(bxInstruction_c *i)
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::RCPSS_VssWssR(bxInstruction_c* i)
 {
 #if BX_CPU_LEVEL >= 6
-  float32 op = BX_READ_XMM_REG_LO_DWORD(i->src());
-  op = approximate_rcp(op);
-  BX_WRITE_XMM_REG_LO_DWORD(i->dst(), op);
+    float32 op = BX_READ_XMM_REG_LO_DWORD(i->src());
+    op = approximate_rcp(op);
+    BX_WRITE_XMM_REG_LO_DWORD(i->dst(), op);
 #endif
 
-  BX_NEXT_INSTR(i);
+    BX_NEXT_INSTR(i);
 }
 
 #if BX_CPU_LEVEL >= 6
@@ -638,47 +639,48 @@ static const Bit16u rsqrt_table1[1024] = {
 // approximate reciprocal sqrt of scalar single precision FP
 float32 approximate_rsqrt(float32 op)
 {
-  float_class_t op_class = float32_class(op);
-  int sign = float32_sign(op);
+    float_class_t op_class = float32_class(op);
+    int sign = float32_sign(op);
 
-  switch(op_class) {
+    switch (op_class)
+    {
     case float_zero:
     case float_denormal:
-      return packFloat32(sign, 0xFF, 0);
+        return packFloat32(sign, 0xFF, 0);
 
     case float_positive_inf:
-      return 0;
+        return 0;
 
     case float_negative_inf:
-      return float32_default_nan;
+        return float32_default_nan;
 
     case float_SNaN:
     case float_QNaN:
-      return convert_to_QNaN(op);
+        return convert_to_QNaN(op);
 
     case float_normalized:
-      break;
-  };
+        break;
+    };
 
-  if (sign == 1)
-    return float32_default_nan;
+    if (sign == 1)
+        return float32_default_nan;
 
-  Bit32u fraction = float32_fraction(op);
-  Bit16s exp = float32_exp(op);
+    Bit32u fraction = float32_fraction(op);
+    Bit16s exp = float32_exp(op);
 
-  /*
-   * Calculate (1/1.yyyyyyyyyy1), the result is always rounded to the
-   * 11th bit after the decimal point by round-to-nearest, regardless
-   * of the current rounding mode.
-   *
-   * Using two precalculated 1024-entry tables.
-   */
+    /*
+     * Calculate (1/1.yyyyyyyyyy1), the result is always rounded to the
+     * 11th bit after the decimal point by round-to-nearest, regardless
+     * of the current rounding mode.
+     *
+     * Using two precalculated 1024-entry tables.
+     */
 
-  const Bit16u *rsqrt_table = (exp & 1) ? rsqrt_table1 : rsqrt_table0;
+    const Bit16u* rsqrt_table = (exp & 1) ? rsqrt_table1 : rsqrt_table0;
 
-  exp = 0x7E - ((exp - 0x7F) >> 1);
+    exp = 0x7E - ((exp - 0x7F) >> 1);
 
-  return packFloat32(0, exp, (Bit32u)(rsqrt_table[fraction >> 13]) << 8);
+    return packFloat32(0, exp, (Bit32u)(rsqrt_table[fraction >> 13]) << 8);
 }
 
 #endif
@@ -689,15 +691,15 @@ float32 approximate_rsqrt(float32 op)
  * from XMM2/MEM32.
  * Possible floating point exceptions: -
  */
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::RSQRTSS_VssWssR(bxInstruction_c *i)
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::RSQRTSS_VssWssR(bxInstruction_c* i)
 {
 #if BX_CPU_LEVEL >= 6
-  float32 op = BX_READ_XMM_REG_LO_DWORD(i->src());
-  op = approximate_rsqrt(op);
-  BX_WRITE_XMM_REG_LO_DWORD(i->dst(), op);
+    float32 op = BX_READ_XMM_REG_LO_DWORD(i->src());
+    op = approximate_rsqrt(op);
+    BX_WRITE_XMM_REG_LO_DWORD(i->dst(), op);
 #endif
 
-  BX_NEXT_INSTR(i);
+    BX_NEXT_INSTR(i);
 }
 
 /*
@@ -706,18 +708,18 @@ void BX_CPP_AttrRegparmN(1) BX_CPU_C::RSQRTSS_VssWssR(bxInstruction_c *i)
  * from XMM2/MEM.
  * Possible floating point exceptions: -
  */
-void BX_CPP_AttrRegparmN(1) BX_CPU_C::RSQRTPS_VpsWpsR(bxInstruction_c *i)
+void BX_CPP_AttrRegparmN(1) BX_CPU_C::RSQRTPS_VpsWpsR(bxInstruction_c* i)
 {
 #if BX_CPU_LEVEL >= 6
-  BxPackedXmmRegister op = BX_READ_XMM_REG(i->src());
+    BxPackedXmmRegister op = BX_READ_XMM_REG(i->src());
 
-  op.xmm32u(0) = approximate_rsqrt(op.xmm32u(0));
-  op.xmm32u(1) = approximate_rsqrt(op.xmm32u(1));
-  op.xmm32u(2) = approximate_rsqrt(op.xmm32u(2));
-  op.xmm32u(3) = approximate_rsqrt(op.xmm32u(3));
+    op.xmm32u(0) = approximate_rsqrt(op.xmm32u(0));
+    op.xmm32u(1) = approximate_rsqrt(op.xmm32u(1));
+    op.xmm32u(2) = approximate_rsqrt(op.xmm32u(2));
+    op.xmm32u(3) = approximate_rsqrt(op.xmm32u(3));
 
-  BX_WRITE_XMM_REG(i->dst(), op);
+    BX_WRITE_XMM_REG(i->dst(), op);
 #endif
 
-  BX_NEXT_INSTR(i);
+    BX_NEXT_INSTR(i);
 }

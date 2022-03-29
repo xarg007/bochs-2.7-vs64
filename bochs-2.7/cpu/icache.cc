@@ -214,11 +214,18 @@ bool BX_CPU_C::mergeTraces(bxICacheEntry_c* entry, bxInstruction_c* i, bx_phy_ad
 
 #if BX_SUPPORT_HANDLERS_CHAINING_SPEEDUPS
         if (max_length + entry->tlen > BX_MAX_TRACE_LENGTH)
+        {
             return 0;
+        }
 #else
         if (max_length + entry->tlen > BX_MAX_TRACE_LENGTH)
+        {
             max_length = BX_MAX_TRACE_LENGTH - entry->tlen;
-        if (max_length == 0) return 0;
+        }
+        if (max_length == 0)
+        {
+            return 0;
+        }
 #endif
 
         memcpy(i, e->i, sizeof(bxInstruction_c) * max_length);
